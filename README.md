@@ -26,13 +26,13 @@ Frontend React + Next.js
     v
 API Backend Node.js + Express
     |
-    +--> Middlewares : authentification, autorisation, validation
+    +--> Middlewares : authentification, autorisation, limitation de debit
     |
     +--> Routes : adresses des endpoints HTTP
     |
     +--> Controllers : reception des requetes et reponses HTTP
     |
-    +--> Services : regles metier de l'application
+    +--> Controllers : regles metier et appels Supabase
     |
     +--> Supabase : PostgreSQL, authentification et stockage
     |
@@ -57,10 +57,7 @@ myticket/
 │   │   ├── config/        # configuration du backend et de Supabase
 │   │   ├── controllers/   # traitement des requetes HTTP
 │   │   ├── middlewares/   # authentification, roles et validations
-│   │   ├── models/        # representation des donnees
 │   │   ├── routes/        # definition des endpoints Express
-│   │   ├── services/      # regles metier
-│   │   ├── utils/         # fonctions utilitaires
 │   │   ├── App.js         # configuration de l'application Express
 │   │   └── server.js      # demarrage du serveur Node.js
 │   ├── .env               # secrets et configuration locale, jamais commitee
@@ -208,3 +205,64 @@ FINISHED  # evenement termine
 12. deployer et surveiller l'application.
 
 Chaque fonctionnalite doit etre comprise, testee et documentee avant de passer a la suivante.
+
+## Contrat de l'API backend
+
+Toutes les routes protegees utilisent l'en-tete suivant :
+
+```http
+Authorization: Bearer <access_token_supabase>
+```
+
+### Authentification
+
+| Methode | URL | Auth | Usage |
+|---|---|---|---|
+| POST | `/api/auth/login` | Non | Connexion email/mot de passe |
+| GET | `/api/auth/me` | Oui | Profil et role de l'utilisateur connecte |
+
+### Demandes organisateur
+
+| Methode | URL | Auth | Usage |
+|---|---|---|---|
+| POST | `/api/organizer-requests` | Oui | Envoyer une demande |
+| GET | `/api/organizer-requests` | Oui | Voir ses demandes |
+
+Le corps de la creation contient `eventType` et `documentPath`.
+
+### Evenements
+
+| Methode | URL | Auth | Role | Usage |
+|---|---|---|---|---|
+| GET | `/api/events/approved` | Non | - | Lister les evenements approuves |
+| POST | `/api/events` | Oui | ORGANIZER | Creer un brouillon |
+| GET | `/api/events/me` | Oui | ORGANIZER | Lister ses evenements |
+| PATCH | `/api/events/:eventId/submit` | Oui | ORGANIZER | Soumettre un evenement |
+
+La validation admin se fait avec `GET /api/admin/events/pending`, puis
+`PATCH /api/admin/events/:eventId/approve` ou
+`PATCH /api/admin/events/:eventId/reject`.
+
+### Reservations et tickets
+
+| Methode | URL | Auth | Usage |
+|---|---|---|---|
+| POST | `/api/reservations` | Oui | Reserver des places |
+| GET | `/api/reservations/me` | Oui | Voir ses reservations |
+| PATCH | `/api/reservations/:reservationId/cancel` | Oui | Annuler une reservation |
+| GET | `/api/tickets/me` | Oui | Voir ses tickets |
+
+Le corps d'une reservation contient `eventId` et `quantity`. Une reservation
+confirmee genere ses tickets via la fonction PostgreSQL transactionnelle.
+
+### Administration
+
+| Methode | URL | Auth | Role | Usage |
+|---|---|---|---|---|
+| GET | `/api/admin/organizer-requests` | Oui | ADMIN | Lister les demandes |
+| PATCH | `/api/admin/organizer-requests/:requestId/approve` | Oui | ADMIN | Approuver une demande |
+| PATCH | `/api/admin/organizer-requests/:requestId/reject` | Oui | ADMIN | Refuser une demande |
+| GET | `/api/admin/events/pending` | Oui | ADMIN | Lister les evenements a valider |
+
+Les routes de paiement existent pour le futur flux de paiement, mais les
+integrations Stripe, PayPal et Mobile Money restent volontairement reportees.
