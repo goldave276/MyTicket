@@ -22,11 +22,13 @@ Cette etape est volontairement separee du code applicatif : une migration initia
 
 ## Procedure pour la migration initiale
 
-1. Recuperer le schema actuel de Supabase, y compris les tables, fonctions RPC, index, triggers et politiques RLS.
-2. Le placer dans un fichier `0001_initial_schema.sql`.
-3. Tester la migration sur un projet Supabase de test.
-4. Comparer les tables et les permissions avec le projet actuel.
-5. Seulement ensuite, utiliser ce fichier comme base de travail partagee.
+1. Executer `supabase/inspect-schema.sql` dans le SQL Editor Supabase.
+2. Recuperer aussi les index et les extensions activees si le projet en utilise.
+3. Exporter le schema actuel, y compris les tables, fonctions RPC, index, triggers et politiques RLS.
+4. Le placer dans un fichier `0001_initial_schema.sql`.
+5. Tester la migration sur un projet Supabase de test.
+6. Comparer les tables et les permissions avec le projet actuel.
+7. Seulement ensuite, utiliser ce fichier comme base de travail partagee.
 
 ## Consequence pour le backend
 
