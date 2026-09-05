@@ -11,6 +11,8 @@ describe("API health", () => {
         expect(response.status).toBe(200);
         expect(response.body.message)
             .toBe("API MyTicket operationnelle");
+        expect(response.headers["x-content-type-options"])
+            .toBe("nosniff");
     });
 
     it("retourne 404 pour une route inconnue", async () => {
