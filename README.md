@@ -153,6 +153,10 @@ configurees dans le gestionnaire de secrets de la plateforme d'hebergement.
 - [ ] `GET /api/health` repond correctement depuis l'hebergement.
 - [ ] Les logs et alertes de la plateforme sont consultables.
 
+Les pushes et pull requests vers `main` declenchent aussi le workflow GitHub
+Actions `.github/workflows/backend-ci.yml`, qui execute automatiquement les
+tests du backend.
+
 ## Regles metier principales
 
 Un utilisateur commence avec le role `USER`.
