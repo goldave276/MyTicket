@@ -212,6 +212,7 @@ async function getApprovedEvents(req, res) {
         .from("events")
         .select("id, title, description, event_type, event_date, location, capacity, price")
         .eq("status", "APPROVED")
+        .gte("event_date", new Date().toISOString())
         .order("event_date", { ascending: true });
 
     if (error) {
