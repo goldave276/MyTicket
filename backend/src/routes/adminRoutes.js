@@ -11,8 +11,7 @@ const {
 const {
     getAllOrganizerRequests,
     approveOrganizerRequest,
-    rejectOrganizerRequest,
-    acceptOrganizerRequest
+    rejectOrganizerRequest
 } = require("../controllers/organizerRequestController");
 
 const {

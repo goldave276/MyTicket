@@ -97,33 +97,6 @@ async function approveOrganizerRequest(req, res) {
     });
 }
 
-async function acceptOrganizerRequest(req, res) {
-    const requestId = Number(req.params.requestId);
-
-    if (!Number.isInteger(requestId)) {
-        return res.status(400).json({
-            message: "Identifiant de demande invalide"
-        });
-    }
-
-    const { data, error } = await req.supabase.rpc(
-        "accept_organizer_request",
-        {
-            p_request_id: requestId
-        }
-    );
-
-    if (error) {
-        return res.status(400).json({
-            message: error.message
-        });
-    }
-
-    return res.status(200).json({
-        message: "Demande acceptee avec succes",
-        request: data
-    });
-}
 
 async function rejectOrganizerRequest(req, res) {
     const requestId = Number(req.params.requestId);
@@ -162,6 +135,5 @@ module.exports = {
     getMyOrganizerRequests,
     getAllOrganizerRequests,
     approveOrganizerRequest,
-    acceptOrganizerRequest,
-    rejectOrganizerRequest,
+    rejectOrganizerRequest
 };
