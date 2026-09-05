@@ -148,6 +148,7 @@ configurees dans le gestionnaire de secrets de la plateforme d'hebergement.
 - [ ] Le schema Supabase et ses fonctions RPC sont versionnes dans les migrations.
 - [ ] Les variables de production sont configurees hors du depot.
 - [ ] L'URL CORS est restreinte au frontend de production.
+- [ ] `FRONTEND_URL` contient l'origine exacte du frontend de production.
 - [ ] `docker compose up --build` demarre correctement le backend.
 - [ ] `GET /api/health` repond correctement depuis l'hebergement.
 - [ ] Les logs et alertes de la plateforme sont consultables.

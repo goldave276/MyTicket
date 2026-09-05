@@ -24,6 +24,15 @@ describe("API health", () => {
             .toBe("Route introuvable");
     });
 
+    it("autorise l'origine du frontend local", async () => {
+        const response = await request(app)
+            .get("/api/health")
+            .set("Origin", "http://localhost:3001");
+
+        expect(response.headers["access-control-allow-origin"])
+            .toBe("http://localhost:3001");
+    });
+
     it("refuse l'acces a /api/auth/me sans token", async () => {
         const response = await request(app)
             .get("/api/auth/me");
