@@ -24,12 +24,13 @@ Cette etape est volontairement separee du code applicatif : une migration initia
 
 1. Executer `supabase/inspect-schema.sql` dans le SQL Editor Supabase.
 2. Executer `supabase/inspect-rpc-and-triggers.sql` pour obtenir les signatures RPC, triggers et relations.
-3. Recuperer aussi les index et les extensions activees si le projet en utilise.
-4. Exporter le schema actuel, y compris les tables, fonctions RPC, index, triggers et politiques RLS.
-5. Le placer dans un fichier `0001_initial_schema.sql`.
-6. Tester la migration sur un projet Supabase de test.
-7. Comparer les tables et les permissions avec le projet actuel.
-8. Seulement ensuite, utiliser ce fichier comme base de travail partagee.
+3. Executer `supabase/check-ticket-generation.sql` pour verifier que les tickets ne sont pas generes deux fois.
+4. Recuperer aussi les index et les extensions activees si le projet en utilise.
+5. Exporter le schema actuel, y compris les tables, fonctions RPC, index, triggers et politiques RLS.
+6. Le placer dans un fichier `0001_initial_schema.sql`.
+7. Tester la migration sur un projet Supabase de test.
+8. Comparer les tables et les permissions avec le projet actuel.
+9. Seulement ensuite, utiliser ce fichier comme base de travail partagee.
 
 ## Consequence pour le backend
 
