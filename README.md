@@ -155,7 +155,7 @@ configurees dans le gestionnaire de secrets de la plateforme d'hebergement.
 
 Les pushes et pull requests vers `main` declenchent aussi le workflow GitHub
 Actions `.github/workflows/backend-ci.yml`, qui execute automatiquement les
-tests du backend.
+tests du backend et construit l'image Docker.
 
 ## Regles metier principales
 
