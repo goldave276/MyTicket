@@ -45,7 +45,7 @@ describe("Validation des entrees des controllers", () => {
         };
 
         await createOrganizerRequest({
-            body: { eventType: "Conference" },
+            body: { eventType: "   ", documentPath: "   " },
             user: { id: "user-id" },
             supabase
         }, response);

@@ -1,7 +1,12 @@
 async function createOrganizerRequest(req, res) {
     const { eventType, documentPath } = req.body;
 
-    if (!eventType || !documentPath) {
+    if (
+        typeof eventType !== "string" ||
+        typeof documentPath !== "string" ||
+        !eventType.trim() ||
+        !documentPath.trim()
+    ) {
         return res.status(400).json({
             message: "Le type d'evenement et le document sont obligatoires"
         });
