@@ -105,6 +105,10 @@ Supabase sera utilise pour :
 - stocker les justificatifs envoyes par les futurs organisateurs ;
 - appliquer les regles d'acces necessaires aux donnees.
 
+Les evolutions de la base doivent etre conservees dans
+`backend/supabase/migrations/`. La migration initiale reste a capturer depuis
+le schema Supabase existant avant de poursuivre le deploiement.
+
 ### Docker
 
 Docker permettra d'executer l'application dans des environnements reproductibles. Les variables sensibles resteront dans des fichiers d'environnement locaux et ne seront jamais publiees sur GitHub.
