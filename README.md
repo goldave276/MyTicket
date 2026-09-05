@@ -102,13 +102,28 @@ Supabase sera utilise pour :
 - stocker les justificatifs envoyes par les futurs organisateurs ;
 - appliquer les regles d'acces necessaires aux donnees.
 
-Les evolutions de la base doivent etre conservees dans
-`backend/supabase/migrations/`. La migration initiale reste a capturer depuis
-le schema Supabase existant avant de poursuivre le deploiement.
+Les evolutions de la base sont conservees dans
+`backend/supabase/migrations/`. La migration initiale et les migrations
+incrementales ont ete testees sur `myticket-test`. Les migrations `0003` et
+`0004` ont ensuite ete appliquees prudemment au projet Supabase reel.
 
 ### Docker
 
 Docker permettra d'executer l'application dans des environnements reproductibles. Les variables sensibles resteront dans des fichiers d'environnement locaux et ne seront jamais publiees sur GitHub.
+
+## Etat du backend
+
+Le MVP backend est valide. Il comprend l'authentification, les roles
+`USER`, `ORGANIZER` et `ADMIN`, les demandes d'organisateur, la gestion des
+evenements, les reservations, les annulations, les tickets, les politiques
+RLS Supabase et les migrations PostgreSQL.
+
+Les tests automatises, la validation des migrations et la construction Docker
+sont executes par GitHub Actions dans `.github/workflows/backend-ci.yml`.
+
+Les paiements reels Stripe, PayPal et Mobile Money restent volontairement
+reportes. Les routes et la structure de paiement sont conservees pour une
+integration ulterieure.
 
 ## Demarrage du backend
 
@@ -312,6 +327,5 @@ confirmee genere ses tickets via la fonction PostgreSQL transactionnelle.
 | PATCH | `/api/admin/organizer-requests/:requestId/approve` | Oui | ADMIN | Approuver une demande |
 | PATCH | `/api/admin/organizer-requests/:requestId/reject` | Oui | ADMIN | Refuser une demande |
 | GET | `/api/admin/events/pending` | Oui | ADMIN | Lister les evenements a valider |
-
-Les routes de paiement existent pour le futur flux de paiement, mais les
-integrations Stripe, PayPal et Mobile Money restent volontairement reportees.
+| PATCH | `/api/admin/events/:eventId/approve` | Oui | ADMIN | Approuver un evenement |
+| PATCH | `/api/admin/events/:eventId/reject` | Oui | ADMIN | Refuser un evenement |
