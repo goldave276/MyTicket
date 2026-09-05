@@ -20,4 +20,21 @@ describe("Protection des routes metier", () => {
         expect(response.status).toBe(401);
         expect(response.body.message).toBe("Authentification requise");
     });
+
+    it("limite les tentatives de connexion", async () => {
+        const responses = [];
+
+        for (let attempt = 0; attempt < 11; attempt += 1) {
+            responses.push(
+                await request(app)
+                    .post("/api/auth/login")
+                    .send({})
+            );
+        }
+
+        expect(responses.slice(0, 10).every((response) => response.status === 400))
+            .toBe(true);
+        expect(responses[10].status).toBe(429);
+        expect(responses[10].body.message).toContain("Trop de tentatives");
+    });
 });
