@@ -46,3 +46,53 @@ jobs:
 
       - name: Build backend image
         run: docker build -t myticket-backend:ci ./backend
+
+  migration-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: myticket_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d myticket_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install --yes postgresql-client
+
+      - name: Apply migrations on an empty PostgreSQL database
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: myticket_ci
+        run: |
+          psql -v ON_ERROR_STOP=1 -f backend/supabase/test-bootstrap.sql
+          for migration in backend/supabase/migrations/*.sql; do
+            echo "Applying $migration"
+            psql -v ON_ERROR_STOP=1 -f "$migration"
+          done
+
+      - name: Verify migrated database
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: myticket_ci
+        run: |
+          test "$(psql -tAc "select count(*) from information_schema.tables where table_schema = 'public' and table_name in ('profiles', 'organizer_requests', 'events', 'reservations', 'tickets', 'payments')")" = "6"
+          test "$(psql -tAc "select count(*) from pg_proc where pronamespace = 'public'::regnamespace and proname in ('create_reservation', 'cancel_reservation', 'submit_event', 'approve_event', 'approve_organizer_request', 'get_organizer_event_reservations', 'cancel_event')")" = "7"
+          test "$(psql -tAc "select count(*) from pg_class where relnamespace = 'public'::regnamespace and relname in ('profiles', 'organizer_requests', 'events', 'reservations', 'tickets', 'payments') and relrowsecurity")" = "6"

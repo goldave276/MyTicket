@@ -34,6 +34,12 @@ Pour les tester sans risque :
 4. Verifier les tables, politiques, fonctions et trigger avec les scripts d'audit.
 5. Executer les tests d'integration uniquement avec les variables du projet de test.
 
+Le workflow GitHub Actions contient aussi un test automatique sur PostgreSQL 16
+vide. Il utilise `test-bootstrap.sql` pour simuler uniquement les objets
+`auth` necessaires aux migrations, puis applique tous les fichiers SQL avec
+`ON_ERROR_STOP=1`. Cela ne remplace pas un projet Supabase vide, mais detecte
+les erreurs SQL et verifie les tables, RPC et RLS sans toucher a la production.
+
 Pour le projet actuel, les evolutions futures doivent etre des migrations
 incrementales, par exemple `0003_add_organizer_reservation_view.sql`, et non une
 seconde execution de la migration initiale.
