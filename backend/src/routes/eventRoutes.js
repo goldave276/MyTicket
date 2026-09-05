@@ -6,6 +6,7 @@ const {
     createEvent,
     getMyEvents,
     submitEvent,
+    cancelEvent,
     getApprovedEvents
 } = require("../controllers/eventController");
 
@@ -32,6 +33,13 @@ router.patch(
     requireAuth,
     requireRole("ORGANIZER"),
     submitEvent
+);
+
+router.patch(
+    "/:eventId/cancel",
+    requireAuth,
+    requireRole("ORGANIZER"),
+    cancelEvent
 );
 
 router.get(

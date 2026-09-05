@@ -1,6 +1,9 @@
 require("dotenv").config();
 
-const { createEvent } = require("../controllers/eventController");
+const {
+    createEvent,
+    cancelEvent
+} = require("../controllers/eventController");
 
 function createResponse() {
     return {
@@ -66,6 +69,20 @@ describe("Validation de creation d'evenement", () => {
         expect(response.statusCode).toBe(400);
         expect(response.body.message).toBe(
             "La capacite doit etre un entier positif"
+        );
+    });
+
+    it("refuse l'annulation avec un identifiant invalide", async () => {
+        const response = createResponse();
+
+        await cancelEvent({
+            params: { eventId: "abc" },
+            supabase: {}
+        }, response);
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.message).toBe(
+            "Identifiant d'evenement invalide"
         );
     });
 });

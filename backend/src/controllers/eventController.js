@@ -133,6 +133,32 @@ async function submitEvent(req, res) {
     });
 }
 
+async function cancelEvent(req, res) {
+    const eventId = Number(req.params.eventId);
+
+    if (!Number.isInteger(eventId)) {
+        return res.status(400).json({
+            message: "Identifiant d'evenement invalide"
+        });
+    }
+
+    const { data, error } = await req.supabase.rpc(
+        "cancel_event",
+        { p_event_id: eventId }
+    );
+
+    if (error) {
+        return res.status(400).json({
+            message: error.message
+        });
+    }
+
+    return res.status(200).json({
+        message: "Evenement annule avec succes",
+        event: data
+    });
+}
+
 async function getPendingEvents(req, res) {
     const { data, error } = await req.supabase
         .from("events")
@@ -230,6 +256,7 @@ module.exports = {
     createEvent,
     getMyEvents,
     submitEvent,
+    cancelEvent,
     getPendingEvents,
     approveEvent,
     rejectEvent,
