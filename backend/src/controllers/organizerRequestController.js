@@ -105,6 +105,7 @@ async function approveOrganizerRequest(req, res) {
 
 async function rejectOrganizerRequest(req, res) {
     const requestId = Number(req.params.requestId);
+    const adminComment = req.body?.adminComment;
 
     if (!Number.isInteger(requestId)) {
         return res.status(400).json({
@@ -112,10 +113,20 @@ async function rejectOrganizerRequest(req, res) {
         });
     }
 
+    if (
+        adminComment !== undefined &&
+        (typeof adminComment !== "string" || adminComment.length > 1000)
+    ) {
+        return res.status(400).json({
+            message: "Le commentaire admin est invalide"
+        });
+    }
+
     const { data, error } = await req.supabase.rpc(
         "reject_organizer_request",
         {
-            p_request_id: requestId
+            p_request_id: requestId,
+            p_admin_comment: adminComment?.trim() || null
         }
     );
 

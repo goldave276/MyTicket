@@ -2,7 +2,8 @@ require("dotenv").config();
 
 const { login } = require("../controllers/authController");
 const {
-    createOrganizerRequest
+    createOrganizerRequest,
+    rejectOrganizerRequest
 } = require("../controllers/organizerRequestController");
 const { createPayment } = require("../controllers/paymentController");
 const {
@@ -71,6 +72,19 @@ describe("Validation des entrees des controllers", () => {
 
         expect(response.statusCode).toBe(400);
         expect(response.body.message).toBe("Mode de paiement invalide");
+    });
+
+    it("refuse un commentaire admin trop long", async () => {
+        const response = createResponse();
+
+        await rejectOrganizerRequest({
+            params: { requestId: 1 },
+            body: { adminComment: "x".repeat(1001) },
+            supabase: {}
+        }, response);
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.message).toBe("Le commentaire admin est invalide");
     });
 
     it("refuse un identifiant de reservation invalide pour l'annulation", async () => {
