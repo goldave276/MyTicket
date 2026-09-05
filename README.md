@@ -110,6 +110,48 @@ le schema Supabase existant avant de poursuivre le deploiement.
 
 Docker permettra d'executer l'application dans des environnements reproductibles. Les variables sensibles resteront dans des fichiers d'environnement locaux et ne seront jamais publiees sur GitHub.
 
+## Demarrage du backend
+
+Depuis le dossier `backend/` :
+
+```powershell
+npm install
+Copy-Item .env.example .env
+npm run dev
+```
+
+Le serveur local ecoute sur `http://localhost:3000`. La verification de sante
+est disponible sur `GET /api/health`.
+
+Pour executer les tests :
+
+```powershell
+cd backend
+npm test
+```
+
+## Demarrage avec Docker
+
+Depuis la racine du projet, apres avoir demarre Docker Desktop :
+
+```powershell
+docker compose up --build
+```
+
+Le fichier `backend/.env` est utilise uniquement localement par Compose. Il ne
+doit jamais etre ajoute a Git. En production, les variables doivent etre
+configurees dans le gestionnaire de secrets de la plateforme d'hebergement.
+
+## Checklist avant deploiement
+
+- [ ] `npm test` passe dans `backend/`.
+- [ ] Le schema Supabase et ses fonctions RPC sont versionnes dans les migrations.
+- [ ] Les variables de production sont configurees hors du depot.
+- [ ] L'URL CORS est restreinte au frontend de production.
+- [ ] `docker compose up --build` demarre correctement le backend.
+- [ ] `GET /api/health` repond correctement depuis l'hebergement.
+- [ ] Les logs et alertes de la plateforme sont consultables.
+
 ## Regles metier principales
 
 Un utilisateur commence avec le role `USER`.
