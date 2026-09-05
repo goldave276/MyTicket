@@ -10,6 +10,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      PORT: 3000
+      FRONTEND_URL: http://localhost:3001
+      SUPABASE_URL: https://ci-placeholder.supabase.co
+      SUPABASE_PUBLISHABLE_KEY: ci-placeholder-key
+
     defaults:
       run:
         working-directory: backend
