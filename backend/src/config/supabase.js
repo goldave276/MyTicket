@@ -7,6 +7,26 @@ if (!supabaseUrl || !supabasePublishableKey) {
     throw new Error("Les variables Supabase sont manquantes");
 }
 
-const supabase = createClient(supabaseUrl, supabasePublishableKey);
+const supabase = createClient(
+    supabaseUrl,
+    supabasePublishableKey
+);
 
-module.exports = supabase;
+function createAuthenticatedClient(accessToken) {
+    return createClient(
+        supabaseUrl,
+        supabasePublishableKey,
+        {
+            global: {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            }
+        }
+    );
+}
+
+module.exports = {
+    supabase,
+    createAuthenticatedClient
+};

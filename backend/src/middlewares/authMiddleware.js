@@ -1,4 +1,8 @@
-const supabase = require("../config/supabase");
+const {
+    supabase,
+    createAuthenticatedClient
+} = require("../config/supabase");
+
 
 async function requireAuth(req, res, next) {
     const authorization = req.headers.authorization;
@@ -23,6 +27,7 @@ async function requireAuth(req, res, next) {
     }
 
     req.user = user;
+    req.supabase = createAuthenticatedClient(token);
     next();
 }
 
