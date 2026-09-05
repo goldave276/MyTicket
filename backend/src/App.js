@@ -40,12 +40,25 @@ app.use("/api/tickets", ticketRoutes);
 
 app.use("/api/payments", paymentRoutes);
 
-
-
-
 app.get("/api/health", (req, res) => {
     res.status(200).json({
         message: "API MyTicket operationnelle"
+    });
+});
+
+// Réponse standard quand aucune route ne correspond.
+app.use((req, res) => {
+    res.status(404).json({
+        message: "Route introuvable"
+    });
+});
+
+// Gestion centralisée des erreurs inattendues.
+app.use((err, req, res, next) => {
+    console.error(err);
+
+    res.status(500).json({
+        message: "Erreur interne du serveur"
     });
 });
 
