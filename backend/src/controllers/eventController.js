@@ -17,12 +17,19 @@ async function createEvent(req, res) {
     const parsedDate = new Date(eventDate);
 
     if (
-        !title ||
-        !description ||
-        !eventType ||
-        !eventDate ||
-        !location ||
-        !capacity
+        typeof title !== "string" ||
+        typeof description !== "string" ||
+        typeof eventType !== "string" ||
+        typeof eventDate !== "string" ||
+        typeof location !== "string" ||
+        !title.trim() ||
+        !description.trim() ||
+        !eventType.trim() ||
+        !eventDate.trim() ||
+        !location.trim() ||
+        capacity === undefined ||
+        capacity === null ||
+        capacity === ""
     ) {
         return res.status(400).json({
             message: "Les informations obligatoires sont manquantes"
@@ -30,6 +37,7 @@ async function createEvent(req, res) {
     }
 
     if (
+        !Number.isFinite(numericCapacity) ||
         !Number.isInteger(numericCapacity) ||
         numericCapacity <= 0
     ) {
@@ -38,7 +46,7 @@ async function createEvent(req, res) {
         });
     }
 
-    if (Number.isNaN(numericPrice) || numericPrice < 0) {
+    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
         return res.status(400).json({
             message: "Le prix doit etre positif ou nul"
         });
