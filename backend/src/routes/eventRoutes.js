@@ -6,9 +6,10 @@ const {
     createEvent,
     getMyEvents,
     submitEvent,
-    rejectEvent,
     getApprovedEvents
 } = require("../controllers/eventController");
+
+const { getEventReservations } = require("../controllers/reservationController");
 
 const router = express.Router();
 
@@ -31,6 +32,13 @@ router.patch(
     requireAuth,
     requireRole("ORGANIZER"),
     submitEvent
+);
+
+router.get(
+    "/:eventId/reservations",
+    requireAuth,
+    requireRole("ORGANIZER"),
+    getEventReservations
 );
 
 

@@ -20,6 +20,24 @@ La base Supabase a ete construite dans le SQL Editor avant la mise en place de c
 
 Cette etape est volontairement separee du code applicatif : une migration initiale incomplete serait plus dangereuse qu'une documentation claire.
 
+## Ne pas appliquer sur le projet actuel
+
+Les fichiers `0001_initial_schema.sql` et `0002_rpc_functions.sql` sont
+destines a un projet Supabase vide ou de test. Ne pas les executer directement
+sur le projet qui contient deja les tables MyTicket.
+
+Pour les tester sans risque :
+
+1. Creer un projet Supabase de test separe.
+2. Executer `0001_initial_schema.sql`.
+3. Executer `0002_rpc_functions.sql`.
+4. Verifier les tables, politiques, fonctions et trigger avec les scripts d'audit.
+5. Executer les tests d'integration uniquement avec les variables du projet de test.
+
+Pour le projet actuel, les evolutions futures doivent etre des migrations
+incrementales, par exemple `0003_add_organizer_reservation_view.sql`, et non une
+seconde execution de la migration initiale.
+
 ## Procedure pour la migration initiale
 
 1. Executer `supabase/inspect-schema.sql` dans le SQL Editor Supabase.

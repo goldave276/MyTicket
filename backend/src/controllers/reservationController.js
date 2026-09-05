@@ -78,8 +78,34 @@ async function cancelReservation(req, res) {
     });
 }
 
+async function getEventReservations(req, res) {
+    const eventId = Number(req.params.eventId);
+
+    if (!Number.isInteger(eventId)) {
+        return res.status(400).json({
+            message: "Identifiant d'evenement invalide"
+        });
+    }
+
+    const { data, error } = await req.supabase.rpc(
+        "get_organizer_event_reservations",
+        { p_event_id: eventId }
+    );
+
+    if (error) {
+        return res.status(400).json({
+            message: error.message
+        });
+    }
+
+    return res.status(200).json({
+        reservations: data
+    });
+}
+
 module.exports = {
     createReservation,
     getMyReservations,
-    cancelReservation
+    cancelReservation,
+    getEventReservations
 };
