@@ -10,9 +10,9 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 
 | Module | Statut | Progression | Description |
 | :--- | :---: | :---: | :--- |
-| **Backend (API Express)** | 🟡 À durcir | MVP fonctionnel | Authentification, rôles, événements, réservations, tickets, stats et admin ; revue de code à traiter hors paiements |
-| **Base de Données (Supabase)** | 🟡 À durcir | MVP fonctionnel | Tables, RLS, fonctions RPC, Storage et index ; validations et tests d'intégration à renforcer |
-| **DevOps & Tests** | 🟢 Opérationnel | 75/75 tests passés | Dockerfile, Docker Compose, Vitest, GitHub Actions CI ; suites de tests unitaires et d'intégration validées |
+| **Backend (API Express)** | 🟢 Validé & Durci | MVP fonctionnel durci | Authentification fail-closed, catalogue paginé, justificatifs sécurisés Storage, Zod, CORS 403, stats et admin |
+| **Base de Données (Supabase)** | 🟢 Validé & Durci | MVP opérationnel | Tables, RLS, fonctions RPC, Storage privé et index de performance |
+| **DevOps & Tests** | 🟢 Opérationnel | 90/90 tests passés | Dockerfile, Docker Compose, Vitest (full, test:unit, test:http), GitHub Actions CI |
 | **Frontend (Next.js / React)** | ⏸️ Mis en pause | 0% | Interface Utilisateur, Espace Organisateur, Dashboard Admin |
 
 ---
@@ -131,3 +131,4 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **06/09/2026** | Backend/Fix | Phase B0.1 (Action A1) : Validation stricte des filtres du catalogue, échappement PostgREST et pagination | ✅ Validé |
 | **06/09/2026** | Backend/Security | Phase B0.2 (Actions A2, A4, A6) : Auth fail-closed, rate limiting dédié (signup, reset) & validation Zod | ✅ Validé |
 | **06/09/2026** | Backend/Security | Phase B0.3 (Action A3) : Validation stricte des justificatifs organisateurs, vérification Storage & URLs signées | ✅ Validé |
+| **06/09/2026** | Backend/Security | Phase B0.4 (Actions A5, A6, A7, A9) : Durcissement CORS 403, validation Zod des événements/réservations, scripts de tests & docs | ✅ Validé |

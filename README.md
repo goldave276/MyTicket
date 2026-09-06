@@ -142,7 +142,9 @@ Pour executer les tests :
 
 ```powershell
 cd backend
-npm test
+npm test          # Suite complete de tests (90 tests)
+npm run test:unit # Tests unitaires et validateurs de schemas Zod
+npm run test:http # Tests d'integration HTTP, securite CORS et guards
 ```
 
 ## Demarrage avec Docker

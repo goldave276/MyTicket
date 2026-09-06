@@ -1,66 +1,24 @@
 const { supabase } = require("../config/supabase");
 const { validateEventQuery, escapePostgrestValue } = require("../validators/eventQueryValidator");
-
+const { validateEventInput, validateEventId } = require("../validators/eventValidator");
 
 async function createEvent(req, res) {
+    const validation = validateEventInput(req.body);
+    if (!validation.isValid) {
+        return res.status(400).json({
+            message: validation.error
+        });
+    }
+
     const {
         title,
         description,
         eventType,
-        eventDate,
+        parsedDate,
         location,
         capacity,
         price
-    } = req.body;
-
-    const numericCapacity = Number(capacity);
-    const numericPrice = Number(price);
-    const parsedDate = new Date(eventDate);
-
-    if (
-        typeof title !== "string" ||
-        typeof description !== "string" ||
-        typeof eventType !== "string" ||
-        typeof eventDate !== "string" ||
-        typeof location !== "string" ||
-        !title.trim() ||
-        !description.trim() ||
-        !eventType.trim() ||
-        !eventDate.trim() ||
-        !location.trim() ||
-        capacity === undefined ||
-        capacity === null ||
-        capacity === ""
-    ) {
-        return res.status(400).json({
-            message: "Les informations obligatoires sont manquantes"
-        });
-    }
-
-    if (
-        !Number.isFinite(numericCapacity) ||
-        !Number.isInteger(numericCapacity) ||
-        numericCapacity <= 0
-    ) {
-        return res.status(400).json({
-            message: "La capacite doit etre un entier positif"
-        });
-    }
-
-    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
-        return res.status(400).json({
-            message: "Le prix doit etre positif ou nul"
-        });
-    }
-
-    if (
-        Number.isNaN(parsedDate.getTime()) ||
-        parsedDate <= new Date()
-    ) {
-        return res.status(400).json({
-            message: "La date doit etre valide et future"
-        });
-    }
+    } = validation.value;
 
     const { data, error } = await req.supabase
         .from("events")
@@ -71,8 +29,8 @@ async function createEvent(req, res) {
             event_type: eventType,
             event_date: parsedDate.toISOString(),
             location,
-            capacity: numericCapacity,
-            price: numericPrice
+            capacity,
+            price
         })
         .select()
         .single();
@@ -107,18 +65,17 @@ async function getMyEvents(req, res) {
 }
 
 async function submitEvent(req, res) {
-    const eventId = Number(req.params.eventId);
-
-    if (!Number.isInteger(eventId)) {
+    const idValidation = validateEventId(req.params.eventId);
+    if (!idValidation.isValid) {
         return res.status(400).json({
-            message: "Identifiant d'evenement invalide"
+            message: idValidation.error
         });
     }
 
     const { data, error } = await req.supabase.rpc(
         "submit_event",
         {
-            p_event_id: eventId
+            p_event_id: idValidation.value
         }
     );
 
@@ -135,47 +92,35 @@ async function submitEvent(req, res) {
 }
 
 async function updateEvent(req, res) {
-    const eventId = Number(req.params.eventId);
+    const idValidation = validateEventId(req.params.eventId);
+    if (!idValidation.isValid) {
+        return res.status(400).json({ message: idValidation.error });
+    }
+
+    const validation = validateEventInput(req.body);
+    if (!validation.isValid) {
+        return res.status(400).json({ message: validation.error });
+    }
+
     const {
         title,
         description,
         eventType,
-        eventDate,
+        parsedDate,
         location,
         capacity,
         price
-    } = req.body;
-    const numericCapacity = Number(capacity);
-    const numericPrice = Number(price);
-    const parsedDate = new Date(eventDate);
-
-    if (!Number.isInteger(eventId)) {
-        return res.status(400).json({ message: "Identifiant d'evenement invalide" });
-    }
-    if (![title, description, eventType, eventDate, location].every(
-        (value) => typeof value === "string" && value.trim()
-    )) {
-        return res.status(400).json({ message: "Les informations obligatoires sont manquantes" });
-    }
-    if (!Number.isInteger(numericCapacity) || numericCapacity <= 0) {
-        return res.status(400).json({ message: "La capacite doit etre un entier positif" });
-    }
-    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
-        return res.status(400).json({ message: "Le prix doit etre positif ou nul" });
-    }
-    if (Number.isNaN(parsedDate.getTime()) || parsedDate <= new Date()) {
-        return res.status(400).json({ message: "La date doit etre valide et future" });
-    }
+    } = validation.value;
 
     const { data, error } = await req.supabase.rpc("update_event", {
-        p_event_id: eventId,
+        p_event_id: idValidation.value,
         p_title: title,
         p_description: description,
         p_event_type: eventType,
         p_event_date: parsedDate.toISOString(),
         p_location: location,
-        p_capacity: numericCapacity,
-        p_price: numericPrice
+        p_capacity: capacity,
+        p_price: price
     });
 
     if (error) return res.status(400).json({ message: error.message });
@@ -183,17 +128,16 @@ async function updateEvent(req, res) {
 }
 
 async function cancelEvent(req, res) {
-    const eventId = Number(req.params.eventId);
-
-    if (!Number.isInteger(eventId)) {
+    const idValidation = validateEventId(req.params.eventId);
+    if (!idValidation.isValid) {
         return res.status(400).json({
-            message: "Identifiant d'evenement invalide"
+            message: idValidation.error
         });
     }
 
     const { data, error } = await req.supabase.rpc(
         "cancel_event",
-        { p_event_id: eventId }
+        { p_event_id: idValidation.value }
     );
 
     if (error) {
@@ -227,18 +171,17 @@ async function getPendingEvents(req, res) {
 }
 
 async function approveEvent(req, res) {
-    const eventId = Number(req.params.eventId);
-
-    if (!Number.isInteger(eventId)) {
+    const idValidation = validateEventId(req.params.eventId);
+    if (!idValidation.isValid) {
         return res.status(400).json({
-            message: "Identifiant d'evenement invalide"
+            message: idValidation.error
         });
     }
 
     const { data, error } = await req.supabase.rpc(
         "approve_event",
         {
-            p_event_id: eventId
+            p_event_id: idValidation.value
         }
     );
 
@@ -255,18 +198,17 @@ async function approveEvent(req, res) {
 }
 
 async function rejectEvent(req, res) {
-    const eventId = Number(req.params.eventId);
-
-    if (!Number.isInteger(eventId)) {
+    const idValidation = validateEventId(req.params.eventId);
+    if (!idValidation.isValid) {
         return res.status(400).json({
-            message: "Identifiant d'evenement invalide"
+            message: idValidation.error
         });
     }
 
     const { data, error } = await req.supabase.rpc(
         "reject_event",
         {
-            p_event_id: eventId
+            p_event_id: idValidation.value
         }
     );
 

@@ -1,9 +1,13 @@
+const { validateReservationId } = require("../validators/reservationValidator");
+const { validateEventId } = require("../validators/eventValidator");
+
 async function createReservation(req, res) {
     const eventId = Number(req.body.eventId);
     const quantity = Number(req.body.quantity);
 
     if (
         !Number.isInteger(eventId) ||
+        eventId <= 0 ||
         !Number.isInteger(quantity) ||
         quantity <= 0
     ) {
@@ -51,18 +55,18 @@ async function getMyReservations(req, res) {
 }
 
 async function cancelReservation(req, res) {
-    const reservationId = Number(req.params.reservationId);
+    const idValidation = validateReservationId(req.params.reservationId);
 
-    if (!Number.isInteger(reservationId)) {
+    if (!idValidation.isValid) {
         return res.status(400).json({
-            message: "Identifiant de reservation invalide"
+            message: idValidation.error
         });
     }
 
     const { data, error } = await req.supabase.rpc(
         "cancel_reservation",
         {
-            p_reservation_id: reservationId
+            p_reservation_id: idValidation.value
         }
     );
 
@@ -79,17 +83,17 @@ async function cancelReservation(req, res) {
 }
 
 async function getEventReservations(req, res) {
-    const eventId = Number(req.params.eventId);
+    const idValidation = validateEventId(req.params.eventId);
 
-    if (!Number.isInteger(eventId)) {
+    if (!idValidation.isValid) {
         return res.status(400).json({
-            message: "Identifiant d'evenement invalide"
+            message: idValidation.error
         });
     }
 
     const { data, error } = await req.supabase.rpc(
         "get_organizer_event_reservations",
-        { p_event_id: eventId }
+        { p_event_id: idValidation.value }
     );
 
     if (error) {

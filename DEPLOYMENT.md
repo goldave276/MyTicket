@@ -38,10 +38,14 @@ Configurez les variables suivantes dans le tableau de bord de votre hébergeur (
 | :--- | :--- | :--- |
 | `NODE_ENV` | Environnement d'exécution | `production` |
 | `PORT` | Port d'écoute du serveur | `3000` (ou fourni par l'hébergeur) |
-| `FRONTEND_URL` | Origine(s) autorisée(s) par CORS | `https://myticket.vercel.app` |
+| `FRONTEND_URL` | Origine(s) autorisée(s) par CORS (séparées par virgule) | `https://myticket.vercel.app` *(interdiction du wildcard `*` en production)* |
 | `SUPABASE_URL` | URL de votre instance Supabase | `https://xyzproject.supabase.co` |
 | `SUPABASE_PUBLISHABLE_KEY` | Clé Anon / Publishable Supabase | `eyJhbGciOi...` |
 | `PASSWORD_RESET_REDIRECT_URL`| Redirection mot de passe | `https://myticket.vercel.app/auth/reset-password` |
+
+> 🔒 **Règle CORS de production :** L'utilisation de `*` dans `FRONTEND_URL` est strictement interdite lorsque `NODE_ENV=production` et provoquera l'arrêt immédiat du serveur au démarrage pour des raisons de sécurité liées à `credentials: true`.
+>
+> 🌐 **Reverse Proxies & Rate Limiting :** Lorsque le backend est déployé derrière un reverse proxy (Render, Railway, Nginx), `express-rate-limit` s'appuie sur l'adresse IP distante (`trust proxy: 1` si un seul saut de proxy).
 
 ---
 

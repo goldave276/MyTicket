@@ -6,7 +6,9 @@
     "scripts": {
         "start": "node src/server.js",
         "dev": "nodemon src/server.js",
-        "test": "vitest run"
+        "test": "vitest run",
+        "test:unit": "vitest run src/tests/event-query-validator.test.js src/tests/organizer-document-validator.test.js src/tests/cors-and-business-validators.test.js src/tests/reservation-validation.test.js src/tests/event-validation.test.js src/tests/input-validation.test.js",
+        "test:http": "vitest run src/tests/auth-guards.test.js src/tests/security-headers.test.js src/tests/health.test.js src/tests/edge-cases.test.js src/tests/auth-hardening.test.js src/tests/admin-stats-users.test.js src/tests/cors-and-business-validators.test.js"
     },
     "keywords": [],
     "author": "",

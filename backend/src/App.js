@@ -22,21 +22,43 @@ const morgan = require("morgan");
 
 const app = express();
 
-const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:3001")
+const rawFrontendUrl = process.env.FRONTEND_URL || "http://localhost:3001";
+const allowedOrigins = rawFrontendUrl
     .split(",")
-    .map(origin => origin.trim());
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+// Vérification de sécurité pour la production
+if (process.env.NODE_ENV === "production" && allowedOrigins.includes("*")) {
+    throw new Error(
+        "Configuration CORS invalide en production : le wildcard '*' est interdit avec credentials: true."
+    );
+}
 
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+        // Autoriser les requêtes sans en-tête Origin (ex: curl, healthchecks internes, jobs serveurs)
+        if (!origin) {
             return callback(null, true);
         }
-        return callback(new Error("Origine non autorisee par la politique CORS"));
+        if (allowedOrigins.includes(origin) || (process.env.NODE_ENV !== "production" && allowedOrigins.includes("*"))) {
+            return callback(null, true);
+        }
+        const corsErr = new Error("Origine non autorisee par la politique CORS");
+        corsErr.code = "CORS_ORIGIN_DENIED";
+        corsErr.status = 403;
+        return callback(corsErr);
     },
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
+// Assurer l'en-tête Vary: Origin pour éviter les caches partagés erronés
+app.use((req, res, next) => {
+    res.setHeader("Vary", "Origin");
+    next();
+});
 
 app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
@@ -75,6 +97,12 @@ app.use((req, res) => {
 
 // Gestion centralisée des erreurs inattendues.
 app.use((err, req, res, next) => {
+    if (err.code === "CORS_ORIGIN_DENIED" || err.status === 403) {
+        return res.status(403).json({
+            message: "Origine non autorisee"
+        });
+    }
+
     console.error(err);
 
     res.status(500).json({

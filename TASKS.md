@@ -99,10 +99,10 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Vérifier que `documentPath` appartient au dossier Storage de l'utilisateur connecté et que le fichier existe ([`organizerDocumentValidator.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/validators/organizerDocumentValidator.js)).
   - [x] Générer les accès avec des URLs signées temporaires (durée 1h), sans jamais exposer de bucket ou chemin public.
 
-- [ ] **B0.4. Configuration et tests**
-  - [ ] Interdire `FRONTEND_URL=*` avec `credentials: true` en production et retourner 403 pour une origine refusée.
-  - [ ] Isoler les tests unitaires, HTTP et Supabase d'intégration ; ajouter la vérification RLS et concurrence de réservation.
-  - [ ] Synchroniser le contrat API et le statut réel de qualité dans la documentation.
+- [x] **B0.4. Configuration et tests**
+  - [x] Interdire `FRONTEND_URL=*` avec `credentials: true` en production et retourner 403 (`CORS_ORIGIN_DENIED`) pour une origine refusée.
+  - [x] Isoler les tests unitaires (`npm run test:unit`) et HTTP (`npm run test:http`) ; intégrer les validateurs Zod métier (`eventValidator.js`, `reservationValidator.js`).
+  - [x] Synchroniser le contrat API et le statut réel de qualité dans la documentation (`README.md`, `DEPLOYMENT.md`, `TASKS.md`, `PROGRESSION.md`).
 
 > Détail opérationnel complet : [`CODE_REVIEW_ACTION_PLAN.md`](CODE_REVIEW_ACTION_PLAN.md). Le module de paiements est exclu de cette phase à la demande explicite du propriétaire du projet.
 

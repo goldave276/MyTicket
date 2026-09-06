@@ -1,10 +1,12 @@
+const { validateReservationId } = require("../validators/reservationValidator");
+
 async function createPayment(req, res) {
     const reservationId = Number(req.body.reservationId);
     const paymentMethod = String(
         req.body.paymentMethod || ""
     ).toUpperCase();
 
-    if (!Number.isInteger(reservationId)) {
+    if (!Number.isInteger(reservationId) || reservationId <= 0) {
         return res.status(400).json({
             message: "Identifiant de reservation invalide"
         });
@@ -81,9 +83,9 @@ async function getPendingPayments(req, res) {
 }
 
 async function confirmOnSitePayment(req, res) {
-    const paymentId = Number(req.params.paymentId);
+    const idValidation = validateReservationId(req.params.paymentId);
 
-    if (!Number.isInteger(paymentId)) {
+    if (!idValidation.isValid) {
         return res.status(400).json({
             message: "Identifiant de paiement invalide"
         });
@@ -92,7 +94,7 @@ async function confirmOnSitePayment(req, res) {
     const { data, error } = await req.supabase.rpc(
         "confirm_on_site_payment",
         {
-            p_payment_id: paymentId
+            p_payment_id: idValidation.value
         }
     );
 
