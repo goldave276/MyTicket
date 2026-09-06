@@ -337,5 +337,8 @@ confirmee genere ses tickets via la fonction PostgreSQL transactionnelle.
 | PATCH | `/api/admin/organizer-requests/:requestId/reject` | Oui | ADMIN | Refuser une demande |
 | GET | `/api/admin/events/pending` | Oui | ADMIN | Lister les evenements a valider |
 | GET | `/api/admin/stats` | Oui | ADMIN | Consulter les statistiques globales |
+| GET | `/api/admin/users` | Oui | ADMIN | Lister les utilisateurs |
+| PATCH | `/api/admin/users/:userId/role` | Oui | ADMIN | Modifier le role d'un utilisateur |
+| PATCH | `/api/admin/users/:userId/block` | Oui | ADMIN | Bloquer ou debloquer un utilisateur |
 | PATCH | `/api/admin/events/:eventId/approve` | Oui | ADMIN | Approuver un evenement |
 | PATCH | `/api/admin/events/:eventId/reject` | Oui | ADMIN | Refuser un evenement |

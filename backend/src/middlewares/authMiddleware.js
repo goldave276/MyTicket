@@ -28,6 +28,17 @@ async function requireAuth(req, res, next) {
 
     req.user = user;
     req.supabase = createAuthenticatedClient(token);
+
+    const { data: profile } = await req.supabase
+        .from("profiles")
+        .select("is_blocked")
+        .eq("id", user.id)
+        .maybeSingle();
+
+    if (profile?.is_blocked) {
+        return res.status(403).json({ message: "Compte bloque" });
+    }
+
     next();
 }
 

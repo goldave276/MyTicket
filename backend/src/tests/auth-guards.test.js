@@ -15,6 +15,7 @@ describe("Protection des routes metier", () => {
         ["GET", "/api/payments/me"],
         ["GET", "/api/admin/events/pending"],
         ["GET", "/api/admin/stats"],
+        ["GET", "/api/admin/users"],
         ["GET", "/api/admin/organizer-requests"]
     ])("refuse %s %s sans token", async (method, path) => {
         const response = await request(app)[method.toLowerCase()](path);

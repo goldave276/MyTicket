@@ -94,5 +94,5 @@ jobs:
           PGDATABASE: myticket_ci
         run: |
           test "$(psql -tAc "select count(*) from information_schema.tables where table_schema = 'public' and table_name in ('profiles', 'organizer_requests', 'events', 'reservations', 'tickets', 'payments')")" = "6"
-          test "$(psql -tAc "select count(*) from pg_proc where pronamespace = 'public'::regnamespace and proname in ('create_reservation', 'cancel_reservation', 'submit_event', 'approve_event', 'approve_organizer_request', 'get_organizer_event_reservations', 'cancel_event', 'update_my_profile', 'update_event', 'get_organizer_stats', 'get_admin_stats')")" = "11"
+          test "$(psql -tAc "select count(*) from pg_proc where pronamespace = 'public'::regnamespace and proname in ('create_reservation', 'cancel_reservation', 'submit_event', 'approve_event', 'approve_organizer_request', 'get_organizer_event_reservations', 'cancel_event', 'update_my_profile', 'update_event', 'get_organizer_stats', 'get_admin_stats', 'admin_list_users', 'admin_update_user_role', 'admin_set_user_blocked')")" = "14"
           test "$(psql -tAc "select count(*) from pg_class where relnamespace = 'public'::regnamespace and relname in ('profiles', 'organizer_requests', 'events', 'reservations', 'tickets', 'payments') and relrowsecurity")" = "6"

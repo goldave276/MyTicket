@@ -20,6 +20,7 @@ const {
 } = require("../controllers/paymentController");
 
 const { getAdminStats } = require("../controllers/statsController");
+const { getUsers, updateUserRole, setUserBlocked } = require("../controllers/userController");
 
 
 
@@ -33,6 +34,10 @@ router.get(
     requireRole("ADMIN"),
     getAdminStats
 );
+
+router.get("/users", requireAuth, requireRole("ADMIN"), getUsers);
+router.patch("/users/:userId/role", requireAuth, requireRole("ADMIN"), updateUserRole);
+router.patch("/users/:userId/block", requireAuth, requireRole("ADMIN"), setUserBlocked);
 
 router.get(
     "/organizer-requests",
