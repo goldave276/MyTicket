@@ -303,6 +303,7 @@ Le corps de la creation contient `eventType` et `documentPath`.
 | GET | `/api/events/approved` | Non | - | Lister les evenements approuves |
 | POST | `/api/events` | Oui | ORGANIZER | Creer un brouillon |
 | GET | `/api/events/me` | Oui | ORGANIZER | Lister ses evenements |
+| PATCH | `/api/events/:eventId` | Oui | ORGANIZER | Modifier un brouillon ou un evenement refuse |
 | PATCH | `/api/events/:eventId/submit` | Oui | ORGANIZER | Soumettre un evenement |
 | PATCH | `/api/events/:eventId/cancel` | Oui | ORGANIZER | Annuler son evenement |
 | GET | `/api/events/:eventId/reservations` | Oui | ORGANIZER | Voir les reservations de son evenement |

@@ -5,6 +5,7 @@ const requireRole = require("../middlewares/requireRole");
 const {
     createEvent,
     getMyEvents,
+    updateEvent,
     submitEvent,
     cancelEvent,
     getApprovedEvents
@@ -33,6 +34,13 @@ router.patch(
     requireAuth,
     requireRole("ORGANIZER"),
     submitEvent
+);
+
+router.patch(
+    "/:eventId",
+    requireAuth,
+    requireRole("ORGANIZER"),
+    updateEvent
 );
 
 router.patch(

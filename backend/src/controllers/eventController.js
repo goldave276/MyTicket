@@ -133,6 +133,54 @@ async function submitEvent(req, res) {
     });
 }
 
+async function updateEvent(req, res) {
+    const eventId = Number(req.params.eventId);
+    const {
+        title,
+        description,
+        eventType,
+        eventDate,
+        location,
+        capacity,
+        price
+    } = req.body;
+    const numericCapacity = Number(capacity);
+    const numericPrice = Number(price);
+    const parsedDate = new Date(eventDate);
+
+    if (!Number.isInteger(eventId)) {
+        return res.status(400).json({ message: "Identifiant d'evenement invalide" });
+    }
+    if (![title, description, eventType, eventDate, location].every(
+        (value) => typeof value === "string" && value.trim()
+    )) {
+        return res.status(400).json({ message: "Les informations obligatoires sont manquantes" });
+    }
+    if (!Number.isInteger(numericCapacity) || numericCapacity <= 0) {
+        return res.status(400).json({ message: "La capacite doit etre un entier positif" });
+    }
+    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+        return res.status(400).json({ message: "Le prix doit etre positif ou nul" });
+    }
+    if (Number.isNaN(parsedDate.getTime()) || parsedDate <= new Date()) {
+        return res.status(400).json({ message: "La date doit etre valide et future" });
+    }
+
+    const { data, error } = await req.supabase.rpc("update_event", {
+        p_event_id: eventId,
+        p_title: title,
+        p_description: description,
+        p_event_type: eventType,
+        p_event_date: parsedDate.toISOString(),
+        p_location: location,
+        p_capacity: numericCapacity,
+        p_price: numericPrice
+    });
+
+    if (error) return res.status(400).json({ message: error.message });
+    return res.status(200).json({ message: "Evenement modifie avec succes", event: data });
+}
+
 async function cancelEvent(req, res) {
     const eventId = Number(req.params.eventId);
 
@@ -272,6 +320,7 @@ async function getApprovedEvents(req, res) {
 module.exports = {
     createEvent,
     getMyEvents,
+    updateEvent,
     submitEvent,
     cancelEvent,
     getPendingEvents,
