@@ -1,13 +1,23 @@
 const { supabase } = require("../config/supabase");
+const {
+    loginSchema,
+    signupSchema,
+    passwordResetSchema,
+    updateProfileSchema,
+    formatZodErrors
+} = require("../validators/authValidator");
 
 async function login(req, res) {
-    const { email, password } = req.body;
+    const parseResult = loginSchema.safeParse(req.body);
 
-    if (!email || !password) {
+    if (!parseResult.success) {
         return res.status(400).json({
-            message: "Email et mot de passe obligatoires"
+            message: "Donnees de connexion invalides",
+            errors: formatZodErrors(parseResult.error)
         });
     }
+
+    const { email, password } = parseResult.data;
 
     const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -28,13 +38,16 @@ async function login(req, res) {
 }
 
 async function signup(req, res) {
-    const { email, password, fullName } = req.body;
+    const parseResult = signupSchema.safeParse(req.body);
 
-    if (!email || !password) {
+    if (!parseResult.success) {
         return res.status(400).json({
-            message: "Email et mot de passe obligatoires"
+            message: "Donnees d'inscription invalides",
+            errors: formatZodErrors(parseResult.error)
         });
     }
+
+    const { email, password, fullName } = parseResult.data;
 
     const { data, error } = await supabase.auth.signUp({
         email,
@@ -55,11 +68,16 @@ async function signup(req, res) {
 }
 
 async function requestPasswordReset(req, res) {
-    const { email } = req.body;
+    const parseResult = passwordResetSchema.safeParse(req.body);
 
-    if (!email) {
-        return res.status(400).json({ message: "Email obligatoire" });
+    if (!parseResult.success) {
+        return res.status(400).json({
+            message: "Email obligatoire et valide",
+            errors: formatZodErrors(parseResult.error)
+        });
     }
+
+    const { email } = parseResult.data;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: process.env.PASSWORD_RESET_REDIRECT_URL
@@ -85,11 +103,16 @@ async function logout(req, res) {
 }
 
 async function updateProfile(req, res) {
-    const { fullName } = req.body;
+    const parseResult = updateProfileSchema.safeParse(req.body);
 
-    if (typeof fullName !== "string" || !fullName.trim()) {
-        return res.status(400).json({ message: "Le nom complet est obligatoire" });
+    if (!parseResult.success) {
+        return res.status(400).json({
+            message: "Donnees de profil invalides",
+            errors: formatZodErrors(parseResult.error)
+        });
     }
+
+    const { fullName } = parseResult.data;
 
     const { data, error } = await req.supabase.rpc("update_my_profile", {
         p_full_name: fullName

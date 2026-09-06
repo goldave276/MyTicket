@@ -33,7 +33,7 @@ describe("Validation des entrees des controllers", () => {
 
         expect(response.statusCode).toBe(400);
         expect(response.body.message).toBe(
-            "Email et mot de passe obligatoires"
+            "Donnees de connexion invalides"
         );
     });
 

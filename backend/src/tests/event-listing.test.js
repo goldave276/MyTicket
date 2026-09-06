@@ -34,6 +34,10 @@ describe("Liste publique des evenements", () => {
             },
             order(field, options) {
                 calls.push(["order", field, options]);
+                return this;
+            },
+            range(start, end) {
+                calls.push(["range", start, end]);
                 return Promise.resolve({ data: [], error: null });
             }
         };

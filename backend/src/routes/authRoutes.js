@@ -23,9 +23,29 @@ const loginLimiter = rateLimit({
     }
 });
 
+const signupLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 5,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    message: {
+        message: "Trop de tentatives d'inscription, reessayez plus tard"
+    }
+});
+
+const passwordResetLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 5,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    message: {
+        message: "Trop de demandes de reinitialisation, reessayez plus tard"
+    }
+});
+
 router.post("/login", loginLimiter, login);
-router.post("/signup", signup);
-router.post("/password-reset", requestPasswordReset);
+router.post("/signup", signupLimiter, signup);
+router.post("/password-reset", passwordResetLimiter, requestPasswordReset);
 
 router.get("/me", requireAuth, getMe);
 router.patch("/profile", requireAuth, updateProfile);
