@@ -234,12 +234,29 @@ async function rejectEvent(req, res) {
 }
 
 async function getApprovedEvents(req, res) {
-    const { data, error } = await supabase
+    const {
+        search,
+        eventType,
+        location,
+        dateFrom,
+        dateTo,
+        minPrice,
+        maxPrice
+    } = req.query || {};
+    let query = supabase
         .from("events")
         .select("id, title, description, event_type, event_date, location, capacity, price")
         .eq("status", "APPROVED")
-        .gte("event_date", new Date().toISOString())
-        .order("event_date", { ascending: true });
+        .gte("event_date", dateFrom || new Date().toISOString());
+
+    if (dateTo) query = query.lte("event_date", dateTo);
+    if (eventType) query = query.ilike("event_type", `%${eventType}%`);
+    if (location) query = query.ilike("location", `%${location}%`);
+    if (search) query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,location.ilike.%${search}%`);
+    if (minPrice !== undefined) query = query.gte("price", Number(minPrice));
+    if (maxPrice !== undefined) query = query.lte("price", Number(maxPrice));
+
+    const { data, error } = await query.order("event_date", { ascending: true });
 
     if (error) {
         return res.status(500).json({

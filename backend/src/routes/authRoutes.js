@@ -3,6 +3,10 @@ const rateLimit = require("express-rate-limit");
 const requireAuth = require("../middlewares/authMiddleware");
 const {
     login,
+    signup,
+    requestPasswordReset,
+    logout,
+    updateProfile,
     getMe
 } = require("../controllers/authController");
 
@@ -20,8 +24,12 @@ const loginLimiter = rateLimit({
 });
 
 router.post("/login", loginLimiter, login);
+router.post("/signup", signup);
+router.post("/password-reset", requestPasswordReset);
 
 router.get("/me", requireAuth, getMe);
+router.patch("/profile", requireAuth, updateProfile);
+router.post("/logout", requireAuth, logout);
 
 
 

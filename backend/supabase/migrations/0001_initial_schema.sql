@@ -79,7 +79,7 @@ create table public.payments (
     reservation_id bigint not null references public.reservations(id) on delete cascade,
     user_id uuid not null references auth.users(id) on delete cascade,
     amount numeric not null,
-    currency varchar not null default 'EUR',
+    currency varchar not null default 'XOF',
     payment_method text not null,
     provider text not null,
     status text not null default 'PENDING',

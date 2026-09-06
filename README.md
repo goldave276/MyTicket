@@ -282,6 +282,10 @@ Authorization: Bearer <access_token_supabase>
 |---|---|---|---|
 | POST | `/api/auth/login` | Non | Connexion email/mot de passe |
 | GET | `/api/auth/me` | Oui | Profil et role de l'utilisateur connecte |
+| POST | `/api/auth/signup` | Non | Creer un compte |
+| POST | `/api/auth/password-reset` | Non | Demander un lien de reinitialisation |
+| PATCH | `/api/auth/profile` | Oui | Modifier le nom du profil |
+| POST | `/api/auth/logout` | Oui | Fermer la session courante |
 
 ### Demandes organisateur
 
@@ -302,6 +306,9 @@ Le corps de la creation contient `eventType` et `documentPath`.
 | PATCH | `/api/events/:eventId/submit` | Oui | ORGANIZER | Soumettre un evenement |
 | PATCH | `/api/events/:eventId/cancel` | Oui | ORGANIZER | Annuler son evenement |
 | GET | `/api/events/:eventId/reservations` | Oui | ORGANIZER | Voir les reservations de son evenement |
+
+La liste publique accepte les filtres `search`, `eventType`, `location`,
+`dateFrom`, `dateTo`, `minPrice` et `maxPrice`.
 
 La validation admin se fait avec `GET /api/admin/events/pending`, puis
 `PATCH /api/admin/events/:eventId/approve` ou
