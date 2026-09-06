@@ -95,9 +95,9 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Ajouter des limiteurs dédiés à l'inscription et à la réinitialisation de mot de passe.
   - [x] Centraliser les schémas Zod de validation des entrées HTTP, identifiants et champs métier.
 
-- [ ] **B0.3. Justificatifs organisateur**
-  - [ ] Vérifier que `documentPath` appartient au dossier Storage de l'utilisateur connecté et que le fichier existe.
-  - [ ] Générer les accès administrateur avec des URL signées temporaires, jamais avec un chemin ou bucket public.
+- [x] **B0.3. Justificatifs organisateur**
+  - [x] Vérifier que `documentPath` appartient au dossier Storage de l'utilisateur connecté et que le fichier existe ([`organizerDocumentValidator.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/validators/organizerDocumentValidator.js)).
+  - [x] Générer les accès avec des URLs signées temporaires (durée 1h), sans jamais exposer de bucket ou chemin public.
 
 - [ ] **B0.4. Configuration et tests**
   - [ ] Interdire `FRONTEND_URL=*` avec `credentials: true` en production et retourner 403 pour une origine refusée.

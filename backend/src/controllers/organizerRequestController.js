@@ -1,21 +1,93 @@
-async function createOrganizerRequest(req, res) {
-    const { eventType, documentPath } = req.body;
+const {
+    validateOrganizerRequestInput
+} = require("../validators/organizerDocumentValidator");
 
-    if (
-        typeof eventType !== "string" ||
-        typeof documentPath !== "string" ||
-        !eventType.trim() ||
-        !documentPath.trim()
-    ) {
-        return res.status(400).json({
-            message: "Le type d'evenement et le document sont obligatoires"
+/**
+ * Enrichit une liste de demandes avec une URL signée temporaire pour chaque justificatif
+ * Durée de validité : 3600 secondes (1 heure)
+ */
+async function enrichRequestsWithSignedUrls(supabase, requests) {
+    if (!Array.isArray(requests) || requests.length === 0) {
+        return [];
+    }
+
+    if (!supabase?.storage?.from) {
+        return requests;
+    }
+
+    const enriched = await Promise.all(
+        requests.map(async (item) => {
+            if (!item.document_path) {
+                return { ...item, signed_document_url: null };
+            }
+
+            try {
+                const { data, error } = await supabase.storage
+                    .from("organizer-documents")
+                    .createSignedUrl(item.document_path, 3600);
+
+                return {
+                    ...item,
+                    signed_document_url: error ? null : (data?.signedUrl || null)
+                };
+            } catch (err) {
+                return { ...item, signed_document_url: null };
+            }
+        })
+    );
+
+    return enriched;
+}
+
+async function createOrganizerRequest(req, res) {
+    const userId = req.user?.id;
+    if (!userId) {
+        return res.status(401).json({
+            message: "Utilisateur non authentifie"
         });
+    }
+
+    const validation = validateOrganizerRequestInput(req.body, userId);
+    if (!validation.isValid) {
+        return res.status(400).json({
+            message: validation.error
+        });
+    }
+
+    const { eventType, documentPath, filename } = validation.value;
+
+    // Vérification de la présence réelle du fichier dans le bucket Storage si l'API Storage est disponible
+    if (req.supabase?.storage?.from) {
+        try {
+            const { data: fileList, error: storageError } = await req.supabase.storage
+                .from("organizer-documents")
+                .list(userId, {
+                    search: filename
+                });
+
+            if (storageError) {
+                return res.status(500).json({
+                    message: "Erreur lors de la verification du document dans l'espace de stockage"
+                });
+            }
+
+            const fileExists = Array.isArray(fileList) && fileList.some((f) => f.name === filename);
+            if (!fileExists) {
+                return res.status(400).json({
+                    message: "Le fichier justificatif est introuvable dans votre espace de stockage"
+                });
+            }
+        } catch (storageErr) {
+            return res.status(500).json({
+                message: "Service de stockage indisponible"
+            });
+        }
     }
 
     const { data, error } = await req.supabase
         .from("organizer_requests")
         .insert({
-            user_id: req.user.id,
+            user_id: userId,
             event_type: eventType,
             document_path: documentPath
         })
@@ -52,8 +124,10 @@ async function getMyOrganizerRequests(req, res) {
         });
     }
 
+    const enrichedRequests = await enrichRequestsWithSignedUrls(req.supabase, data);
+
     return res.status(200).json({
-        requests: data
+        requests: enrichedRequests
     });
 }
 
@@ -69,15 +143,17 @@ async function getAllOrganizerRequests(req, res) {
         });
     }
 
+    const enrichedRequests = await enrichRequestsWithSignedUrls(req.supabase, data);
+
     return res.status(200).json({
-        requests: data
+        requests: enrichedRequests
     });
 }
 
 async function approveOrganizerRequest(req, res) {
     const requestId = Number(req.params.requestId);
 
-    if (!Number.isInteger(requestId)) {
+    if (!Number.isInteger(requestId) || requestId <= 0) {
         return res.status(400).json({
             message: "Identifiant de demande invalide"
         });
@@ -102,12 +178,11 @@ async function approveOrganizerRequest(req, res) {
     });
 }
 
-
 async function rejectOrganizerRequest(req, res) {
     const requestId = Number(req.params.requestId);
     const adminComment = req.body?.adminComment;
 
-    if (!Number.isInteger(requestId)) {
+    if (!Number.isInteger(requestId) || requestId <= 0) {
         return res.status(400).json({
             message: "Identifiant de demande invalide"
         });
@@ -141,10 +216,6 @@ async function rejectOrganizerRequest(req, res) {
         request: data
     });
 }
-
-
-
-
 
 module.exports = {
     createOrganizerRequest,
