@@ -1,20 +1,19 @@
-const { validateReservationId } = require("../validators/reservationValidator");
+const {
+    validateReservationInput,
+    validateReservationId
+} = require("../validators/reservationValidator");
 const { validateEventId } = require("../validators/eventValidator");
 
 async function createReservation(req, res) {
-    const eventId = Number(req.body.eventId);
-    const quantity = Number(req.body.quantity);
+    const validation = validateReservationInput(req.body);
 
-    if (
-        !Number.isInteger(eventId) ||
-        eventId <= 0 ||
-        !Number.isInteger(quantity) ||
-        quantity <= 0
-    ) {
+    if (!validation.isValid) {
         return res.status(400).json({
-            message: "Evenement ou quantite invalide"
+            message: validation.error
         });
     }
+
+    const { eventId, quantity } = validation.value;
 
     const { data, error } = await req.supabase.rpc(
         "create_reservation",

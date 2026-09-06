@@ -137,8 +137,11 @@ function validateEventInput(body) {
 }
 
 function validateEventId(id) {
+    if (id === null || id === undefined || id === "") {
+        return { isValid: false, error: "Identifiant d'evenement invalide" };
+    }
     const num = Number(id);
-    if (!Number.isInteger(num) || num <= 0) {
+    if (!Number.isSafeInteger(num) || num <= 0) {
         return { isValid: false, error: "Identifiant d'evenement invalide" };
     }
     return { isValid: true, value: num };

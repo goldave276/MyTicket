@@ -10,9 +10,9 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 
 | Module | Statut | Progression | Description |
 | :--- | :---: | :---: | :--- |
-| **Backend (API Express)** | 🟢 Validé & Durci | MVP fonctionnel durci | Authentification fail-closed, catalogue paginé, justificatifs sécurisés Storage, Zod, CORS 403, stats et admin |
-| **Base de Données (Supabase)** | 🟢 Validé & Durci | MVP opérationnel | Tables, RLS, fonctions RPC, Storage privé et index de performance |
-| **DevOps & Tests** | 🟢 Opérationnel | 90/90 tests passés | Dockerfile, Docker Compose, Vitest (full, test:unit, test:http), GitHub Actions CI |
+| **Backend (API Express)** | 🟢 Validé & Durci | MVP fonctionnel durci | Auth fail-closed, catalogue paginé, Storage sécurisé, Zod, CORS 403, Safe BigInt et RLS |
+| **Base de Données (Supabase)** | 🟢 Validé & Durci | Migrations 0001 à 0010 | Invariants SQL, RLS insertion 'DRAFT' seule, RPC réservation temporelle & FOR UPDATE |
+| **DevOps & Tests** | 🟢 Opérationnel | 100/100 tests passés | Dockerfile, Docker Compose, Vitest (full, test:unit, test:http), GitHub Actions CI |
 | **Frontend (Next.js / React)** | ⏸️ Mis en pause | 0% | Interface Utilisateur, Espace Organisateur, Dashboard Admin |
 
 ---
@@ -74,6 +74,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - `0007_statistics.sql` (`get_organizer_stats`, `get_admin_stats`)
   - `0008_admin_users.sql` (`admin_list_users`, `admin_update_user_role`, `admin_set_user_blocked`)
   - `0009_performance_indexes.sql` (index PostgreSQL et règles storage)
+  - `0010_sql_invariants_and_rls.sql` (invariants SQL, RLS insertion 'DRAFT' et RPC create_reservation)
 
 ---
 
@@ -132,3 +133,4 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **06/09/2026** | Backend/Security | Phase B0.2 (Actions A2, A4, A6) : Auth fail-closed, rate limiting dédié (signup, reset) & validation Zod | ✅ Validé |
 | **06/09/2026** | Backend/Security | Phase B0.3 (Action A3) : Validation stricte des justificatifs organisateurs, vérification Storage & URLs signées | ✅ Validé |
 | **06/09/2026** | Backend/Security | Phase B0.4 (Actions A5, A6, A7, A9) : Durcissement CORS 403, validation Zod des événements/réservations, scripts de tests & docs | ✅ Validé |
+| **06/09/2026** | Database/Security | Phase B0.5 (Priorité P0) : Migration 0010 (RLS insertion 'DRAFT', invariants SQL, RPC réservation temporelle, safe BigInt) | ✅ Validé |

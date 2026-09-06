@@ -288,81 +288,17 @@ async function getApprovedEvents(req, res) {
 }
 
 async function getOrganizerStats(req, res) {
-    const { data: rpcData, error: rpcError } = await req.supabase.rpc("get_organizer_stats");
+    const { data, error } = await req.supabase.rpc("get_organizer_stats");
 
-    if (!rpcError && rpcData) {
-        return res.status(200).json({
-            stats: rpcData
-        });
-    }
-
-    try {
-        const { data: myEvents, error: eventsError } = await req.supabase
-            .from("events")
-            .select("id, status, capacity, price")
-            .eq("organizer_id", req.user.id);
-
-        if (eventsError) {
-            return res.status(500).json({
-                message: "Impossible de recuperer les statistiques de l'organisateur"
-            });
-        }
-
-        const eventIds = (myEvents || []).map(e => e.id);
-
-        let reservations = [];
-        if (eventIds.length > 0) {
-            const { data: resData, error: resError } = await req.supabase
-                .from("reservations")
-                .select("id, event_id, status, quantity")
-                .in("event_id", eventIds);
-
-            if (!resError && resData) {
-                reservations = resData;
-            }
-        }
-
-        const eventsSummary = {
-            total: (myEvents || []).length,
-            draft: (myEvents || []).filter(e => e.status === "DRAFT").length,
-            pending: (myEvents || []).filter(e => e.status === "PENDING").length,
-            approved: (myEvents || []).filter(e => e.status === "APPROVED").length,
-            rejected: (myEvents || []).filter(e => e.status === "REJECTED").length,
-            cancelled: (myEvents || []).filter(e => e.status === "CANCELLED").length,
-            finished: (myEvents || []).filter(e => e.status === "FINISHED").length,
-            totalCapacity: (myEvents || []).reduce((sum, e) => sum + (Number(e.capacity) || 0), 0)
-        };
-
-        const confirmedReservations = reservations.filter(r => r.status === "CONFIRMED");
-        const ticketsSold = confirmedReservations.reduce((sum, r) => sum + (Number(r.quantity) || 0), 0);
-
-        const eventPriceMap = new Map((myEvents || []).map(e => [e.id, Number(e.price) || 0]));
-        const estimatedRevenue = confirmedReservations.reduce((sum, r) => {
-            const price = eventPriceMap.get(r.event_id) || 0;
-            return sum + (price * (Number(r.quantity) || 0));
-        }, 0);
-
-        return res.status(200).json({
-            stats: {
-                events: eventsSummary,
-                reservations: {
-                    total: reservations.length,
-                    confirmed: confirmedReservations.length,
-                    pending: reservations.filter(r => r.status === "PENDING").length,
-                    cancelled: reservations.filter(r => r.status === "CANCELLED").length,
-                    ticketsSold
-                },
-                revenue: {
-                    estimatedRevenue,
-                    currency: "XOF"
-                }
-            }
-        });
-    } catch (err) {
+    if (error) {
         return res.status(500).json({
-            message: "Erreur lors du calcul des statistiques organisateur"
+            message: "Impossible de recuperer les statistiques de l'organisateur"
         });
     }
+
+    return res.status(200).json({
+        stats: data
+    });
 }
 
 module.exports = {

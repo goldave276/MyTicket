@@ -27,6 +27,7 @@ Assurez-vous que toutes les migrations du dossier `backend/supabase/migrations/`
 7. `0007_statistics.sql` (Fonctions statistiques RPC)
 8. `0008_admin_users.sql` (Fonctions de gestion des utilisateurs)
 9. `0009_performance_indexes.sql` (Index PostgreSQL & bucket `organizer-documents`)
+10. `0010_sql_invariants_and_rls.sql` (Invariants SQL, RLS insertion 'DRAFT' et sécurisation de la RPC `create_reservation`)
 
 ---
 

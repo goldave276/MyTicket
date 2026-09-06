@@ -104,6 +104,15 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Isoler les tests unitaires (`npm run test:unit`) et HTTP (`npm run test:http`) ; intégrer les validateurs Zod métier (`eventValidator.js`, `reservationValidator.js`).
   - [x] Synchroniser le contrat API et le statut réel de qualité dans la documentation (`README.md`, `DEPLOYMENT.md`, `TASKS.md`, `PROGRESSION.md`).
 
+- [x] **B0.5. Invariants SQL/RLS et cohérence métier — priorité P0**
+  - [x] Créer une migration qui interdit l'insertion directe d'un événement dans tout statut autre que `DRAFT` ([`0010_sql_invariants_and_rls.sql`](file:///c:/Users/MSI/Desktop/myticket/backend/supabase/migrations/0010_sql_invariants_and_rls.sql)).
+  - [x] Définir côté PostgreSQL les invariants non contournables : statut initial 'DRAFT', capacité maximale (<= 100 000) et intégrité système.
+  - [x] Modifier la RPC `create_reservation` afin de refuser tout événement avec `event_date <= now()` et basculer les événements échus en `FINISHED`.
+  - [x] Remplacer les conversions JavaScript non sûres des IDs `bigint` par une validation sans perte de précision (`Number.isSafeInteger` dans [`eventValidator.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/validators/eventValidator.js) et [`reservationValidator.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/validators/reservationValidator.js)).
+  - [x] Faire utiliser à `createReservation` son validateur dédié, appliquer la limite métier de quantité (1..100) et retourner 400 pour un corps absent/invalide.
+  - [x] Ajouter des tests de validation et de robustesse des invariants ([`sql-invariants-and-rls.test.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/tests/sql-invariants-and-rls.test.js)).
+  - [x] Supprimer les fallbacks de statistiques qui retournent des données incomplètes sous RLS ; répondre 500 en cas d'erreur de la RPC.
+
 > Détail opérationnel complet : [`CODE_REVIEW_ACTION_PLAN.md`](CODE_REVIEW_ACTION_PLAN.md). Le module de paiements est exclu de cette phase à la demande explicite du propriétaire du projet.
 
 ### 📊 Phase B1 : Endpoints Complémentaires & Statistiques

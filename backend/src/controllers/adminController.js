@@ -1,86 +1,15 @@
 async function getAdminStats(req, res) {
-    const { data: rpcData, error: rpcError } = await req.supabase.rpc("get_admin_stats");
+    const { data, error } = await req.supabase.rpc("get_admin_stats");
 
-    if (!rpcError && rpcData) {
-        return res.status(200).json({
-            stats: rpcData
-        });
-    }
-
-    try {
-        const [
-            { data: profiles, error: profilesError },
-            { data: events, error: eventsError },
-            { data: reservations, error: reservationsError },
-            { data: tickets, error: ticketsError },
-            { data: payments, error: paymentsError }
-        ] = await Promise.all([
-            req.supabase.from("profiles").select("id, role, is_blocked"),
-            req.supabase.from("events").select("id, status"),
-            req.supabase.from("reservations").select("id, status, quantity"),
-            req.supabase.from("tickets").select("id, status"),
-            req.supabase.from("payments").select("id, amount, status").eq("status", "CONFIRMED")
-        ]);
-
-        if (profilesError || eventsError || reservationsError || ticketsError || paymentsError) {
-            return res.status(500).json({
-                message: "Impossible de recuperer les statistiques administratives"
-            });
-        }
-
-        const userStats = {
-            total: (profiles || []).length,
-            users: (profiles || []).filter(p => p.role === "USER").length,
-            organizers: (profiles || []).filter(p => p.role === "ORGANIZER").length,
-            admins: (profiles || []).filter(p => p.role === "ADMIN").length,
-            blocked: (profiles || []).filter(p => p.is_blocked).length
-        };
-
-        const eventStats = {
-            total: (events || []).length,
-            draft: (events || []).filter(e => e.status === "DRAFT").length,
-            pending: (events || []).filter(e => e.status === "PENDING").length,
-            approved: (events || []).filter(e => e.status === "APPROVED").length,
-            rejected: (events || []).filter(e => e.status === "REJECTED").length,
-            cancelled: (events || []).filter(e => e.status === "CANCELLED").length,
-            finished: (events || []).filter(e => e.status === "FINISHED").length
-        };
-
-        const reservationStats = {
-            total: (reservations || []).length,
-            confirmed: (reservations || []).filter(r => r.status === "CONFIRMED").length,
-            pending: (reservations || []).filter(r => r.status === "PENDING").length,
-            cancelled: (reservations || []).filter(r => r.status === "CANCELLED").length,
-            totalQuantitySold: (reservations || [])
-                .filter(r => r.status === "CONFIRMED")
-                .reduce((sum, r) => sum + (r.quantity || 0), 0)
-        };
-
-        const ticketStats = {
-            total: (tickets || []).length,
-            active: (tickets || []).filter(t => t.status === "ACTIVE").length,
-            cancelled: (tickets || []).filter(t => t.status === "CANCELLED").length
-        };
-
-        const revenueStats = {
-            totalConfirmedRevenue: (payments || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0),
-            currency: "XOF"
-        };
-
-        return res.status(200).json({
-            stats: {
-                users: userStats,
-                events: eventStats,
-                reservations: reservationStats,
-                tickets: ticketStats,
-                revenue: revenueStats
-            }
-        });
-    } catch (err) {
+    if (error) {
         return res.status(500).json({
-            message: "Erreur lors du calcul des statistiques"
+            message: "Impossible de recuperer les statistiques administratives"
         });
     }
+
+    return res.status(200).json({
+        stats: data
+    });
 }
 
 async function getAllUsers(req, res) {
