@@ -10,13 +10,16 @@ where not tgisinternal
   and tgrelid::regclass::text in ('public.reservations', 'public.tickets')
 order by table_name, trigger_name;
 
--- 2. Detecte une quantite de tickets differente de la reservation.
+-- 2. Detecte une quantite de tickets differente de la reservation CONFIRMED.
 select
     r.id as reservation_id,
     r.quantity,
     count(t.id) as ticket_count
 from public.reservations r
-left join public.tickets t on t.reservation_id = r.id
+left join public.tickets t
+    on t.reservation_id = r.id
+   and t.status = 'ACTIVE'
+where r.status = 'CONFIRMED'
 group by r.id, r.quantity
 having count(t.id) <> r.quantity
 order by r.id;

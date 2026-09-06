@@ -54,7 +54,7 @@ create table public.reservations (
     event_id bigint not null references public.events(id) on delete cascade,
     user_id uuid not null references auth.users(id) on delete cascade,
     quantity integer not null,
-    status text not null default 'CONFIRMED',
+    status text not null default 'PENDING',
     created_at timestamptz not null default now(),
     constraint reservations_quantity_check check (quantity > 0),
     constraint reservations_status_check

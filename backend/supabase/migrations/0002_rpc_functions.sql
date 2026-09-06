@@ -30,18 +30,15 @@ begin
 
     select coalesce(sum(quantity), 0) into current_reserved
     from public.reservations
-    where event_id = p_event_id and status = 'CONFIRMED';
+    where event_id = p_event_id
+      and status in ('PENDING', 'CONFIRMED');
     if current_reserved + p_quantity > event_row.capacity then
         raise exception 'Nombre de places insuffisant';
     end if;
 
     insert into public.reservations (event_id, user_id, quantity, status)
-    values (p_event_id, auth.uid(), p_quantity, 'CONFIRMED')
+    values (p_event_id, auth.uid(), p_quantity, 'PENDING')
     returning * into reservation_row;
-
-    insert into public.tickets (reservation_id, event_id, user_id)
-    select reservation_row.id, reservation_row.event_id, reservation_row.user_id
-    from generate_series(1, reservation_row.quantity);
     return reservation_row;
 end;
 $$;
@@ -57,11 +54,14 @@ begin
     select * into reservation_row from public.reservations
     where id = p_reservation_id and user_id = auth.uid() for update;
     if not found then raise exception 'Reservation introuvable ou non autorisee'; end if;
-    if reservation_row.status <> 'CONFIRMED' then
+    if reservation_row.status <> 'PENDING' then
         raise exception 'Cette reservation ne peut pas etre annulee';
     end if;
     update public.reservations set status = 'CANCELLED' where id = p_reservation_id;
-    update public.tickets set status = 'CANCELLED' where reservation_id = p_reservation_id;
+    update public.payments
+    set status = 'CANCELLED', updated_at = now()
+    where reservation_id = p_reservation_id
+      and status = 'PENDING';
     select * into reservation_row from public.reservations where id = p_reservation_id;
     return reservation_row;
 end;
@@ -229,6 +229,9 @@ begin
     end if;
     select * into reservation_row from public.reservations
     where id = payment_row.reservation_id for update;
+    if reservation_row.status <> 'PENDING' then
+        raise exception 'Cette reservation n est plus en attente';
+    end if;
     update public.payments set status = 'SUCCEEDED', confirmed_by = auth.uid(),
         confirmed_at = now(), updated_at = now() where id = p_payment_id;
     update public.reservations set status = 'CONFIRMED'
@@ -242,8 +245,8 @@ end;
 $$;
 
 -- Fonction conservee pour compatibilite avec le schema actuel.
--- Aucun trigger ne l'appelle dans le flux actuel : create_reservation et
--- confirm_on_site_payment generent eux-memes les tickets.
+-- Aucun trigger ne l'appelle dans le flux actuel : seul confirm_on_site_payment
+-- genere des tickets lorsque la reservation passe a CONFIRMED.
 create or replace function public.generate_tickets_for_reservation()
 returns trigger
 language plpgsql

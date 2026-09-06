@@ -8,11 +8,11 @@ const {
     updateEvent,
     submitEvent,
     cancelEvent,
-    getApprovedEvents
+    getApprovedEvents,
+    getOrganizerStats
 } = require("../controllers/eventController");
 
 const { getEventReservations } = require("../controllers/reservationController");
-const { getOrganizerStats } = require("../controllers/statsController");
 
 const router = express.Router();
 

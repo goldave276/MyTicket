@@ -52,16 +52,40 @@ Le trigger applicatif actif est `on_auth_user_created` sur `auth.users`, qui
 appelle `handle_new_user()` pour creer le profil.
 
 Aucun trigger applicatif actif n'est attache a `reservations` ou `tickets`.
-La generation des tickets est donc faite par les RPC de reservation et de
-confirmation de paiement.
+La generation des tickets est faite uniquement quand une reservation est
+confirmee par `confirm_on_site_payment`.
 
-## Points a traiter avant la migration initiale
+## Signatures des `id`
 
-- recuperer la definition exacte des colonnes `id` et de leurs sequences ou identites ;
-- exporter les definitions SQL completes des RPC ;
-- verifier les index applicatifs ;
-- tester le schema sur un projet Supabase de test ;
-- decider si le flux de reservation est confirme immediatement ou reste `PENDING` avant paiement.
+- `profiles.id` : `uuid primary key references auth.users(id) on delete cascade`
+- `organizer_requests.id` : `bigint generated always as identity primary key`
+- `events.id` : `bigint generated always as identity primary key`
+- `reservations.id` : `bigint generated always as identity primary key`
+- `tickets.id` : `bigint generated always as identity primary key`
+- `payments.id` : `bigint generated always as identity primary key`
 
-Tant que ces points ne sont pas valides, ne pas presenter ce rapport comme une
-migration executable. La source actuelle reste le projet Supabase existant.
+Chaque colonne `bigint generated always as identity` est adossee a une sequence
+PostgreSQL geree par l'identite. Aucun sequence applicative explicite n'est
+decrite dans les migrations.
+
+## Index applicatifs
+
+- `profiles_pkey` sur `profiles(id)`
+- `organizer_requests_pkey` sur `organizer_requests(id)`
+- `organizer_requests_one_pending_per_user` sur `organizer_requests(user_id)` avec filtre `status = 'PENDING'`
+- `events_pkey` sur `events(id)`
+- `reservations_pkey` sur `reservations(id)`
+- `tickets_pkey` sur `tickets(id)`
+- `tickets_ticket_code_key` sur `tickets(ticket_code)`
+- `payments_pkey` sur `payments(id)`
+- `payments_provider_payment_id_key` sur `payments(provider_payment_id)`
+
+## Correspondance backend
+
+- `create_reservation` cree maintenant une reservation `PENDING`
+- `create_payment_for_reservation` attend une reservation `PENDING`
+- `confirm_on_site_payment` confirme la reservation puis genere les tickets
+- `cancel_reservation` cible les reservations encore `PENDING`
+
+Le contrat RPC et schema est maintenant aligne sur le flux "reservation en
+attente jusqu'au paiement".

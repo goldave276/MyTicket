@@ -48,7 +48,7 @@ seconde execution de la migration initiale.
 
 1. Executer `supabase/inspect-schema.sql` dans le SQL Editor Supabase.
 2. Executer `supabase/inspect-rpc-and-triggers.sql` pour obtenir les signatures RPC, triggers et relations.
-3. Executer `supabase/check-ticket-generation.sql` pour verifier que les tickets ne sont pas generes deux fois.
+3. Executer `supabase/check-ticket-generation.sql` pour verifier que les tickets ne sont generes deux fois pour les reservations `CONFIRMED`.
 4. Recuperer aussi les index et les extensions activees si le projet en utilise.
 5. Exporter le schema actuel, y compris les tables, fonctions RPC, index, triggers et politiques RLS.
 6. Le placer dans un fichier `0001_initial_schema.sql`.

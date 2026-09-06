@@ -19,8 +19,12 @@ const {
     confirmOnSitePayment
 } = require("../controllers/paymentController");
 
-const { getAdminStats } = require("../controllers/statsController");
-const { getUsers, updateUserRole, setUserBlocked } = require("../controllers/userController");
+const {
+    getAdminStats,
+    getUsers,
+    updateUserRole,
+    setUserBlocked
+} = require("../controllers/adminController");
 
 
 
