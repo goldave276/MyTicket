@@ -22,11 +22,25 @@ const morgan = require("morgan");
 
 const app = express();
 
+const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:3001")
+    .split(",")
+    .map(origin => origin.trim());
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3001"
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+            return callback(null, true);
+        }
+        return callback(new Error("Origine non autorisee par la politique CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
-app.use(helmet());
+
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: "1mb" }));
 
