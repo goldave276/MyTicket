@@ -9,6 +9,7 @@ const {
     submitEvent,
     cancelEvent,
     getApprovedEvents,
+    getPublicEventDetail,
     getOrganizerStats
 } = require("../controllers/eventController");
 
@@ -69,6 +70,11 @@ router.get(
 router.get(
     "/approved",
     getApprovedEvents
+);
+
+router.get(
+    "/:eventId",
+    getPublicEventDetail
 );
 
 module.exports = router;

@@ -42,6 +42,9 @@ function parseIsoDate(val) {
     if (typeof val !== "string") return null;
     const trimmed = val.trim();
     if (!trimmed) return undefined;
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(trimmed)) {
+        return null;
+    }
     const date = new Date(trimmed);
     if (Number.isNaN(date.getTime())) {
         return null;
@@ -51,7 +54,7 @@ function parseIsoDate(val) {
 
 function escapePostgrestValue(str) {
     if (!str) return "";
-    return str.replace(/[,().%:\\]/g, "");
+    return str.replace(/[,().%_:\\]/g, "");
 }
 
 function validateEventQuery(query = {}) {

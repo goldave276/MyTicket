@@ -269,6 +269,7 @@ async function getApprovedEvents(req, res) {
 
     const { data, count, error } = await query
         .order("event_date", { ascending: true })
+        .order("id", { ascending: true })
         .range(from, to);
 
     if (error) {
@@ -285,6 +286,30 @@ async function getApprovedEvents(req, res) {
             total: count ?? (data ? data.length : 0)
         }
     });
+}
+
+async function getPublicEventDetail(req, res) {
+    const idValidation = validateEventId(req.params.eventId);
+
+    if (!idValidation.isValid) {
+        return res.status(400).json({ message: idValidation.error });
+    }
+
+    const { data, error } = await supabase.rpc("get_public_event_detail", {
+        p_event_id: idValidation.value
+    });
+
+    if (error) {
+        return res.status(500).json({
+            message: "Impossible de recuperer le detail de l'evenement"
+        });
+    }
+
+    if (!data) {
+        return res.status(404).json({ message: "Evenement introuvable" });
+    }
+
+    return res.status(200).json({ event: data });
 }
 
 async function getOrganizerStats(req, res) {
@@ -311,5 +336,6 @@ module.exports = {
     approveEvent,
     rejectEvent,
     getApprovedEvents,
+    getPublicEventDetail,
     getOrganizerStats
 };

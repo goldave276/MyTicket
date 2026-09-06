@@ -1,5 +1,7 @@
 const { z } = require("zod");
 
+const ISO_DATE_TIME_WITH_ZONE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
+
 const eventPayloadSchema = z.object({
     title: z
         .string({ required_error: "Les informations obligatoires sont manquantes" })
@@ -31,6 +33,7 @@ const eventPayloadSchema = z.object({
         .min(1, "Les informations obligatoires sont manquantes")
         .refine(
             (val) => {
+                if (!ISO_DATE_TIME_WITH_ZONE.test(val)) return false;
                 const parsed = new Date(val);
                 return !isNaN(parsed.getTime());
             },
@@ -99,7 +102,7 @@ function validateEventInput(body) {
     }
 
     const parsedDate = new Date(eventDate);
-    if (Number.isNaN(parsedDate.getTime()) || parsedDate <= new Date()) {
+    if (!ISO_DATE_TIME_WITH_ZONE.test(eventDate) || Number.isNaN(parsedDate.getTime()) || parsedDate <= new Date()) {
         return { isValid: false, error: "La date doit etre valide et future" };
     }
 

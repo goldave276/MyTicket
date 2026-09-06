@@ -28,6 +28,7 @@ Assurez-vous que toutes les migrations du dossier `backend/supabase/migrations/`
 8. `0008_admin_users.sql` (Fonctions de gestion des utilisateurs)
 9. `0009_performance_indexes.sql` (Index PostgreSQL & bucket `organizer-documents`)
 10. `0010_sql_invariants_and_rls.sql` (Invariants SQL, RLS insertion 'DRAFT' et sécurisation de la RPC `create_reservation`)
+11. `0011_event_lifecycle_and_public_details.sql` (Cycle de vie, trigger invariants, annulation atomique, disponibilité publique et protection du rôle organisateur)
 
 ---
 

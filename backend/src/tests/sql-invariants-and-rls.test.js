@@ -8,6 +8,8 @@ const {
 const { createReservation, getEventReservations } = require("../controllers/reservationController");
 const { getOrganizerStats } = require("../controllers/eventController");
 const { getAdminStats } = require("../controllers/adminController");
+const fs = require("fs");
+const path = require("path");
 
 function createResponse() {
     return {
@@ -25,6 +27,16 @@ function createResponse() {
 }
 
 describe("Invariants SQL, RLS et Validations Safe BigInt (Phase B0.5)", () => {
+    it("separe le refus de reservation expiree de la tache qui clot les evenements", () => {
+        const migration = fs.readFileSync(
+            path.join(__dirname, "../../supabase/migrations/0011_event_lifecycle_and_public_details.sql"),
+            "utf8"
+        );
+
+        expect(migration).toContain("create or replace function public.finish_expired_events()");
+        expect(migration).toContain("raise exception 'Cet evenement n est pas disponible'");
+        expect(migration).not.toMatch(/set status = 'FINISHED'[\s\S]{0,300}raise exception 'Cet evenement est deja passe'/);
+    });
     describe("Validation sans perte de precision sur les identifiants BigInt", () => {
         it("valide les identifiants entiers stricts dans la plage safe integer", () => {
             expect(validateEventId(1).isValid).toBe(true);
@@ -144,4 +156,51 @@ describe("Invariants SQL, RLS et Validations Safe BigInt (Phase B0.5)", () => {
             expect(result.error).toContain("100 000");
         });
     });
+
+    describe("Garanties SQL et Cycle de vie (Migration 0011)", () => {
+        const migration0011 = fs.readFileSync(
+            path.join(__dirname, "../../supabase/migrations/0011_event_lifecycle_and_public_details.sql"),
+            "utf8"
+        );
+
+        it("definit le trigger BEFORE INSERT OR UPDATE pour les invariants d'evenement", () => {
+            expect(migration0011).toContain("create trigger enforce_event_invariants_before_write");
+            expect(migration0011).toContain("before insert or update on public.events");
+            expect(migration0011).toContain("if new.status <> 'DRAFT' then");
+            expect(migration0011).toContain("raise exception 'Un evenement doit etre cree au statut DRAFT'");
+            expect(migration0011).toContain("raise exception 'La date de l evenement doit etre future'");
+            expect(migration0011).toContain("new.capacity < 1 or new.capacity > 100000");
+        });
+
+        it("desactive atomiquement les reservations et billets lors de l'annulation d'un evenement", () => {
+            expect(migration0011).toContain("create or replace function public.cancel_event(");
+            expect(migration0011).toContain("update public.events");
+            expect(migration0011).toContain("set status = 'CANCELLED'");
+            expect(migration0011).toContain("update public.reservations");
+            expect(migration0011).toContain("set status = 'CANCELLED'");
+            expect(migration0011).toContain("status in ('PENDING', 'CONFIRMED')");
+            expect(migration0011).toContain("update public.tickets");
+            expect(migration0011).toContain("set status = 'CANCELLED'");
+            expect(migration0011).toContain("status = 'ACTIVE'");
+        });
+
+        it("protege contre la retrogradation d'un organisateur possedant des evenements actifs ou futurs", () => {
+            expect(migration0011).toContain("create or replace function public.admin_update_user_role(");
+            expect(migration0011).toContain("if p_role = 'USER' then");
+            expect(migration0011).toContain("where organizer_id = p_user_id");
+            expect(migration0011).toContain("and status in ('APPROVED', 'PENDING')");
+            expect(migration0011).toContain("and event_date > now()");
+            expect(migration0011).toContain("Impossible de retrograder un organisateur ayant des evenements actifs ou futurs");
+        });
+
+        it("calcule la capacite restante de maniere atomique dans get_public_event_detail", () => {
+            expect(migration0011).toContain("create or replace function public.get_public_event_detail(");
+            expect(migration0011).toContain("'remainingCapacity', greatest(");
+            expect(migration0011).toContain("e.capacity - coalesce(");
+            expect(migration0011).toContain("where r.event_id = e.id");
+            expect(migration0011).toContain("and r.status in ('PENDING', 'CONFIRMED')");
+        });
+    });
 });
+
+

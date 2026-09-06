@@ -142,7 +142,7 @@ Pour executer les tests :
 
 ```powershell
 cd backend
-npm test          # Suite complete de tests (90 tests)
+npm test          # Suite complete de tests (107 tests)
 npm run test:unit # Tests unitaires et validateurs de schemas Zod
 npm run test:http # Tests d'integration HTTP, securite CORS et guards
 ```
@@ -205,7 +205,7 @@ Le frontend recharge ensuite le profil confirme par le backend et peut afficher 
 
 Un utilisateur ne peut pas creer une nouvelle demande tant qu'une demande `PENDING` existe deja pour lui.
 
-Lorsque l'organisateur n'a plus aucun evenement actif ou futur a gerer, son role temporaire peut etre retire et il redevient `USER`. Les evenements termines restent conserves pour l'historique.
+Lorsque l'organisateur n'a plus aucun evenement actif ou futur a gerer, son role peut etre retire par un administrateur et il redevient `USER`. Une fonction SQL securisee empeche la retrogradation si des evenements actifs ou futurs existent encore. Les evenements termines restent conserves pour l'historique.
 
 Statuts d'un evenement :
 
@@ -303,6 +303,7 @@ Le corps de la creation contient `eventType` et `documentPath`.
 | Methode | URL | Auth | Role | Usage |
 |---|---|---|---|---|
 | GET | `/api/events/approved` | Non | - | Lister les evenements approuves |
+| GET | `/api/events/:eventId` | Non | - | Consulter le detail public et les places restantes |
 | POST | `/api/events` | Oui | ORGANIZER | Creer un brouillon |
 | GET | `/api/events/me` | Oui | ORGANIZER | Lister ses evenements |
 | GET | `/api/events/stats` | Oui | ORGANIZER | Consulter ses statistiques |
@@ -312,7 +313,7 @@ Le corps de la creation contient `eventType` et `documentPath`.
 | GET | `/api/events/:eventId/reservations` | Oui | ORGANIZER | Voir les reservations de son evenement |
 
 La liste publique accepte les filtres `search`, `eventType`, `location`,
-`dateFrom`, `dateTo`, `minPrice` et `maxPrice`.
+`dateFrom`, `dateTo`, `minPrice`, `maxPrice`, `page` et `limit`.
 
 La validation admin se fait avec `GET /api/admin/events/pending`, puis
 `PATCH /api/admin/events/:eventId/approve` ou

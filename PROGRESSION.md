@@ -10,9 +10,9 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 
 | Module | Statut | Progression | Description |
 | :--- | :---: | :---: | :--- |
-| **Backend (API Express)** | 🟢 Validé & Durci | MVP fonctionnel durci | Auth fail-closed, catalogue paginé, Storage sécurisé, Zod, CORS 403, Safe BigInt et RLS |
-| **Base de Données (Supabase)** | 🟢 Validé & Durci | Migrations 0001 à 0010 | Invariants SQL, RLS insertion 'DRAFT' seule, RPC réservation temporelle & FOR UPDATE |
-| **DevOps & Tests** | 🟢 Opérationnel | 100/100 tests passés | Dockerfile, Docker Compose, Vitest (full, test:unit, test:http), GitHub Actions CI |
+| **Backend (API Express)** | 🟢 Validé & Durci | 100% (hors paiements) | Auth, rôles, catalogue, cycle de vie événement, détail public et RLS durcis |
+| **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0011 | RLS `DRAFT`, trigger invariants, annulation atomique, disponibilité publique et RPC sécurisées |
+| **DevOps & Tests** | 🟢 Validé | 107/107 tests validés | Dockerfile, Vitest (unit & http), CI GitHub Actions, guide de déploiement et configuration proxy |
 | **Frontend (Next.js / React)** | ⏸️ Mis en pause | 0% | Interface Utilisateur, Espace Organisateur, Dashboard Admin |
 
 ---
@@ -75,6 +75,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - `0008_admin_users.sql` (`admin_list_users`, `admin_update_user_role`, `admin_set_user_blocked`)
   - `0009_performance_indexes.sql` (index PostgreSQL et règles storage)
   - `0010_sql_invariants_and_rls.sql` (invariants SQL, RLS insertion 'DRAFT' et RPC create_reservation)
+  - `0011_event_lifecycle_and_public_details.sql` (cycle de vie événement, trigger invariants, annulation atomique, disponibilité publique et rétrogradation organisateur)
 
 ---
 
@@ -134,3 +135,4 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **06/09/2026** | Backend/Security | Phase B0.3 (Action A3) : Validation stricte des justificatifs organisateurs, vérification Storage & URLs signées | ✅ Validé |
 | **06/09/2026** | Backend/Security | Phase B0.4 (Actions A5, A6, A7, A9) : Durcissement CORS 403, validation Zod des événements/réservations, scripts de tests & docs | ✅ Validé |
 | **06/09/2026** | Database/Security | Phase B0.5 (Priorité P0) : Migration 0010 (RLS insertion 'DRAFT', invariants SQL, RPC réservation temporelle, safe BigInt) | ✅ Validé |
+| **06/09/2026** | Backend/Database | Phase B0.6 (Priorité P1) : Migration 0011 (trigger invariants, correction RPC `create_reservation`, fonction cron `finish_expired_events`, annulation atomique `cancel_event` avec désactivation des tickets, RPC détail public `get_public_event_detail`, sécurité de rétrogradation organisateur dans `admin_update_user_role`, alignement `trust proxy`, documentation README/DEPLOYMENT, 107/107 tests passants) | ✅ Validé |

@@ -15,25 +15,14 @@ async function getAdminStats(req, res) {
 async function getAllUsers(req, res) {
     const { data: rpcUsers, error: rpcError } = await req.supabase.rpc("admin_list_users");
 
-    if (!rpcError && rpcUsers) {
-        return res.status(200).json({
-            users: rpcUsers
-        });
-    }
-
-    const { data, error } = await req.supabase
-        .from("profiles")
-        .select("id, full_name, role, is_blocked, created_at")
-        .order("created_at", { ascending: false });
-
-    if (error) {
+    if (rpcError) {
         return res.status(500).json({
             message: "Impossible de recuperer la liste des utilisateurs"
         });
     }
 
     return res.status(200).json({
-        users: data
+        users: rpcUsers || []
     });
 }
 

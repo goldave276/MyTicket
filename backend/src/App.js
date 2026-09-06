@@ -22,6 +22,13 @@ const morgan = require("morgan");
 
 const app = express();
 
+// A activer uniquement derriere un proxy unique de confiance (Render, Railway,
+// Nginx configure comme unique saut). Sans ce reglage, le rate limiting voit
+// l'IP du proxy au lieu de celle du client.
+if (process.env.TRUST_PROXY === "1") {
+    app.set("trust proxy", 1);
+}
+
 const rawFrontendUrl = process.env.FRONTEND_URL || "http://localhost:3001";
 const allowedOrigins = rawFrontendUrl
     .split(",")

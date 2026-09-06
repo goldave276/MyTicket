@@ -113,6 +113,19 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Ajouter des tests de validation et de robustesse des invariants ([`sql-invariants-and-rls.test.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/tests/sql-invariants-and-rls.test.js)).
   - [x] Supprimer les fallbacks de statistiques qui retournent des données incomplètes sous RLS ; répondre 500 en cas d'erreur de la RPC.
 
+- [x] **B0.6. Cycle de vie événement, contrat API et exploitation — priorité P1**
+  - [x] Corriger `create_reservation` dans une nouvelle migration : l'`UPDATE ... status = 'FINISHED'` suivi d'un `RAISE EXCEPTION` est annulé par rollback. Mettre le passage en `FINISHED` dans une tâche planifiée/transaction distincte, ou ne pas lever d'exception après la mise à jour selon le contrat retenu ([`0011_event_lifecycle_and_public_details.sql`](file:///c:/Users/MSI/Desktop/myticket/backend/supabase/migrations/0011_event_lifecycle_and_public_details.sql)).
+  - [x] Ajouter une garantie SQL pour les données d'événement créées directement via Supabase : date future au moment de la création/modification, tailles maximales des textes et plafond de prix. Ne pas utiliser un `CHECK (event_date > now())` instable ; utiliser une RPC unique ou un trigger `BEFORE INSERT OR UPDATE` (`enforce_event_invariants_before_write`).
+  - [x] Définir puis implémenter la règle métier d'annulation d'un événement : désactiver les tickets déjà émis et mettre à jour les réservations concernées de façon transactionnelle. Les remboursements et paiements restent hors périmètre (`cancel_event`).
+  - [x] Ajouter l'endpoint public de détail d'événement annoncé par le produit, avec disponibilité calculée de manière atomique/sûre (`capacity - réservations PENDING/CONFIRMED`). Le placer dans le routeur sans entrer en conflit avec `/approved`, `/me`, `/stats` et les routes organisateur (`GET /api/events/:eventId` + RPC `get_public_event_detail`).
+  - [x] Implémenter ou retirer du README la révocation du rôle `ORGANIZER` lorsqu'aucun événement actif ou futur ne reste à gérer ; prévoir une RPC/admin action vérifiant les invariants avant rétrogradation (`admin_update_user_role` dans migration 0011).
+  - [x] Configurer `app.set('trust proxy', 1)` uniquement pour les hébergeurs à un saut de proxy documentés, ou rendre ce réglage configurable. Aligner le code avec `DEPLOYMENT.md` pour que le rate limiting utilise la vraie IP (`TRUST_PROXY=1`).
+  - [x] Retirer les contrôleurs dupliqués et non branchés (`userController.js`, `statsController.js`) ou les connecter explicitement ; une seule implémentation doit définir le contrat admin/statistiques.
+  - [x] Supprimer le fallback `getAllUsers` qui peut retourner une liste partielle sous RLS si `admin_list_users` échoue ; retourner une erreur contrôlée tant qu'une RPC admin ne répond pas.
+  - [x] Mettre à jour le README : 107 tests actuels (et non 90), paramètres `page`/`limit` du catalogue, état réel du frontend, et distinction entre validation structurelle CI et tests RLS exécutés avec des identités Supabase.
+  - [x] Ajouter des tests d'intégration avec Supabase local/projet isolé : JWT utilisateur/organisateur/admin, policy RLS réelle, transition `FINISHED`, annulation et désactivation de ticket, calcul de places restantes, et concurrence de réservation ([`sql-invariants-and-rls.test.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/tests/sql-invariants-and-rls.test.js), [`event-public-detail.test.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/tests/event-public-detail.test.js)).
+
+
 > Détail opérationnel complet : [`CODE_REVIEW_ACTION_PLAN.md`](CODE_REVIEW_ACTION_PLAN.md). Le module de paiements est exclu de cette phase à la demande explicite du propriétaire du projet.
 
 ### 📊 Phase B1 : Endpoints Complémentaires & Statistiques
