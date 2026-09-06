@@ -124,3 +124,4 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **06/09/2026** | Docs | Création du suivi `PROGRESSION.md`, feuille de route `TASKS.md` et règles `AGENTS.md` | ✅ Validé |
 | **06/09/2026** | Backend | Phase B1 : Implémentation des stats Organisateur/Admin & gestion des utilisateurs | ✅ Validé |
 | **06/09/2026** | Database/Backend | Phase B2 : Migration 0009 (index & storage), intégration RPC complète | ✅ Validé |
+| **06/09/2026** | Tests/Backend | Étape 1 : Tests exhaustifs de robustesse et cas limites (`edge-cases.test.js`) | ✅ Validé |
