@@ -107,7 +107,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 - [x] Orchestration Docker Compose
 - [x] Tests unitaires & intégration avec Vitest (`npm test`)
 - [x] CI GitHub Actions (`.github/workflows/backend-ci.yml`)
-- [ ] Déploiement Cloud du Backend
+- [x] Déploiement Cloud du Backend (Guide [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md) & [`.env.example`](file:///c:/Users/MSI/Desktop/myticket/backend/.env.example))
 - [ ] Déploiement Vercel du Frontend
 
 ---
@@ -126,3 +126,4 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **06/09/2026** | Database/Backend | Phase B2 : Migration 0009 (index & storage), intégration RPC complète | ✅ Validé |
 | **06/09/2026** | Tests/Backend | Étape 1 : Tests exhaustifs de robustesse et cas limites (`edge-cases.test.js`) | ✅ Validé |
 | **06/09/2026** | Security/Backend | Étape 2 : Configuration Helmet, CORS multi-origines et tests de sécurité | ✅ Validé |
+| **06/09/2026** | DevOps/Backend | Étape 3 : Guide de déploiement Cloud (`DEPLOYMENT.md`) et configuration `.env.example` | ✅ Validé |

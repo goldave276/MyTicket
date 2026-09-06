@@ -117,10 +117,10 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 
 ## 🌐 PARTIE 3 : DÉPLOIEMENT & ENVIRONNEMENT
 
-- [ ] **D1. Déploiement Backend**
-  - [ ] Hébergement du conteneur Docker (Render / Railway / VPS).
-  - [ ] Configuration des variables d'environnement de production et restriction CORS sur le domaine frontend.
-  - [ ] Vérification du point de santé `GET /api/health`.
+- [x] **D1. Déploiement Backend**
+  - [x] Documentation complète du déploiement Docker multi-environnements ([`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md)).
+  - [x] Configuration des variables de production et politique CORS multi-origines ([`.env.example`](file:///c:/Users/MSI/Desktop/myticket/backend/.env.example)).
+  - [x] Point de santé et tests de sécurité validés (`GET /api/health`).
 
 - [ ] **D2. Déploiement Frontend**
   - [ ] Hébergement de l'application Next.js sur **Vercel**.
