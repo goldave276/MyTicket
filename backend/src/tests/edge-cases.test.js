@@ -33,10 +33,20 @@ describe("Tests de robustesse et cas limites (Edge Cases)", () => {
     });
 
     describe("Cas limites : Evenements", () => {
-        it("refuse la consultation des evenements avec des filtres invalides sans crasher", async () => {
+        it("refuse la consultation des evenements avec des filtres invalides en 400 immediat", async () => {
             const response = await request(app)
                 .get("/api/events/approved?minPrice=notanumber&maxPrice=invalid");
-            expect([200, 400, 500]).toContain(response.status);
+            expect(response.status).toBe(400);
+            expect(response.body.message).toBe("Filtres invalides");
+            expect(response.body.errors.minPrice).toBeDefined();
+            expect(response.body.errors.maxPrice).toBeDefined();
+        });
+
+        it("refuse si minPrice > maxPrice", async () => {
+            const response = await request(app)
+                .get("/api/events/approved?minPrice=5000&maxPrice=1000");
+            expect(response.status).toBe(400);
+            expect(response.body.errors.minPrice).toBeDefined();
         });
     });
 

@@ -1,4 +1,5 @@
 const { supabase } = require("../config/supabase");
+const { validateEventQuery, escapePostgrestValue } = require("../validators/eventQueryValidator");
 
 
 async function createEvent(req, res) {
@@ -282,6 +283,15 @@ async function rejectEvent(req, res) {
 }
 
 async function getApprovedEvents(req, res) {
+    const validation = validateEventQuery(req.query);
+
+    if (!validation.isValid) {
+        return res.status(400).json({
+            message: "Filtres invalides",
+            errors: validation.errors
+        });
+    }
+
     const {
         search,
         eventType,
@@ -289,22 +299,35 @@ async function getApprovedEvents(req, res) {
         dateFrom,
         dateTo,
         minPrice,
-        maxPrice
-    } = req.query || {};
+        maxPrice,
+        page,
+        limit
+    } = validation.value;
+
     let query = supabase
         .from("events")
-        .select("id, title, description, event_type, event_date, location, capacity, price")
+        .select("id, title, description, event_type, event_date, location, capacity, price", { count: "exact" })
         .eq("status", "APPROVED")
         .gte("event_date", dateFrom || new Date().toISOString());
 
     if (dateTo) query = query.lte("event_date", dateTo);
     if (eventType) query = query.ilike("event_type", `%${eventType}%`);
     if (location) query = query.ilike("location", `%${location}%`);
-    if (search) query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,location.ilike.%${search}%`);
-    if (minPrice !== undefined) query = query.gte("price", Number(minPrice));
-    if (maxPrice !== undefined) query = query.lte("price", Number(maxPrice));
+    if (search) {
+        const escaped = escapePostgrestValue(search);
+        if (escaped) {
+            query = query.or(`title.ilike.%${escaped}%,description.ilike.%${escaped}%,location.ilike.%${escaped}%`);
+        }
+    }
+    if (minPrice !== undefined) query = query.gte("price", minPrice);
+    if (maxPrice !== undefined) query = query.lte("price", maxPrice);
 
-    const { data, error } = await query.order("event_date", { ascending: true });
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    const { data, count, error } = await query
+        .order("event_date", { ascending: true })
+        .range(from, to);
 
     if (error) {
         return res.status(500).json({
@@ -313,7 +336,12 @@ async function getApprovedEvents(req, res) {
     }
 
     return res.status(200).json({
-        events: data
+        events: data || [],
+        pagination: {
+            page,
+            limit,
+            total: count ?? (data ? data.length : 0)
+        }
     });
 }
 

@@ -10,9 +10,9 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 
 | Module | Statut | Progression | Description |
 | :--- | :---: | :---: | :--- |
-| **Backend (API Express)** | 🟢 Opérationnel | 100% (MVP) | Authentification, Rôles, Événements, Réservations, Tickets, Stats, Admin |
-| **Base de Données (Supabase)** | 🟢 Opérationnel | 100% (MVP) | Tables, RLS, Fonctions RPC, Storage Justificatifs, Index (0001 à 0009) |
-| **DevOps & Tests** | 🟢 Opérationnel | 95% | Dockerfile, Docker Compose, Vitest, GitHub Actions CI |
+| **Backend (API Express)** | 🟡 À durcir | MVP fonctionnel | Authentification, rôles, événements, réservations, tickets, stats et admin ; revue de code à traiter hors paiements |
+| **Base de Données (Supabase)** | 🟡 À durcir | MVP fonctionnel | Tables, RLS, fonctions RPC, Storage et index ; validations et tests d'intégration à renforcer |
+| **DevOps & Tests** | 🟡 À corriger | Tests backend 49/50 | Dockerfile, Docker Compose, Vitest, GitHub Actions CI ; un test de filtres publics dépasse actuellement le délai |
 | **Frontend (Next.js / React)** | ⏸️ Mis en pause | 0% | Interface Utilisateur, Espace Organisateur, Dashboard Admin |
 
 ---
@@ -127,3 +127,5 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **06/09/2026** | Tests/Backend | Étape 1 : Tests exhaustifs de robustesse et cas limites (`edge-cases.test.js`) | ✅ Validé |
 | **06/09/2026** | Security/Backend | Étape 2 : Configuration Helmet, CORS multi-origines et tests de sécurité | ✅ Validé |
 | **06/09/2026** | DevOps/Backend | Étape 3 : Guide de déploiement Cloud (`DEPLOYMENT.md`) et configuration `.env.example` | ✅ Validé |
+| **06/09/2026** | Revue senior | Revue statique complète, plan d'action détaillé dans `CODE_REVIEW_ACTION_PLAN.md` | ✅ Documenté |
+| **06/09/2026** | Backend/Fix | Phase B0.1 (Action A1) : Validation stricte des filtres du catalogue, échappement PostgREST et pagination | ✅ Validé |

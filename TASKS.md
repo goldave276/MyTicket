@@ -84,6 +84,28 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 
 ## ⚙️ PARTIE 2 : BACKEND & BASE DE DONNÉES (`backend/` - Express & Supabase)
 
+### 🔎 Phase B0 : Durcissement issu de la revue de code (hors paiements)
+- [x] **B0.1. Catalogue public robuste**
+  - [x] Valider, normaliser et paginer les filtres de `GET /api/events/approved` avant tout appel Supabase ([`eventQueryValidator.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/validators/eventQueryValidator.js)).
+  - [x] Neutraliser les caractères spéciaux dans la recherche PostgREST (`escapePostgrestValue`).
+  - [x] Corriger le test de filtres invalides avec rejet 400 immédiat sans appel distant.
+
+- [ ] **B0.2. Authentification et accès**
+  - [ ] Passer le contrôle de compte bloqué en mode fail-closed lorsque la lecture de profil échoue ou est absente.
+  - [ ] Ajouter des limiteurs dédiés à l'inscription et à la réinitialisation de mot de passe.
+  - [ ] Centraliser les schémas Zod de validation des entrées HTTP, identifiants et champs métier.
+
+- [ ] **B0.3. Justificatifs organisateur**
+  - [ ] Vérifier que `documentPath` appartient au dossier Storage de l'utilisateur connecté et que le fichier existe.
+  - [ ] Générer les accès administrateur avec des URL signées temporaires, jamais avec un chemin ou bucket public.
+
+- [ ] **B0.4. Configuration et tests**
+  - [ ] Interdire `FRONTEND_URL=*` avec `credentials: true` en production et retourner 403 pour une origine refusée.
+  - [ ] Isoler les tests unitaires, HTTP et Supabase d'intégration ; ajouter la vérification RLS et concurrence de réservation.
+  - [ ] Synchroniser le contrat API et le statut réel de qualité dans la documentation.
+
+> Détail opérationnel complet : [`CODE_REVIEW_ACTION_PLAN.md`](CODE_REVIEW_ACTION_PLAN.md). Le module de paiements est exclu de cette phase à la demande explicite du propriétaire du projet.
+
 ### 📊 Phase B1 : Endpoints Complémentaires & Statistiques
 - [x] **B1.1. Statistiques Organisateur & Admin**
   - [x] Créer le contrôleur et la route `GET /api/events/organizer/stats` (taux de remplissage, billets vendus, total XOF).
