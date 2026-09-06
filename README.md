@@ -303,6 +303,7 @@ Le corps de la creation contient `eventType` et `documentPath`.
 | GET | `/api/events/approved` | Non | - | Lister les evenements approuves |
 | POST | `/api/events` | Oui | ORGANIZER | Creer un brouillon |
 | GET | `/api/events/me` | Oui | ORGANIZER | Lister ses evenements |
+| GET | `/api/events/stats` | Oui | ORGANIZER | Consulter ses statistiques |
 | PATCH | `/api/events/:eventId` | Oui | ORGANIZER | Modifier un brouillon ou un evenement refuse |
 | PATCH | `/api/events/:eventId/submit` | Oui | ORGANIZER | Soumettre un evenement |
 | PATCH | `/api/events/:eventId/cancel` | Oui | ORGANIZER | Annuler son evenement |
@@ -335,5 +336,6 @@ confirmee genere ses tickets via la fonction PostgreSQL transactionnelle.
 | PATCH | `/api/admin/organizer-requests/:requestId/approve` | Oui | ADMIN | Approuver une demande |
 | PATCH | `/api/admin/organizer-requests/:requestId/reject` | Oui | ADMIN | Refuser une demande |
 | GET | `/api/admin/events/pending` | Oui | ADMIN | Lister les evenements a valider |
+| GET | `/api/admin/stats` | Oui | ADMIN | Consulter les statistiques globales |
 | PATCH | `/api/admin/events/:eventId/approve` | Oui | ADMIN | Approuver un evenement |
 | PATCH | `/api/admin/events/:eventId/reject` | Oui | ADMIN | Refuser un evenement |

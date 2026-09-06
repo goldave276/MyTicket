@@ -12,6 +12,7 @@ const {
 } = require("../controllers/eventController");
 
 const { getEventReservations } = require("../controllers/reservationController");
+const { getOrganizerStats } = require("../controllers/statsController");
 
 const router = express.Router();
 
@@ -34,6 +35,13 @@ router.patch(
     requireAuth,
     requireRole("ORGANIZER"),
     submitEvent
+);
+
+router.get(
+    "/stats",
+    requireAuth,
+    requireRole("ORGANIZER"),
+    getOrganizerStats
 );
 
 router.patch(

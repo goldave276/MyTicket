@@ -19,11 +19,20 @@ const {
     confirmOnSitePayment
 } = require("../controllers/paymentController");
 
+const { getAdminStats } = require("../controllers/statsController");
+
 
 
 
 
 const router = express.Router();
+
+router.get(
+    "/stats",
+    requireAuth,
+    requireRole("ADMIN"),
+    getAdminStats
+);
 
 router.get(
     "/organizer-requests",
