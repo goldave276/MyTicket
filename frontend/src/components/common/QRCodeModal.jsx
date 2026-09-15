@@ -19,7 +19,7 @@ export default function QRCodeModal({ isOpen, onClose, ticket }) {
     <Modal isOpen={isOpen} onClose={onClose} title="Pass Électronique / QR Code" maxWidth="max-w-md">
       <div className="flex flex-col items-center text-center space-y-6">
         {/* Ticket Header Info */}
-        <div className="w-full bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-500/20 rounded-2xl p-4">
+        <div className="w-full bg-indigo-500/10 dark:bg-indigo-950/40 border border-indigo-500/20 rounded-lg p-4">
           <span className="text-xs uppercase font-bold tracking-wider text-indigo-600 dark:text-indigo-400">
             Pass Officiel MyTicket
           </span>
@@ -32,7 +32,7 @@ export default function QRCodeModal({ isOpen, onClose, ticket }) {
         </div>
 
         {/* QR Code Container */}
-        <div className="bg-white p-5 rounded-2xl shadow-xl border border-zinc-200 flex flex-col items-center justify-center">
+        <div className="bg-white p-5 rounded-lg shadow-md border border-zinc-200 flex flex-col items-center justify-center">
           <QRCodeSVG value={qrData} size={192} level="M" includeMargin={false} />
           <p className="text-xs text-zinc-400 mt-3 font-mono">Scannez à l’entrée de la salle</p>
         </div>

@@ -31,7 +31,7 @@ export default function Sidebar({ mode = 'user' }) {
   const links = mode === 'organizer' ? organizerLinks : mode === 'admin' ? adminLinks : userLinks;
 
   return (
-    <aside className="w-full md:w-64 shrink-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 shadow-sm h-fit">
+    <aside className="w-full md:w-64 shrink-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 shadow-sm h-fit">
       <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800 mb-3">
         <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
           {mode === 'organizer' ? 'Espace Organisateur' : mode === 'admin' ? 'Administration' : 'Mon Compte'}
@@ -47,9 +47,9 @@ export default function Sidebar({ mode = 'user' }) {
             <Link
               key={link.href}
               href={link.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                  ? 'bg-indigo-600 text-white shadow-md'
                   : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
               }`}
             >

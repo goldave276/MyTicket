@@ -68,7 +68,7 @@ export default function EventDetailsPage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-pulse py-12">
-        <div className="h-80 bg-zinc-200 dark:bg-zinc-800 rounded-3xl w-full" />
+        <div className="h-80 bg-zinc-200 dark:bg-zinc-800 rounded-xl w-full" />
         <div className="h-10 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2" />
         <div className="h-20 bg-zinc-200 dark:bg-zinc-800 rounded w-full" />
       </div>
@@ -115,7 +115,7 @@ export default function EventDetailsPage() {
         </Link>
 
         {/* Hero Cover Image & Header */}
-        <div className="relative rounded-3xl overflow-hidden h-80 sm:h-96 w-full border border-zinc-200 dark:border-zinc-800 shadow-2xl bg-zinc-900">
+        <div className="relative rounded-xl overflow-hidden h-80 sm:h-96 w-full border border-zinc-200 dark:border-zinc-800 shadow-lg bg-zinc-900">
           {/* eslint-disable-next-line @next/next/no-img-element -- remote Unsplash placeholder, not a next/image-optimized asset */}
           <img
             src={eventImage}
@@ -126,12 +126,12 @@ export default function EventDetailsPage() {
 
           <div className="absolute bottom-6 left-6 right-6 space-y-3 text-white">
             <div className="flex flex-wrap gap-2">
-              <span className="px-3.5 py-1 rounded-full text-xs font-extrabold bg-indigo-600 uppercase tracking-wider">
+              <span className="px-3.5 py-1 rounded-full text-xs font-semibold bg-indigo-600 uppercase tracking-wider">
                 {event.event_type || event.eventType || 'Événement'}
               </span>
               <Badge status={event.status || 'APPROVED'} />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{event.title}</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{event.title}</h1>
           </div>
         </div>
 
@@ -140,9 +140,9 @@ export default function EventDetailsPage() {
           {/* Left Details */}
           <div className="lg:col-span-2 space-y-8">
             {/* Specs Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                   <CalendarIcon className="w-5 h-5" />
                 </div>
                 <div>
@@ -163,7 +163,7 @@ export default function EventDetailsPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
                   <MapPinIcon className="w-5 h-5" />
                 </div>
                 <div>
@@ -174,7 +174,7 @@ export default function EventDetailsPage() {
             </div>
 
             {/* Description */}
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 shadow-sm space-y-4">
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">À propos de cet événement</h3>
               <p className="text-zinc-600 dark:text-zinc-300 text-base leading-relaxed whitespace-pre-line">
                 {event.description}
@@ -183,11 +183,11 @@ export default function EventDetailsPage() {
 
             {/* Guarantees */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
                 <CheckCircleIcon className="w-5 h-5 shrink-0" />
                 Confirmation Instantanée & QR Pass
               </div>
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold">
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold">
                 <TicketIcon className="w-5 h-5 shrink-0" />
                 Annulation & Gestion autonome
               </div>
@@ -196,11 +196,11 @@ export default function EventDetailsPage() {
 
           {/* Right Ticket Purchase Box */}
           <div className="lg:col-span-1">
-            <div className="sticky top-28 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-2xl space-y-6">
+            <div className="sticky top-28 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-lg space-y-6">
               <div className="flex justify-between items-center pb-4 border-b border-zinc-100 dark:border-zinc-800">
                 <div>
                   <span className="text-xs font-bold uppercase text-zinc-400">Prix par place</span>
-                  <h4 className="text-2xl font-black text-indigo-600 dark:text-indigo-400">
+                  <h4 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                     {eventPrice === 0 ? 'GRATUIT' : `${eventPrice} FCFA`}
                   </h4>
                 </div>
@@ -223,7 +223,7 @@ export default function EventDetailsPage() {
                     >
                       -
                     </button>
-                    <span className="flex-1 text-center font-black text-lg">{quantity}</span>
+                    <span className="flex-1 text-center font-bold text-lg">{quantity}</span>
                     <button
                       onClick={() => setQuantity(Math.min(available, quantity + 1))}
                       className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 font-bold text-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
@@ -237,7 +237,7 @@ export default function EventDetailsPage() {
               {/* Total Calculation */}
               <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center text-sm font-bold">
                 <span className="text-zinc-600 dark:text-zinc-400">Montant total</span>
-                <span className="text-xl font-black text-zinc-900 dark:text-white">
+                <span className="text-xl font-bold text-zinc-900 dark:text-white">
                   {totalPrice === 0 ? 'GRATUIT' : `${totalPrice} FCFA`}
                 </span>
               </div>
@@ -246,10 +246,10 @@ export default function EventDetailsPage() {
               <button
                 onClick={handleBook}
                 disabled={isSoldOut || booking}
-                className={`w-full py-4 px-6 rounded-2xl font-extrabold text-base transition-all flex items-center justify-center gap-2 shadow-xl ${
+                className={`w-full py-4 px-6 rounded-lg font-semibold text-base transition-all flex items-center justify-center gap-2 shadow-md ${
                   isSoldOut
                     ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-indigo-500/25 hover:scale-[1.02]'
+                    : 'bg-indigo-600 hover:bg-indigo-700 text-white'
                 }`}
               >
                 <TicketIcon className="w-5 h-5" />

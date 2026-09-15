@@ -26,7 +26,7 @@ export function ToastProvider({ children }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-center justify-between p-4 rounded-xl shadow-xl border backdrop-blur-md transition-all duration-300 transform translate-y-0 ${
+            className={`pointer-events-auto flex items-center justify-between p-4 rounded-xl shadow-md border backdrop-blur-md transition-all duration-300 transform translate-y-0 ${
               toast.type === 'error'
                 ? 'bg-rose-900/90 text-rose-100 border-rose-700/50'
                 : toast.type === 'info'

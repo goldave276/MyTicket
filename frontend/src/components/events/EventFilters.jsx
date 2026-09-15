@@ -21,7 +21,7 @@ export default function EventFilters({ filters, onChange, onReset }) {
   );
 
   return (
-    <div className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-xl mb-8 space-y-6">
+    <div className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-md mb-8 space-y-6">
       <div className="flex flex-col md:flex-row gap-4">
         {/* Search Bar */}
         <div className="relative flex-1">
@@ -31,7 +31,7 @@ export default function EventFilters({ filters, onChange, onReset }) {
             placeholder="Rechercher un événement, un artiste, un lieu..."
             value={filters.search || ''}
             onChange={(e) => handleChange('search', e.target.value)}
-            className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/80 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-sm transition-all"
+            className="w-full pl-12 pr-4 py-3.5 rounded-lg bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/80 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-sm transition-all"
           />
         </div>
 
@@ -40,7 +40,7 @@ export default function EventFilters({ filters, onChange, onReset }) {
           <select
             value={filters.eventType || ''}
             onChange={(e) => handleChange('eventType', e.target.value)}
-            className="w-full px-4 py-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/80 text-zinc-900 dark:text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer"
+            className="w-full px-4 py-3.5 rounded-lg bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/80 text-zinc-900 dark:text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer"
           >
             {CATEGORIES.map((cat) => (
               <option key={cat.id} value={cat.id} className="bg-white dark:bg-zinc-900">

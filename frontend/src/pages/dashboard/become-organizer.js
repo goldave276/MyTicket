@@ -76,7 +76,7 @@ export default function BecomeOrganizerPage() {
 
         <div className="flex-1 space-y-6">
           <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
-            <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
               Espace Demande Organisateur
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
@@ -86,7 +86,7 @@ export default function BecomeOrganizerPage() {
 
           {/* Already Organizer Banner */}
           {isOrganizer && (
-            <div className="p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-900 dark:text-emerald-100 space-y-3">
+            <div className="p-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-900 dark:text-emerald-100 space-y-3">
               <div className="flex items-center gap-3">
                 <CheckCircleIcon className="w-6 h-6 text-emerald-500" />
                 <h3 className="text-lg font-bold">Vous êtes un Organisateur Officiel !</h3>
@@ -106,7 +106,7 @@ export default function BecomeOrganizerPage() {
 
           {/* Pending Request Alert */}
           {!isOrganizer && pendingRequest && (
-            <div className="p-6 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-100 space-y-3">
+            <div className="p-6 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-100 space-y-3">
               <div className="flex items-center gap-3">
                 <ClockIcon className="w-6 h-6 text-amber-500" />
                 <h3 className="text-lg font-bold">Demande en cours de traitement</h3>
@@ -123,9 +123,9 @@ export default function BecomeOrganizerPage() {
 
           {/* Application Form */}
           {!isOrganizer && !pendingRequest && (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 shadow-md space-y-6">
               <div className="flex items-center gap-3 pb-4 border-b border-zinc-100 dark:border-zinc-800">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                   <BuildingIcon className="w-5 h-5" />
                 </div>
                 <div>
@@ -186,7 +186,7 @@ export default function BecomeOrganizerPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 hover:scale-[1.01] disabled:opacity-50"
+                  className="w-full py-4 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {submitting ? 'Envoi du dossier...' : 'Soumettre ma demande d’accréditation'}
                   <ArrowRightIcon className="w-4 h-4" />
@@ -197,13 +197,13 @@ export default function BecomeOrganizerPage() {
 
           {/* History of Requests */}
           {!loading && requests.length > 0 && (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-sm space-y-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-4">
               <h4 className="text-base font-bold text-zinc-900 dark:text-white">Historique de vos demandes</h4>
               <div className="space-y-3">
                 {requests.map((req) => (
                   <div
                     key={req.id}
-                    className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 flex justify-between items-center"
+                    className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 flex justify-between items-center"
                   >
                     <div>
                       <span className="text-sm font-bold text-zinc-900 dark:text-white">

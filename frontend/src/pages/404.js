@@ -12,12 +12,12 @@ export default function Custom404() {
 
       <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
         <div className="max-w-md w-full text-center space-y-6">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
             <TicketIcon className="w-8 h-8" />
           </div>
           <div className="space-y-2">
-            <span className="text-6xl font-black tracking-tight text-zinc-200 dark:text-zinc-800">404</span>
-            <h1 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">
+            <span className="text-6xl font-bold tracking-tight text-zinc-200 dark:text-zinc-800">404</span>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
               Cette page n’existe pas
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -26,7 +26,7 @@ export default function Custom404() {
           </div>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm shadow-md shadow-indigo-500/25 transition-all hover:scale-105"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all"
           >
             Retour au catalogue
             <ArrowRightIcon className="w-4 h-4" />

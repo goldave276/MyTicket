@@ -52,7 +52,7 @@ export default function ProfilePage() {
 
         <div className="flex-1 space-y-6">
           <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
-            <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
               Paramètres du Profil
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
@@ -60,10 +60,10 @@ export default function ProfilePage() {
             </p>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xl space-y-8">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 shadow-md space-y-8">
             {/* Header info */}
             <div className="flex items-center gap-4 pb-6 border-b border-zinc-100 dark:border-zinc-800">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-2xl flex items-center justify-center shadow-lg">
+              <div className="w-16 h-16 rounded-full bg-indigo-600 text-white font-bold text-2xl flex items-center justify-center shadow-lg">
                 {(fullName || user.email || 'U').charAt(0).toUpperCase()}
               </div>
               <div className="space-y-1">
@@ -107,7 +107,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={updating}
-                className="py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 hover:scale-[1.02] disabled:opacity-50"
+                className="py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {updating ? 'Mise à jour...' : 'Enregistrer les modifications'}
               </button>

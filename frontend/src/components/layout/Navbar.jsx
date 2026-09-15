@@ -15,11 +15,11 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+          <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
             <TicketIcon className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-900 via-indigo-950 to-purple-900 dark:from-white dark:via-zinc-200 dark:to-indigo-300 bg-clip-text text-transparent">
+            <span className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-white">
               MyTicket
             </span>
             <span className="block text-[10px] uppercase font-bold tracking-widest text-indigo-600 dark:text-indigo-400 -mt-1">
@@ -76,7 +76,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/auth/signup"
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm shadow-md shadow-indigo-500/25 transition-all hover:scale-105"
+                className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all"
               >
                 S’inscrire
               </Link>

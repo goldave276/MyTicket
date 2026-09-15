@@ -31,7 +31,7 @@ export default function UserDropdown() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2.5 p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
       >
-        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-bold text-sm flex items-center justify-center shadow-md">
+        <div className="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-sm flex items-center justify-center shadow-md">
           {initials}
         </div>
         <span className="hidden md:inline text-sm font-semibold text-zinc-800 dark:text-zinc-200 max-w-[120px] truncate">
@@ -40,7 +40,7 @@ export default function UserDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-lg py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {/* User Info Header */}
           <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
             <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">

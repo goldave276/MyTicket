@@ -69,7 +69,7 @@ export default function OrganizerDashboardPage() {
         <div className="flex-1 space-y-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
             <div>
-              <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
+              <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
                 Espace Organisateur
               </h1>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
@@ -79,7 +79,7 @@ export default function OrganizerDashboardPage() {
 
             <Link
               href="/organizer/events/create"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-sm shadow-lg shadow-indigo-500/25 transition-all hover:scale-105"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-lg transition-all"
             >
               <PlusIcon className="w-5 h-5" />
               Créer un Événement

@@ -40,15 +40,15 @@ export default function LoginPage() {
       </Head>
 
       <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8 bg-white dark:bg-zinc-900 p-8 sm:p-10 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-2xl">
+        <div className="max-w-md w-full space-y-8 bg-white dark:bg-zinc-900 p-8 sm:p-10 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-lg">
           {/* Header */}
           <div className="text-center space-y-3">
             <Link href="/" className="inline-flex items-center gap-2">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
+              <div className="w-12 h-12 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-lg">
                 <TicketIcon className="w-7 h-7" />
               </div>
             </Link>
-            <h2 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white">
+            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
               Espace Connexion
             </h2>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -104,7 +104,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 hover:scale-[1.02] disabled:opacity-50"
+              className="w-full py-4 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? 'Connexion en cours...' : 'Se Connecter'}
               <ArrowRightIcon className="w-4 h-4" />

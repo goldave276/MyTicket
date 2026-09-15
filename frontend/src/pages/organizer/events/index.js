@@ -112,7 +112,7 @@ export default function OrganizerEventsListPage() {
         <div className="flex-1 space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
             <div>
-              <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
+              <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
                 Mes Événements
               </h1>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
@@ -125,7 +125,7 @@ export default function OrganizerEventsListPage() {
                 setEditingEvent(null);
                 setIsModalOpen(true);
               }}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-sm shadow-md transition-all hover:scale-105"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-md transition-all"
             >
               <PlusIcon className="w-5 h-5" />
               Nouveau Brouillon
@@ -157,17 +157,17 @@ export default function OrganizerEventsListPage() {
               onRetry={fetchEvents}
             />
           ) : filteredEvents.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
+            <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Aucun événement dans cet onglet</h3>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
                 Créez un nouveau brouillon pour commencer à organiser vos futurs événements.
               </p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-zinc-600 dark:text-zinc-300">
-                  <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase font-extrabold text-zinc-500">
+                  <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase font-semibold text-zinc-500">
                     <tr>
                       <th className="p-4">Titre</th>
                       <th className="p-4">Date & Lieu</th>

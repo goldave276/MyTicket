@@ -81,7 +81,7 @@ export default function AdminOrganizerRequestsPage() {
 
         <div className="flex-1 space-y-6">
           <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
-            <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
               Demandes d’Accréditation Organisateur
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
@@ -94,17 +94,17 @@ export default function AdminOrganizerRequestsPage() {
           ) : error ? (
             <ErrorState title="Impossible de charger les demandes" onRetry={fetchRequests} />
           ) : requests.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
+            <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Aucune demande en attente</h3>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
                 Toutes les demandes d’organisateur ont été traitées.
               </p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-zinc-600 dark:text-zinc-300">
-                  <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase font-extrabold text-zinc-500">
+                  <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase font-semibold text-zinc-500">
                     <tr>
                       <th className="p-4">Demandeur</th>
                       <th className="p-4">Type</th>

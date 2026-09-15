@@ -55,7 +55,7 @@ export default function CreateEventPage() {
             <Link href="/organizer/events" className="text-xs font-bold text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">
               ← Retour à mes événements
             </Link>
-            <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight mt-2">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mt-2">
               Créer un nouvel événement
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
@@ -63,7 +63,7 @@ export default function CreateEventPage() {
             </p>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xl">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 shadow-md">
             <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
@@ -180,7 +180,7 @@ export default function CreateEventPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 hover:scale-[1.02] disabled:opacity-50"
+                  className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   {submitting ? 'Création...' : 'Enregistrer le Brouillon'}
                   <ArrowRightIcon className="w-4 h-4" />

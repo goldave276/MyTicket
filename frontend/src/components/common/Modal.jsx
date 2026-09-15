@@ -27,7 +27,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
       {/* Modal Container */}
       <div
-        className={`relative w-full ${maxWidth} bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl overflow-hidden transition-all transform scale-100 z-10`}
+        className={`relative w-full ${maxWidth} bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden transition-all transform scale-100 z-10`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-100 dark:border-zinc-800">

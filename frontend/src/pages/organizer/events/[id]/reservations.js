@@ -63,7 +63,7 @@ export default function EventReservationsListPage() {
             <Link href="/organizer/events" className="text-xs font-bold text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">
               ← Retour à la liste de mes événements
             </Link>
-            <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight mt-2">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mt-2">
               Réservations : {eventDetails?.title || 'Chargement...'}
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
@@ -76,7 +76,7 @@ export default function EventReservationsListPage() {
           ) : error ? (
             <ErrorState title="Impossible de charger les réservations" onRetry={fetchEventReservations} />
           ) : reservations.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
+            <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
               <div className="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">
                 <TicketIcon className="w-8 h-8" />
               </div>
@@ -86,10 +86,10 @@ export default function EventReservationsListPage() {
               </p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-zinc-600 dark:text-zinc-300">
-                  <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase font-extrabold text-zinc-500">
+                  <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase font-semibold text-zinc-500">
                     <tr>
                       <th className="p-4">Participant</th>
                       <th className="p-4">Email</th>
@@ -109,7 +109,7 @@ export default function EventReservationsListPage() {
                           </td>
                           <td className="p-4 text-xs font-mono text-zinc-500">{res.user?.email || res.userEmail || '-'}</td>
                           <td className="p-4">
-                            <span className="px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 font-extrabold text-zinc-900 dark:text-white text-xs">
+                            <span className="px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 font-semibold text-zinc-900 dark:text-white text-xs">
                               {res.quantity} ticket(s)
                             </span>
                           </td>

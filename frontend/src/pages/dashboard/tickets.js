@@ -50,7 +50,7 @@ export default function UserTicketsPage() {
 
         <div className="flex-1 space-y-6">
           <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
-            <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
               Mes Billets & Pass Électroniques
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
@@ -66,7 +66,7 @@ export default function UserTicketsPage() {
           ) : error ? (
             <ErrorState title="Impossible de charger vos billets" onRetry={fetchTickets} />
           ) : tickets.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
+            <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
               <div className="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">
                 <QrCodeIcon className="w-8 h-8" />
               </div>
@@ -80,11 +80,11 @@ export default function UserTicketsPage() {
               {tickets.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-xl space-y-5 flex flex-col justify-between"
+                  className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-md space-y-5 flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
                         PASS VERIFIÉ
                       </span>
                       <span className="font-mono text-xs font-bold text-zinc-400">#{String(ticket.id).slice(-8)}</span>
@@ -117,7 +117,7 @@ export default function UserTicketsPage() {
 
                   <button
                     onClick={() => setSelectedTicket(ticket)}
-                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2"
                   >
                     <QrCodeIcon className="w-4 h-4" />
                     Afficher le QR Code

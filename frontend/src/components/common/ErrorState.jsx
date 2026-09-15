@@ -12,7 +12,7 @@ export default function ErrorState({
   onRetry,
 }) {
   return (
-    <div className="w-full rounded-3xl border border-dashed border-rose-300 dark:border-rose-900/50 p-12 text-center flex flex-col items-center justify-center space-y-4 my-8 bg-rose-50/50 dark:bg-rose-950/10">
+    <div className="w-full rounded-xl border border-dashed border-rose-300 dark:border-rose-900/50 p-12 text-center flex flex-col items-center justify-center space-y-4 my-8 bg-rose-50/50 dark:bg-rose-950/10">
       <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
         <XCircleIcon className="w-8 h-8" />
       </div>

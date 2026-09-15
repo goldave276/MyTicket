@@ -16,7 +16,7 @@ export default function EventGrid({ events = [], loading = false, showStatus = f
 
   if (events.length === 0) {
     return (
-      <div className="w-full rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center flex flex-col items-center justify-center space-y-4 my-8 bg-zinc-50/50 dark:bg-zinc-900/30">
+      <div className="w-full rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center flex flex-col items-center justify-center space-y-4 my-8 bg-zinc-50/50 dark:bg-zinc-900/30">
         <div className="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
           <SparklesIcon className="w-8 h-8" />
         </div>

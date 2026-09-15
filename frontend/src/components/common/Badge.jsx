@@ -26,9 +26,8 @@ export default function Badge({ status, customLabel, className = '' }) {
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border backdrop-blur-sm ${config.color} ${className}`}
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${config.color} ${className}`}
     >
-      <span className="w-1.5 h-1.5 rounded-full bg-current mr-1.5 opacity-75 animate-pulse" />
       {customLabel || config.label}
     </span>
   );

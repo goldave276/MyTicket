@@ -37,7 +37,7 @@ export default function EventCard({ event, showStatus = false, onAction }) {
   const percentLeft = Math.max(0, Math.min(100, Math.round((remaining / total) * 100)));
 
   return (
-    <div className="group relative rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm hover:shadow-2xl hover:border-indigo-500/30 transition-all duration-300 flex flex-col justify-between">
+    <div className="group relative rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm hover:shadow-lg hover:border-indigo-500/30 transition-all duration-300 flex flex-col justify-between">
       {/* Event Cover Image & Badge */}
       <div className="relative h-48 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
         <img
@@ -53,7 +53,7 @@ export default function EventCard({ event, showStatus = false, onAction }) {
 
         {/* Category Badge */}
         <div className="absolute top-4 left-4 flex gap-2">
-          <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-white/90 dark:bg-zinc-900/90 text-zinc-900 dark:text-white backdrop-blur-md shadow-md uppercase tracking-wider">
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/90 dark:bg-zinc-900/90 text-zinc-900 dark:text-white backdrop-blur-md shadow-md uppercase tracking-wider">
             {category}
           </span>
           {showStatus && status && <Badge status={status} />}
@@ -61,7 +61,7 @@ export default function EventCard({ event, showStatus = false, onAction }) {
 
         {/* Price Badge */}
         <div className="absolute bottom-4 right-4">
-          <span className="px-3.5 py-1.5 rounded-full text-sm font-black bg-indigo-600 text-white shadow-lg">
+          <span className="px-3.5 py-1.5 rounded-full text-sm font-bold bg-indigo-600 text-white shadow-lg">
             {eventPrice === 0 ? 'GRATUIT' : `${eventPrice} FCFA`}
           </span>
         </div>
@@ -139,7 +139,7 @@ export default function EventCard({ event, showStatus = false, onAction }) {
               className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md ${
                 remaining === 0
                   ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-indigo-500/20 hover:scale-[1.02]'
+                  : 'bg-indigo-600 hover:bg-indigo-700 text-white'
               }`}
             >
               <TicketIcon className="w-4 h-4" />

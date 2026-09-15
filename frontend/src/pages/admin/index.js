@@ -59,7 +59,7 @@ export default function AdminDashboardPage() {
 
         <div className="flex-1 space-y-8">
           <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
-            <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
               Administration de la Plateforme
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
@@ -100,8 +100,8 @@ export default function AdminDashboardPage() {
 
           {/* Action Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-xl space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-md space-y-4">
+              <div className="w-12 h-12 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                 <BuildingIcon className="w-6 h-6" />
               </div>
               <div>
@@ -119,8 +119,8 @@ export default function AdminDashboardPage() {
               </Link>
             </div>
 
-            <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-xl space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-md space-y-4">
+              <div className="w-12 h-12 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                 <TicketIcon className="w-6 h-6" />
               </div>
               <div>
