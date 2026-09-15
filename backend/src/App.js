@@ -29,7 +29,7 @@ if (process.env.TRUST_PROXY === "1") {
     app.set("trust proxy", 1);
 }
 
-const rawFrontendUrl = process.env.FRONTEND_URL || "http://localhost:3001";
+const rawFrontendUrl = process.env.FRONTEND_URL || "http://localhost:3333,http://localhost:3001";
 const allowedOrigins = rawFrontendUrl
     .split(",")
     .map((origin) => origin.trim())
