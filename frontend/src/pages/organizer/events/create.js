@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import eventService from '@/services/eventService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import { ArrowRightIcon } from '@/components/common/Icons';
 
 export default function CreateEventPage() {
-  const { user, isOrganizer, loading: authLoading } = useAuth();
+  const { ready } = useRequireAuth({ role: 'ORGANIZER' });
   const { showToast } = useToast();
   const router = useRouter();
 
@@ -21,11 +21,10 @@ export default function CreateEventPage() {
     location: '',
     price: 0,
     totalTickets: 100,
-    imageUrl: '',
   });
   const [submitting, setSubmitting] = useState(false);
 
-  if (authLoading || !isOrganizer) return null;
+  if (!ready) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,10 +32,10 @@ export default function CreateEventPage() {
 
     try {
       await eventService.createDraftEvent(formData);
-      showToast('Brouillon d\'événement créé avec succès !', 'success');
+      showToast('Brouillon d’événement créé avec succès !', 'success');
       router.push('/organizer/events');
     } catch (err) {
-      showToast(err.message || 'Erreur lors de la création de l\'événement', 'error');
+      showToast(err.message || 'Erreur lors de la création de l’événement', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -60,7 +59,7 @@ export default function CreateEventPage() {
               Créer un nouvel événement
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-              Remplissez les détails. L'événement sera enregistré comme brouillon avant d'être soumis à validation.
+              Remplissez les détails. L’événement sera enregistré comme brouillon avant d’être soumis à validation.
             </p>
           </div>
 
@@ -68,7 +67,7 @@ export default function CreateEventPage() {
             <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Titre de l'événement *
+                  Titre de l’événement *
                 </label>
                 <input
                   type="text"
@@ -113,33 +112,18 @@ export default function CreateEventPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Lieu / Salle *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="ex: Palais des Congrès, Lomé"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Image de couverture (URL)
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://..."
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Lieu / Salle *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="ex: Palais des Congrès, Lomé"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -179,7 +163,7 @@ export default function CreateEventPage() {
                 <textarea
                   rows="5"
                   required
-                  placeholder="Décrivez le contenu et les temps forts de l'événement..."
+                  placeholder="Décrivez le contenu et les temps forts de l’événement..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"

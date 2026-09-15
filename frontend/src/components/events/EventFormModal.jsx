@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Modal from '../common/Modal';
 
 const CATEGORIES = [
@@ -10,43 +10,35 @@ const CATEGORIES = [
   { id: 'WORKSHOP', label: 'Atelier & Formation' },
 ];
 
-export default function EventFormModal({ isOpen, onClose, onSubmit, initialData = null, isSubmitting = false }) {
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    eventType: 'CONCERT',
-    date: '',
-    location: '',
-    price: 0,
-    totalTickets: 100,
-    imageUrl: '',
-  });
+function buildFormData(initialData) {
+  if (!initialData) {
+    return {
+      title: '',
+      description: '',
+      eventType: 'CONCERT',
+      date: '',
+      location: '',
+      price: 0,
+      totalTickets: 100,
+    };
+  }
+  const rawDate = initialData.date || initialData.event_date;
+  return {
+    title: initialData.title || '',
+    description: initialData.description || '',
+    eventType: initialData.eventType || initialData.event_type || 'CONCERT',
+    date: rawDate ? new Date(rawDate).toISOString().slice(0, 16) : '',
+    location: initialData.location || '',
+    price: initialData.price ?? initialData.ticket_price ?? 0,
+    totalTickets: initialData.totalTickets ?? initialData.total_tickets ?? 100,
+  };
+}
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        title: initialData.title || '',
-        description: initialData.description || '',
-        eventType: initialData.eventType || initialData.event_type || 'CONCERT',
-        date: initialData.date || initialData.event_date ? new Date(initialData.date || initialData.event_date).toISOString().slice(0, 16) : '',
-        location: initialData.location || '',
-        price: initialData.price ?? initialData.ticket_price ?? 0,
-        totalTickets: initialData.totalTickets ?? initialData.total_tickets ?? 100,
-        imageUrl: initialData.imageUrl || initialData.image_url || '',
-      });
-    } else {
-      setFormData({
-        title: '',
-        description: '',
-        eventType: 'CONCERT',
-        date: '',
-        location: '',
-        price: 0,
-        totalTickets: 100,
-        imageUrl: '',
-      });
-    }
-  }, [initialData, isOpen]);
+// `initialData` only ever changes while this component is unmounted and
+// remounted under a fresh `key` (see organizer/events/index.js), so a plain
+// lazy initializer is enough here — no effect needed to resynchronize state.
+export default function EventFormModal({ isOpen, onClose, onSubmit, initialData = null, isSubmitting = false }) {
+  const [formData, setFormData] = useState(() => buildFormData(initialData));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -57,14 +49,14 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, initialData 
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? "Modifier l'événement" : 'Créer un nouvel événement'}
+      title={initialData ? "Modifier l’événement" : 'Créer un nouvel événement'}
       maxWidth="max-w-xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Title */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
-            Titre de l'événement *
+            Titre de l’événement *
           </label>
           <input
             type="text"
@@ -109,34 +101,19 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, initialData 
           </div>
         </div>
 
-        {/* Location & Image URL */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
-              Lieu / Adresse *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="ex: Palais des Congrès, Lomé"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
-              Image URL (Couverture)
-            </label>
-            <input
-              type="url"
-              placeholder="https://..."
-              value={formData.imageUrl}
-              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-            />
-          </div>
+        {/* Location */}
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+            Lieu / Adresse *
+          </label>
+          <input
+            type="text"
+            required
+            placeholder="ex: Palais des Congrès, Lomé"
+            value={formData.location}
+            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
         </div>
 
         {/* Price & Capacity */}
@@ -178,7 +155,7 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, initialData 
           <textarea
             rows="4"
             required
-            placeholder="Présentez le programme, les artistes, l'accès..."
+            placeholder="Présentez le programme, les artistes, l’accès..."
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"

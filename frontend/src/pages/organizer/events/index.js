@@ -1,83 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import eventService from '@/services/eventService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
 import EventFormModal from '@/components/events/EventFormModal';
+import ErrorState from '@/components/common/ErrorState';
 import { SkeletonTable } from '@/components/common/Skeleton';
 import { PlusIcon, EditIcon, CheckCircleIcon, XCircleIcon, CalendarIcon } from '@/components/common/Icons';
 
 export default function OrganizerEventsListPage() {
-  const { user, isOrganizer, loading: authLoading } = useAuth();
+  const { ready } = useRequireAuth({ role: 'ORGANIZER' });
   const { showToast } = useToast();
-  const router = useRouter();
 
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [activeTab, setActiveTab] = useState('ALL');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (!authLoading && !isOrganizer) {
-      router.push('/dashboard');
-      return;
-    }
-
-    if (user && isOrganizer) {
-      fetchEvents();
-    }
-  }, [user, isOrganizer, authLoading, router]);
-
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const data = await eventService.getMyEvents();
       setEvents(Array.isArray(data) ? data : data.events || []);
-    } catch {
-      // Demo fallback
-      setEvents([
-        {
-          id: 'org-ev-1',
-          title: 'Concert Live Afrobeat 2026',
-          eventType: 'CONCERT',
-          date: '2026-10-15T20:00:00Z',
-          location: 'Palais des Congrès, Lomé',
-          price: 5000,
-          totalTickets: 200,
-          availableTickets: 152,
-          status: 'DRAFT',
-        },
-        {
-          id: 'org-ev-2',
-          title: 'Workshop IA & Web Dev',
-          eventType: 'WORKSHOP',
-          date: '2026-11-20T14:00:00Z',
-          location: 'Hub Tech Lomé',
-          price: 2000,
-          totalTickets: 50,
-          availableTickets: 38,
-          status: 'PENDING',
-        },
-      ]);
+    } catch (err) {
+      setError(true);
+      showToast(err.message || 'Impossible de charger vos événements', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    // Deferred to a microtask so this effect doesn't call setState synchronously.
+    if (ready) queueMicrotask(() => fetchEvents());
+  }, [ready, fetchEvents]);
 
   const handleSubmitEvent = async (eventId) => {
     try {
       await eventService.submitEvent(eventId);
-      showToast('Événement soumis à l\'administration pour validation !', 'success');
+      showToast('Événement soumis à l’administration pour validation !', 'success');
       fetchEvents();
     } catch (err) {
-      showToast(err.message || 'Impossible de soumettre l\'événement', 'error');
+      showToast(err.message || 'Impossible de soumettre l’événement', 'error');
     }
   };
 
@@ -89,7 +61,7 @@ export default function OrganizerEventsListPage() {
       showToast('Événement annulé', 'info');
       fetchEvents();
     } catch (err) {
-      showToast(err.message || 'Impossible d\'annuler l\'événement', 'error');
+      showToast(err.message || 'Impossible d’annuler l’événement', 'error');
     }
   };
 
@@ -101,19 +73,19 @@ export default function OrganizerEventsListPage() {
         showToast('Événement mis à jour avec succès', 'success');
       } else {
         await eventService.createDraftEvent(formData);
-        showToast('Brouillon d\'événement créé avec succès', 'success');
+        showToast('Brouillon d’événement créé avec succès', 'success');
       }
       setIsModalOpen(false);
       setEditingEvent(null);
       fetchEvents();
     } catch (err) {
-      showToast(err.message || 'Erreur lors de l\'enregistrement', 'error');
+      showToast(err.message || 'Erreur lors de l’enregistrement', 'error');
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (authLoading || !isOrganizer) return null;
+  if (!ready) return null;
 
   const filteredEvents = events.filter((e) => {
     if (activeTab === 'ALL') return true;
@@ -144,7 +116,7 @@ export default function OrganizerEventsListPage() {
                 Mes Événements
               </h1>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                Gérez vos brouillons, soumettez-les à l'administration et suivez les ventes.
+                Gérez vos brouillons, soumettez-les à l’administration et suivez les ventes.
               </p>
             </div>
 
@@ -179,6 +151,11 @@ export default function OrganizerEventsListPage() {
 
           {loading ? (
             <SkeletonTable rows={5} />
+          ) : error ? (
+            <ErrorState
+              title="Impossible de charger vos événements"
+              onRetry={fetchEvents}
+            />
           ) : filteredEvents.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Aucun événement dans cet onglet</h3>
@@ -277,8 +254,11 @@ export default function OrganizerEventsListPage() {
           )}
         </div>
 
-        {/* Modal Form */}
+        {/* Modal Form — keyed so it fully remounts (and resets its internal
+            state) each time it is opened for a different target, or reopened
+            for a new draft. See EventFormModal.jsx for why. */}
         <EventFormModal
+          key={isModalOpen ? `event-form-${editingEvent?.id ?? 'new'}` : 'event-form-closed'}
           isOpen={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
