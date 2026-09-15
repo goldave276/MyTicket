@@ -113,7 +113,7 @@ export default function LoginPage() {
 
           {/* Footer link */}
           <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 text-center text-xs text-zinc-500 dark:text-zinc-400">
-            Vous n'avez pas de compte ?{' '}
+            Vous n’avez pas de compte ?{' '}
             <Link href="/auth/signup" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
               Créer un compte gratuitement
             </Link>

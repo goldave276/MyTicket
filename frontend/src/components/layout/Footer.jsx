@@ -18,7 +18,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-              La plateforme moderne pour réserver, créer et gérer vos tickets d'événements en toute sécurité.
+              La plateforme moderne pour réserver, créer et gérer vos tickets d’événements en toute sécurité.
             </p>
           </div>
 
@@ -67,7 +67,7 @@ export default function Footer() {
             <ul className="space-y-2.5 text-sm text-zinc-600 dark:text-zinc-400">
               <li>Politique de confidentialité</li>
               <li>Conditions Générales de Vente</li>
-              <li>Centre d'aide / Contact</li>
+              <li>Centre d’aide / Contact</li>
             </ul>
           </div>
         </div>

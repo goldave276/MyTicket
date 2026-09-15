@@ -4,7 +4,9 @@ import authService from '../services/authService';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  // Lazy initializer: read the last known user from storage synchronously so the
+  // first render already reflects it, instead of setting it from inside an effect.
+  const [user, setUser] = useState(() => authService.getStoredUser());
   const [loading, setLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
@@ -28,12 +30,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    // Initial load from storage then refresh from backend
-    const stored = authService.getStoredUser();
-    if (stored) {
-      setUser(stored);
-    }
-    refreshUser();
+    // Confirm (or invalidate) the stored user against the backend on mount.
+    // Deferred to a microtask so the effect doesn't call setState
+    // synchronously (refreshUser sets `loading` before its first `await`).
+    queueMicrotask(() => refreshUser());
   }, [refreshUser]);
 
   const login = async (credentials) => {

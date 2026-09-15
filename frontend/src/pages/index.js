@@ -2,55 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import eventService from '@/services/eventService';
+import { useToast } from '@/context/ToastContext';
 import EventFilters from '@/components/events/EventFilters';
 import EventGrid from '@/components/events/EventGrid';
-import { TicketIcon, SparklesIcon, CalendarIcon, ShieldIcon } from '@/components/common/Icons';
-
-const DEMO_EVENTS = [
-  {
-    id: 'demo-1',
-    title: 'Festival Afrobeat & Culture 2026',
-    description: 'Une soirée inoubliable célébrant les plus grands artistes Afrobeat du moment avec des prestations live exceptionnelles.',
-    event_type: 'CONCERT',
-    location: 'Palais des Congrès, Lomé',
-    date: '2026-10-15T20:00:00Z',
-    price: 5000,
-    available_tickets: 45,
-    total_tickets: 200,
-    status: 'APPROVED',
-    image_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: 'demo-2',
-    title: 'Sommet Tech & Innovation Afrique',
-    description: 'Conférence internationale regroupant fondateurs, investisseurs et développeurs autour des IA et des FinTechs.',
-    event_type: 'CONFERENCE',
-    location: 'Hôtel 2 Février, Lomé',
-    date: '2026-11-05T09:00:00Z',
-    price: 15000,
-    available_tickets: 12,
-    total_tickets: 150,
-    status: 'APPROVED',
-    image_url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: 'demo-3',
-    title: 'Pièce de Théâtre : L\'Héritage du Roi',
-    description: 'Une tragédie comique vibrante interprétée par la troupe nationale dans une scénographie moderne.',
-    event_type: 'THEATRE',
-    location: 'Institut Français du Togo',
-    date: '2026-09-28T19:30:00Z',
-    price: 3000,
-    available_tickets: 80,
-    total_tickets: 100,
-    status: 'APPROVED',
-    image_url: 'https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=800&q=80',
-  },
-];
+import ErrorState from '@/components/common/ErrorState';
+import { TicketIcon, SparklesIcon } from '@/components/common/Icons';
 
 export default function Home() {
+  const { showToast } = useToast();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
     eventType: '',
@@ -61,22 +23,18 @@ export default function Home() {
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const data = await eventService.getApprovedEvents(filters);
       const list = Array.isArray(data) ? data : data.events || data.data || [];
-      // Use demo events if DB returns empty list initially
-      if (list.length === 0 && !filters.search && !filters.eventType) {
-        setEvents(DEMO_EVENTS);
-      } else {
-        setEvents(list);
-      }
-    } catch {
-      // Fallback to demo events on API network error
-      setEvents(DEMO_EVENTS);
+      setEvents(list);
+    } catch (err) {
+      setError(true);
+      showToast(err.message || 'Impossible de charger les événements', 'error');
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, showToast]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -98,7 +56,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>MyTicket - Réservation et Billetterie d'Événements</title>
+        <title>MyTicket - Réservation et Billetterie d’Événements</title>
       </Head>
 
       {/* Hero Banner Section */}
@@ -146,7 +104,7 @@ export default function Home() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
-              Événements à l'affiche
+              Événements à l’affiche
             </h2>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
               Explorez les événements validés et ouverts à la réservation.
@@ -166,7 +124,11 @@ export default function Home() {
         <EventFilters filters={filters} onChange={setFilters} onReset={handleResetFilters} />
 
         {/* Event Grid */}
-        <EventGrid events={events} loading={loading} />
+        {error ? (
+          <ErrorState title="Impossible de charger les événements" onRetry={fetchEvents} />
+        ) : (
+          <EventGrid events={events} loading={loading} />
+        )}
       </section>
     </>
   );

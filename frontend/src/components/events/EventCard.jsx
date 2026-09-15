@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Badge from '../common/Badge';
 import { CalendarIcon, MapPinIcon, TicketIcon, ArrowRightIcon } from '../common/Icons';
+import { getEventImage } from '@/utils/eventImages';
 
 export default function EventCard({ event, showStatus = false, onAction }) {
   if (!event) return null;
@@ -31,7 +32,7 @@ export default function EventCard({ event, showStatus = false, onAction }) {
   const eventPrice = price ?? ticket_price ?? 0;
   const remaining = available_tickets ?? availableTickets ?? 0;
   const total = total_tickets ?? totalTickets ?? 100;
-  const image = image_url || imageUrl || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=800&q=80';
+  const image = image_url || imageUrl || getEventImage(category);
 
   const percentLeft = Math.max(0, Math.min(100, Math.round((remaining / total) * 100)));
 
@@ -130,7 +131,7 @@ export default function EventCard({ event, showStatus = false, onAction }) {
               onClick={() => onAction(event)}
               className="w-full py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md"
             >
-              Gérer l'événement
+              Gérer l’événement
             </button>
           ) : (
             <Link

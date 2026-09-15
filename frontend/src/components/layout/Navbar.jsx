@@ -78,7 +78,7 @@ export default function Navbar() {
                 href="/auth/signup"
                 className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm shadow-md shadow-indigo-500/25 transition-all hover:scale-105"
               >
-                S'inscrire
+                S’inscrire
               </Link>
             </div>
           )}

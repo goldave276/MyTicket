@@ -1,70 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import adminService from '@/services/adminService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
 import Modal from '@/components/common/Modal';
+import ErrorState from '@/components/common/ErrorState';
 import { SkeletonTable } from '@/components/common/Skeleton';
 import { CheckCircleIcon, XCircleIcon, UserIcon } from '@/components/common/Icons';
 
 export default function AdminOrganizerRequestsPage() {
-  const { user, isAdmin, loading: authLoading } = useAuth();
+  const { ready } = useRequireAuth({ role: 'ADMIN' });
   const { showToast } = useToast();
-  const router = useRouter();
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // Reject Modal
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (!authLoading && !isAdmin) {
-      router.push('/dashboard');
-      return;
-    }
-
-    if (user && isAdmin) {
-      fetchRequests();
-    }
-  }, [user, isAdmin, authLoading, router]);
-
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const data = await adminService.getOrganizerRequests();
       setRequests(Array.isArray(data) ? data : data.requests || []);
-    } catch {
-      // Demo fallback
-      setRequests([
-        {
-          id: 'req-01',
-          user: { fullName: 'Kofi Togo', email: 'kofi@example.com' },
-          eventType: 'CONCERT',
-          documentPath: 'doc_prefecture_001.pdf',
-          description: 'Agence événementielle organisant des festivals de musique urbaine.',
-          status: 'PENDING',
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'req-02',
-          user: { fullName: 'Ablavi Johnson', email: 'ablavi@example.com' },
-          eventType: 'CONFERENCE',
-          documentPath: 'doc_registre_tech.pdf',
-          description: 'Organisation de sommets Tech et IA en Afrique de l\'Ouest.',
-          status: 'PENDING',
-          createdAt: new Date().toISOString(),
-        },
-      ]);
+    } catch (err) {
+      setError(true);
+      showToast(err.message || 'Impossible de charger les demandes', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    // Deferred to a microtask so this effect doesn't call setState synchronously.
+    if (ready) queueMicrotask(() => fetchRequests());
+  }, [ready, fetchRequests]);
 
   const handleApprove = async (requestId) => {
     try {
@@ -72,7 +48,7 @@ export default function AdminOrganizerRequestsPage() {
       showToast('Demande approuvée avec succès ! Le membre est désormais Organisateur.', 'success');
       fetchRequests();
     } catch (err) {
-      showToast(err.message || 'Erreur lors de l\'approbation', 'error');
+      showToast(err.message || 'Erreur lors de l’approbation', 'error');
     }
   };
 
@@ -92,7 +68,7 @@ export default function AdminOrganizerRequestsPage() {
     }
   };
 
-  if (authLoading || !isAdmin) return null;
+  if (!ready) return null;
 
   return (
     <>
@@ -106,7 +82,7 @@ export default function AdminOrganizerRequestsPage() {
         <div className="flex-1 space-y-6">
           <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
             <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">
-              Demandes d'Accréditation Organisateur
+              Demandes d’Accréditation Organisateur
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
               Examinez les dossiers soumis et attribuez le rôle Organisateur aux membres vérifiés.
@@ -115,11 +91,13 @@ export default function AdminOrganizerRequestsPage() {
 
           {loading ? (
             <SkeletonTable rows={5} />
+          ) : error ? (
+            <ErrorState title="Impossible de charger les demandes" onRetry={fetchRequests} />
           ) : requests.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Aucune demande en attente</h3>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
-                Toutes les demandes d'organisateur ont été traitées.
+                Toutes les demandes d’organisateur ont été traitées.
               </p>
             </div>
           ) : (
@@ -195,7 +173,7 @@ export default function AdminOrganizerRequestsPage() {
         <Modal
           isOpen={Boolean(rejectingId)}
           onClose={() => setRejectingId(null)}
-          title="Refuser la demande d'organisateur"
+          title="Refuser la demande d’organisateur"
         >
           <div className="space-y-4">
             <p className="text-sm text-zinc-600 dark:text-zinc-300">

@@ -1,59 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import reservationService from '@/services/reservationService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
+import ErrorState from '@/components/common/ErrorState';
 import { SkeletonTable } from '@/components/common/Skeleton';
 import { TicketIcon, CalendarIcon, QrCodeIcon, XCircleIcon } from '@/components/common/Icons';
 
 export default function UserReservationsPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { ready } = useRequireAuth();
   const { showToast } = useToast();
-  const router = useRouter();
 
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth/login?redirect=/dashboard');
-      return;
-    }
-
-    if (user) {
-      fetchReservations();
-    }
-  }, [user, authLoading, router]);
-
-  const fetchReservations = async () => {
+  const fetchReservations = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const data = await reservationService.getMyReservations();
       setReservations(Array.isArray(data) ? data : data.reservations || []);
-    } catch {
-      // Fallback demo data
-      setReservations([
-        {
-          id: 'res-101',
-          eventId: 'demo-1',
-          event: {
-            title: 'Festival Afrobeat & Culture 2026',
-            date: '2026-10-15T20:00:00Z',
-            location: 'Palais des Congrès, Lomé',
-          },
-          quantity: 2,
-          status: 'CONFIRMED',
-          createdAt: new Date().toISOString(),
-        },
-      ]);
+    } catch (err) {
+      setError(true);
+      showToast(err.message || 'Impossible de charger vos réservations', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    if (!ready) return;
+    // Deferred to a microtask: `fetchReservations` sets state synchronously
+    // (the loading flag) before its first `await`, and React's compiler
+    // flags a *synchronous* setState call inside an effect body. Queuing it
+    // this way keeps the fetch effect-driven without tripping that rule.
+    queueMicrotask(() => fetchReservations());
+  }, [ready, fetchReservations]);
 
   const handleCancel = async (reservationId) => {
     if (!confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) return;
@@ -63,11 +49,11 @@ export default function UserReservationsPage() {
       showToast('Réservation annulée avec succès', 'info');
       fetchReservations();
     } catch (err) {
-      showToast(err.message || 'Impossible d\'annuler la réservation', 'error');
+      showToast(err.message || 'Impossible d’annuler la réservation', 'error');
     }
   };
 
-  if (authLoading || !user) return null;
+  if (!ready) return null;
 
   return (
     <>
@@ -85,7 +71,7 @@ export default function UserReservationsPage() {
                 Mes Réservations
               </h1>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                Gérez l'ensemble de vos places réservées pour les événements à venir.
+                Gérez l’ensemble de vos places réservées pour les événements à venir.
               </p>
             </div>
 
@@ -100,6 +86,8 @@ export default function UserReservationsPage() {
 
           {loading ? (
             <SkeletonTable rows={4} />
+          ) : error ? (
+            <ErrorState title="Impossible de charger vos réservations" onRetry={fetchReservations} />
           ) : reservations.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
               <div className="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">
@@ -107,7 +95,7 @@ export default function UserReservationsPage() {
               </div>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Aucune réservation pour le moment</h3>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
-                Découvrez les événements à l'affiche et réservez vos premiers tickets !
+                Découvrez les événements à l’affiche et réservez vos premiers tickets !
               </p>
               <Link
                 href="/"

@@ -1,65 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import ticketService from '@/services/ticketService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import QRCodeModal from '@/components/common/QRCodeModal';
+import ErrorState from '@/components/common/ErrorState';
 import { SkeletonCard } from '@/components/common/Skeleton';
 import { TicketIcon, QrCodeIcon, CalendarIcon, MapPinIcon } from '@/components/common/Icons';
 
 export default function UserTicketsPage() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
+  const { ready } = useRequireAuth();
+  const { showToast } = useToast();
 
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth/login?redirect=/dashboard/tickets');
-      return;
-    }
-
-    if (user) {
-      fetchTickets();
-    }
-  }, [user, authLoading, router]);
-
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const data = await ticketService.getMyTickets();
       setTickets(Array.isArray(data) ? data : data.tickets || []);
-    } catch {
-      // Fallback demo tickets
-      setTickets([
-        {
-          id: 'TCK-2026-8841',
-          eventId: 'demo-1',
-          eventName: 'Festival Afrobeat & Culture 2026',
-          eventDate: '2026-10-15T20:00:00Z',
-          eventLocation: 'Palais des Congrès, Lomé',
-          userName: user?.full_name || 'Utilisateur MyTicket',
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: 'TCK-2026-9932',
-          eventId: 'demo-2',
-          eventName: 'Sommet Tech & Innovation Afrique',
-          eventDate: '2026-11-05T09:00:00Z',
-          eventLocation: 'Hôtel 2 Février, Lomé',
-          userName: user?.full_name || 'Utilisateur MyTicket',
-          created_at: new Date().toISOString(),
-        },
-      ]);
+    } catch (err) {
+      setError(true);
+      showToast(err.message || 'Impossible de charger vos billets', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
-  if (authLoading || !user) return null;
+  useEffect(() => {
+    // Deferred to a microtask so this effect doesn't call setState synchronously.
+    if (ready) queueMicrotask(() => fetchTickets());
+  }, [ready, fetchTickets]);
+
+  if (!ready) return null;
 
   return (
     <>
@@ -76,7 +54,7 @@ export default function UserTicketsPage() {
               Mes Billets & Pass Électroniques
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-              Accédez à vos QR Codes d'accès pour les événements auxquels vous participez.
+              Accédez à vos QR Codes d’accès pour les événements auxquels vous participez.
             </p>
           </div>
 
@@ -85,6 +63,8 @@ export default function UserTicketsPage() {
               <SkeletonCard />
               <SkeletonCard />
             </div>
+          ) : error ? (
+            <ErrorState title="Impossible de charger vos billets" onRetry={fetchTickets} />
           ) : tickets.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
               <div className="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">
@@ -107,7 +87,7 @@ export default function UserTicketsPage() {
                       <span className="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
                         PASS VERIFIÉ
                       </span>
-                      <span className="font-mono text-xs font-bold text-zinc-400">#{ticket.id.slice(-8)}</span>
+                      <span className="font-mono text-xs font-bold text-zinc-400">#{String(ticket.id).slice(-8)}</span>
                     </div>
 
                     <h3 className="text-lg font-bold text-zinc-900 dark:text-white line-clamp-1">

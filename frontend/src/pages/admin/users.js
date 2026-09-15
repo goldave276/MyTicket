@@ -1,71 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import adminService from '@/services/adminService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
+import ErrorState from '@/components/common/ErrorState';
 import { SkeletonTable } from '@/components/common/Skeleton';
-import { SearchIcon, UserIcon, ShieldIcon } from '@/components/common/Icons';
+import { SearchIcon, UserIcon } from '@/components/common/Icons';
 
 export default function AdminUsersPage() {
-  const { user, isAdmin, loading: authLoading } = useAuth();
+  const { ready } = useRequireAuth({ role: 'ADMIN' });
   const { showToast } = useToast();
-  const router = useRouter();
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    if (!authLoading && !isAdmin) {
-      router.push('/dashboard');
-      return;
-    }
-
-    if (user && isAdmin) {
-      fetchUsers();
-    }
-  }, [user, isAdmin, authLoading, router]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const data = await adminService.getUsers();
       setUsers(Array.isArray(data) ? data : data.users || []);
-    } catch {
-      // Demo fallback users
-      setUsers([
-        {
-          id: 'usr-001',
-          fullName: 'Jean Dupont',
-          email: 'jean.dupont@example.com',
-          role: 'USER',
-          isBlocked: false,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'usr-002',
-          fullName: 'Sonia Lawson',
-          email: 'sonia.lawson@example.com',
-          role: 'ORGANIZER',
-          isBlocked: false,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 'usr-003',
-          fullName: 'Admin Principal',
-          email: 'admin@myticket.tg',
-          role: 'ADMIN',
-          isBlocked: false,
-          createdAt: new Date().toISOString(),
-        },
-      ]);
+    } catch (err) {
+      setError(true);
+      showToast(err.message || 'Impossible de charger les utilisateurs', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    // Deferred to a microtask so this effect doesn't call setState synchronously.
+    if (ready) queueMicrotask(() => fetchUsers());
+  }, [ready, fetchUsers]);
 
   const handleRoleChange = async (userId, newRole) => {
     try {
@@ -88,7 +58,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  if (authLoading || !isAdmin) return null;
+  if (!ready) return null;
 
   const filteredUsers = users.filter((u) => {
     const query = search.toLowerCase();
@@ -131,6 +101,8 @@ export default function AdminUsersPage() {
 
           {loading ? (
             <SkeletonTable rows={5} />
+          ) : error ? (
+            <ErrorState title="Impossible de charger les utilisateurs" onRetry={fetchUsers} />
           ) : filteredUsers.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Aucun utilisateur trouvé</h3>

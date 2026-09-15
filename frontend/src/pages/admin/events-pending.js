@@ -1,63 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import adminService from '@/services/adminService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
 import Modal from '@/components/common/Modal';
+import ErrorState from '@/components/common/ErrorState';
 import { SkeletonTable } from '@/components/common/Skeleton';
 import { CheckCircleIcon, XCircleIcon, CalendarIcon, MapPinIcon } from '@/components/common/Icons';
 
 export default function AdminPendingEventsPage() {
-  const { user, isAdmin, loading: authLoading } = useAuth();
+  const { ready } = useRequireAuth({ role: 'ADMIN' });
   const { showToast } = useToast();
-  const router = useRouter();
 
   const [pendingEvents, setPendingEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // Reject Modal State
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (!authLoading && !isAdmin) {
-      router.push('/dashboard');
-      return;
-    }
-
-    if (user && isAdmin) {
-      fetchPendingEvents();
-    }
-  }, [user, isAdmin, authLoading, router]);
-
-  const fetchPendingEvents = async () => {
+  const fetchPendingEvents = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const data = await adminService.getPendingEvents();
       setPendingEvents(Array.isArray(data) ? data : data.events || []);
-    } catch {
-      // Demo fallback
-      setPendingEvents([
-        {
-          id: 'ev-pend-01',
-          title: 'Soirée de Gala des Entrepreneurs 2026',
-          eventType: 'CONFERENCE',
-          organizer: 'Lomé Business Club',
-          date: '2026-12-01T19:00:00Z',
-          location: 'Hôtel 2 Février, Lomé',
-          price: 25000,
-          totalTickets: 100,
-          status: 'PENDING',
-        },
-      ]);
+    } catch (err) {
+      setError(true);
+      showToast(err.message || 'Impossible de charger les événements à valider', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    // Deferred to a microtask so this effect doesn't call setState synchronously.
+    if (ready) queueMicrotask(() => fetchPendingEvents());
+  }, [ready, fetchPendingEvents]);
 
   const handleApprove = async (eventId) => {
     try {
@@ -85,7 +68,7 @@ export default function AdminPendingEventsPage() {
     }
   };
 
-  if (authLoading || !isAdmin) return null;
+  if (!ready) return null;
 
   return (
     <>
@@ -108,11 +91,13 @@ export default function AdminPendingEventsPage() {
 
           {loading ? (
             <SkeletonTable rows={4} />
+          ) : error ? (
+            <ErrorState title="Impossible de charger les événements à valider" onRetry={fetchPendingEvents} />
           ) : pendingEvents.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Aucun événement à valider</h3>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
-                Tous les événements soumis ont été examinés par l'administration.
+                Tous les événements soumis ont été examinés par l’administration.
               </p>
             </div>
           ) : (
@@ -121,7 +106,7 @@ export default function AdminPendingEventsPage() {
                 <table className="w-full text-left text-sm text-zinc-600 dark:text-zinc-300">
                   <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase font-extrabold text-zinc-500">
                     <tr>
-                      <th className="p-4">Titre de l'événement</th>
+                      <th className="p-4">Titre de l’événement</th>
                       <th className="p-4">Catégorie</th>
                       <th className="p-4">Date & Lieu</th>
                       <th className="p-4">Prix / Places</th>
@@ -189,7 +174,7 @@ export default function AdminPendingEventsPage() {
         <Modal
           isOpen={Boolean(rejectingId)}
           onClose={() => setRejectingId(null)}
-          title="Refuser la publication de l'événement"
+          title="Refuser la publication de l’événement"
         >
           <div className="space-y-4">
             <p className="text-sm text-zinc-600 dark:text-zinc-300">
@@ -215,7 +200,7 @@ export default function AdminPendingEventsPage() {
                 disabled={submitting}
                 className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-md disabled:opacity-50"
               >
-                {submitting ? 'Refus...' : 'Refuser l\'événement'}
+                {submitting ? 'Refus...' : 'Refuser l’événement'}
               </button>
             </div>
           </div>

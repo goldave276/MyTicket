@@ -1,29 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
-import { UserIcon, ArrowRightIcon } from '@/components/common/Icons';
 
 export default function ProfilePage() {
-  const { user, userRole, updateProfile, loading: authLoading } = useAuth();
+  const { ready, user, userRole } = useRequireAuth();
+  const { updateProfile } = useAuth();
   const { showToast } = useToast();
-  const router = useRouter();
 
   const [fullName, setFullName] = useState('');
-  const [updating, setUpdating] = useState(false);
+  // Tracks the `user` object we last synced `fullName` from. `user` only
+  // loads asynchronously (and is refreshed again after a successful save),
+  // so instead of a `useEffect` that would set state as a side effect, we
+  // adjust the derived state during render itself — the pattern React's own
+  // docs recommend for "adjusting state when a prop changes".
+  const [syncedUser, setSyncedUser] = useState(user);
+  if (user !== syncedUser) {
+    setSyncedUser(user);
+    setFullName(user?.full_name || user?.fullName || '');
+  }
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth/login?redirect=/dashboard/profile');
-      return;
-    }
-    if (user) {
-      setFullName(user.full_name || user.fullName || '');
-    }
-  }, [user, authLoading, router]);
+  const [updating, setUpdating] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +39,7 @@ export default function ProfilePage() {
     }
   };
 
-  if (authLoading || !user) return null;
+  if (!ready) return null;
 
   return (
     <>

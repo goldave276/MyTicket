@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import eventService from '@/services/eventService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import StatCard from '@/components/dashboard/StatCard';
 import EventGrid from '@/components/events/EventGrid';
+import ErrorState from '@/components/common/ErrorState';
 import { TicketIcon, BuildingIcon, BarChartIcon, PlusIcon } from '@/components/common/Icons';
 
 export default function OrganizerDashboardPage() {
-  const { user, isOrganizer, loading: authLoading } = useAuth();
-  const router = useRouter();
+  const { ready } = useRequireAuth({ role: 'ORGANIZER' });
+  const { showToast } = useToast();
 
   const [stats, setStats] = useState({
     totalEvents: 0,
@@ -21,24 +22,15 @@ export default function OrganizerDashboardPage() {
   });
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (!authLoading && !isOrganizer) {
-      router.push('/dashboard');
-      return;
-    }
-
-    if (user && isOrganizer) {
-      fetchDashboardData();
-    }
-  }, [user, isOrganizer, authLoading, router]);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const [statsData, eventsData] = await Promise.all([
-        eventService.getOrganizerStats().catch(() => ({})),
-        eventService.getMyEvents().catch(() => []),
+        eventService.getOrganizerStats(),
+        eventService.getMyEvents(),
       ]);
 
       const myEventsList = Array.isArray(eventsData) ? eventsData : eventsData.events || [];
@@ -47,17 +39,23 @@ export default function OrganizerDashboardPage() {
       setStats({
         totalEvents: statsData.totalEvents ?? myEventsList.length,
         activeEvents: statsData.activeEvents ?? myEventsList.filter((e) => e.status === 'APPROVED').length,
-        totalTicketsSold: statsData.totalTicketsSold ?? 48,
-        totalRevenue: statsData.totalRevenue ?? 240000,
+        totalTicketsSold: statsData.totalTicketsSold ?? 0,
+        totalRevenue: statsData.totalRevenue ?? 0,
       });
-    } catch {
-      // Fallback
+    } catch (err) {
+      setError(true);
+      showToast(err.message || 'Impossible de charger votre tableau de bord', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
-  if (authLoading || !isOrganizer) return null;
+  useEffect(() => {
+    // Deferred to a microtask so this effect doesn't call setState synchronously.
+    if (ready) queueMicrotask(() => fetchDashboardData());
+  }, [ready, fetchDashboardData]);
+
+  if (!ready) return null;
 
   return (
     <>
@@ -88,45 +86,51 @@ export default function OrganizerDashboardPage() {
             </Link>
           </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              title="Total Événements"
-              value={stats.totalEvents}
-              icon={BuildingIcon}
-              color="indigo"
-            />
-            <StatCard
-              title="Événements Actifs"
-              value={stats.activeEvents}
-              icon={TicketIcon}
-              color="emerald"
-            />
-            <StatCard
-              title="Tickets Vendus"
-              value={stats.totalTicketsSold}
-              icon={BarChartIcon}
-              color="purple"
-            />
-            <StatCard
-              title="Revenu Estimé"
-              value={`${stats.totalRevenue.toLocaleString()} FCFA`}
-              icon={BarChartIcon}
-              color="amber"
-            />
-          </div>
+          {error ? (
+            <ErrorState title="Impossible de charger votre tableau de bord" onRetry={fetchDashboardData} />
+          ) : (
+            <>
+              {/* Stats Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard
+                  title="Total Événements"
+                  value={stats.totalEvents}
+                  icon={BuildingIcon}
+                  color="indigo"
+                />
+                <StatCard
+                  title="Événements Actifs"
+                  value={stats.activeEvents}
+                  icon={TicketIcon}
+                  color="emerald"
+                />
+                <StatCard
+                  title="Tickets Vendus"
+                  value={stats.totalTicketsSold}
+                  icon={BarChartIcon}
+                  color="purple"
+                />
+                <StatCard
+                  title="Revenu Estimé"
+                  value={`${stats.totalRevenue.toLocaleString()} FCFA`}
+                  icon={BarChartIcon}
+                  color="amber"
+                />
+              </div>
 
-          {/* Recent Events Section */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Vos Événements Récents</h3>
-              <Link href="/organizer/events" className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-                Voir tous mes événements →
-              </Link>
-            </div>
+              {/* Recent Events Section */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Vos Événements Récents</h3>
+                  <Link href="/organizer/events" className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                    Voir tous mes événements →
+                  </Link>
+                </div>
 
-            <EventGrid events={events.slice(0, 6)} loading={loading} showStatus={true} />
-          </div>
+                <EventGrid events={events.slice(0, 6)} loading={loading} showStatus={true} />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>

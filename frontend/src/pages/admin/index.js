@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import adminService from '@/services/adminService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import StatCard from '@/components/dashboard/StatCard';
+import ErrorState from '@/components/common/ErrorState';
 import { ShieldIcon, BuildingIcon, TicketIcon, UserIcon, ArrowRightIcon } from '@/components/common/Icons';
 
 export default function AdminDashboardPage() {
-  const { user, isAdmin, loading: authLoading } = useAuth();
-  const router = useRouter();
+  const { ready } = useRequireAuth({ role: 'ADMIN' });
+  const { showToast } = useToast();
 
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -19,41 +20,33 @@ export default function AdminDashboardPage() {
     pendingEvents: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (!authLoading && !isAdmin) {
-      router.push('/dashboard');
-      return;
-    }
-
-    if (user && isAdmin) {
-      fetchAdminStats();
-    }
-  }, [user, isAdmin, authLoading, router]);
-
-  const fetchAdminStats = async () => {
+  const fetchAdminStats = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const data = await adminService.getGlobalStats();
       setStats({
-        totalUsers: data.totalUsers ?? 124,
-        totalOrganizers: data.totalOrganizers ?? 18,
-        pendingRequests: data.pendingRequests ?? 3,
-        pendingEvents: data.pendingEvents ?? 5,
+        totalUsers: data.totalUsers ?? 0,
+        totalOrganizers: data.totalOrganizers ?? 0,
+        pendingRequests: data.pendingRequests ?? 0,
+        pendingEvents: data.pendingEvents ?? 0,
       });
-    } catch {
-      setStats({
-        totalUsers: 124,
-        totalOrganizers: 18,
-        pendingRequests: 3,
-        pendingEvents: 5,
-      });
+    } catch (err) {
+      setError(true);
+      showToast(err.message || 'Impossible de charger les statistiques', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
-  if (authLoading || !isAdmin) return null;
+  useEffect(() => {
+    // Deferred to a microtask so this effect doesn't call setState synchronously.
+    if (ready) queueMicrotask(() => fetchAdminStats());
+  }, [ready, fetchAdminStats]);
+
+  if (!ready) return null;
 
   return (
     <>
@@ -74,33 +67,36 @@ export default function AdminDashboardPage() {
             </p>
           </div>
 
-          {/* Stats Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              title="Utilisateurs Inscrits"
-              value={stats.totalUsers}
-              icon={UserIcon}
-              color="indigo"
-            />
-            <StatCard
-              title="Organisateurs Validés"
-              value={stats.totalOrganizers}
-              icon={BuildingIcon}
-              color="purple"
-            />
-            <StatCard
-              title="Demandes Organisateur"
-              value={stats.pendingRequests}
-              icon={ShieldIcon}
-              color="amber"
-            />
-            <StatCard
-              title="Événements à valider"
-              value={stats.pendingEvents}
-              icon={TicketIcon}
-              color="emerald"
-            />
-          </div>
+          {error ? (
+            <ErrorState title="Impossible de charger les statistiques" onRetry={fetchAdminStats} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard
+                title="Utilisateurs Inscrits"
+                value={loading ? '—' : stats.totalUsers}
+                icon={UserIcon}
+                color="indigo"
+              />
+              <StatCard
+                title="Organisateurs Validés"
+                value={loading ? '—' : stats.totalOrganizers}
+                icon={BuildingIcon}
+                color="purple"
+              />
+              <StatCard
+                title="Demandes Organisateur"
+                value={loading ? '—' : stats.pendingRequests}
+                icon={ShieldIcon}
+                color="amber"
+              />
+              <StatCard
+                title="Événements à valider"
+                value={loading ? '—' : stats.pendingEvents}
+                icon={TicketIcon}
+                color="emerald"
+              />
+            </div>
+          )}
 
           {/* Action Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -111,7 +107,7 @@ export default function AdminDashboardPage() {
               <div>
                 <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Demandes Organisateur</h3>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                  Examinez les dossiers d'accréditation soumis par les membres et validez leurs rôles.
+                  Examinez les dossiers d’accréditation soumis par les membres et validez leurs rôles.
                 </p>
               </div>
               <Link
