@@ -1,10 +1,13 @@
 import React from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import Modal from './Modal';
 import { TicketIcon, CalendarIcon, MapPinIcon } from './Icons';
 
 export default function QRCodeModal({ isOpen, onClose, ticket }) {
   if (!ticket) return null;
 
+  // Generated entirely client-side with qrcode.react: the ticket holder's
+  // data never leaves the browser to reach a third-party QR rendering service.
   const qrData = JSON.stringify({
     ticketId: ticket.id,
     eventId: ticket.eventId || ticket.event_id,
@@ -30,17 +33,8 @@ export default function QRCodeModal({ isOpen, onClose, ticket }) {
 
         {/* QR Code Container */}
         <div className="bg-white p-5 rounded-2xl shadow-xl border border-zinc-200 flex flex-col items-center justify-center">
-          <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`}
-            alt="Ticket QR Code"
-            className="w-48 h-48 object-contain"
-            onError={(e) => {
-              // Fallback SVG representation if offline
-              e.target.onerror = null;
-              e.target.style.display = 'none';
-            }}
-          />
-          <p className="text-xs text-zinc-400 mt-3 font-mono">Scannez à l'entrée de la salle</p>
+          <QRCodeSVG value={qrData} size={192} level="M" includeMargin={false} />
+          <p className="text-xs text-zinc-400 mt-3 font-mono">Scannez à l’entrée de la salle</p>
         </div>
 
         {/* Details list */}
