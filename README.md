@@ -118,8 +118,8 @@ Le MVP backend est valide. Il comprend l'authentification, les roles
 evenements, les reservations, les annulations, les tickets, les politiques
 RLS Supabase et les migrations PostgreSQL.
 
-Les tests automatises, la validation des migrations et la construction Docker
-sont executes par GitHub Actions dans `.github/workflows/backend-ci.yml`.
+Aucune integration continue GitHub Actions n'est active pour le moment.
+Executer manuellement `npm test` dans `backend/` avant chaque push.
 
 Les paiements reels Stripe, PayPal et Mobile Money restent volontairement
 reportes. Les routes et la structure de paiement sont conservees pour une
@@ -170,9 +170,8 @@ configurees dans le gestionnaire de secrets de la plateforme d'hebergement.
 - [ ] `GET /api/health` repond correctement depuis l'hebergement.
 - [ ] Les logs et alertes de la plateforme sont consultables.
 
-Les pushes et pull requests vers `main` declenchent aussi le workflow GitHub
-Actions `.github/workflows/backend-ci.yml`, qui execute automatiquement les
-tests du backend et construit l'image Docker.
+Aucun workflow GitHub Actions n'est actif : `npm test` et la construction
+Docker doivent etre verifies manuellement avant chaque push.
 
 ## Regles metier principales
 
