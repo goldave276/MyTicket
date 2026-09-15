@@ -13,7 +13,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **Backend (API Express)** | 🟢 Validé & Durci | 100% (hors paiements) | Auth, rôles, catalogue, cycle de vie événement, détail public et RLS durcis |
 | **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0011 | RLS `DRAFT`, trigger invariants, annulation atomique, disponibilité publique et RPC sécurisées |
 | **DevOps & Tests** | 🟢 Validé | 107/107 tests validés | Dockerfile, Vitest (unit & http), CI GitHub Actions, guide de déploiement et configuration proxy |
-| **Frontend (Next.js / React)** | ⏸️ Mis en pause | 0% | Interface Utilisateur, Espace Organisateur, Dashboard Admin |
+| **Frontend (Next.js / React)** | 🟡 Fonctionnel, à finaliser | ~80% (hors upload justificatif & paiements) | Interface Utilisateur, Espace Organisateur, Dashboard Admin construits et durcis ; `npm run lint` propre |
 
 ---
 
@@ -80,27 +80,30 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 ---
 
 ### 3. 🖥️ Frontend Web (`frontend/`)
-- [ ] **Socle & Configuration**
-  - [ ] Configuration du client API (`services/api.js`) avec gestion des tokens
-  - [ ] Context d'authentification et état utilisateur (`AuthProvider`)
-  - [ ] Système de design (thème, typographie, composants UI de base)
-  - [ ] Navigation, Header, Footer et Layouts conditionnels par rôle
-- [ ] **Espace Public & Utilisateur (`USER`)**
-  - [ ] Page d'accueil avec catalogue d'événements & barre de recherche/filtres
-  - [ ] Page détail d'un événement
-  - [ ] Pages Auth : Connexion, Inscription, Mot de passe oublié
-  - [ ] Modal / Page de réservation de billets
-  - [ ] Page "Mes Réservations" et affichage des tickets avec QR code / UUID
-  - [ ] Page "Mon Profil" & Formulaire "Devenir Organisateur"
-- [ ] **Espace Organisateur (`ORGANIZER`)**
-  - [ ] Dashboard Organisateur (liste des événements et leurs statuts)
-  - [ ] Formulaire de création / édition d'événement
-  - [ ] Suivi des participants / réservations par événement
-- [ ] **Espace Administrateur (`ADMIN`)**
-  - [ ] Dashboard de modération
-  - [ ] Interface d'examen des demandes organisateurs (avec aperçu du justificatif)
-  - [ ] Interface de validation des événements soumis
-  - [ ] Interface de confirmation des paiements sur place
+- [x] **Socle & Configuration**
+  - [x] Client API centralisé (`services/api.js`) avec injection du bearer token et nettoyage sur 401
+  - [x] Context d'authentification et état utilisateur (`AuthProvider`) + hook `useRequireAuth` pour les routes protégées par rôle
+  - [x] Système de design Tailwind (thème, composants UI communs : `Badge`, `Modal`, `Skeleton`, `ErrorState`)
+  - [x] Navigation, Header, Footer et Layouts conditionnels par rôle
+  - [ ] Rafraîchissement automatique du token avant expiration (actuellement : nettoyage réactif sur 401 uniquement)
+- [x] **Espace Public & Utilisateur (`USER`)**
+  - [x] Page d'accueil avec catalogue d'événements & barre de recherche/filtres
+  - [x] Page détail d'un événement (avec état d'erreur réel si l'événement est introuvable)
+  - [x] Pages Auth : Connexion, Inscription, Mot de passe oublié
+  - [x] Réservation de billets (sélection de quantité, confirmation)
+  - [x] Page "Mes Réservations" et "Mes Billets" avec QR Pass généré côté client (`qrcode.react`)
+  - [x] Page "Mon Profil" & formulaire "Devenir Organisateur"
+  - [ ] Upload réel du justificatif vers Supabase Storage (le formulaire demande aujourd'hui le nom du fichier déjà déposé ; l'upload direct navigateur → Storage reste à implémenter)
+- [x] **Espace Organisateur (`ORGANIZER`)**
+  - [x] Dashboard Organisateur (statistiques réelles, liste des événements par statut)
+  - [x] Formulaire de création / édition d'événement (mapping des champs corrigé le 15/09/2026, cf. journal)
+  - [x] Suivi des participants / réservations par événement
+- [x] **Espace Administrateur (`ADMIN`)**
+  - [x] Dashboard de statistiques globales
+  - [x] Interface d'examen des demandes organisateurs
+  - [x] Interface de validation des événements soumis
+  - [x] Gestion des utilisateurs (rôles, blocage)
+  - [ ] Interface de confirmation des paiements sur place (dépend du chantier paiements, hors périmètre)
 
 ---
 
@@ -136,3 +139,9 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **06/09/2026** | Backend/Security | Phase B0.4 (Actions A5, A6, A7, A9) : Durcissement CORS 403, validation Zod des événements/réservations, scripts de tests & docs | ✅ Validé |
 | **06/09/2026** | Database/Security | Phase B0.5 (Priorité P0) : Migration 0010 (RLS insertion 'DRAFT', invariants SQL, RPC réservation temporelle, safe BigInt) | ✅ Validé |
 | **06/09/2026** | Backend/Database | Phase B0.6 (Priorité P1) : Migration 0011 (trigger invariants, correction RPC `create_reservation`, fonction cron `finish_expired_events`, annulation atomique `cancel_event` avec désactivation des tickets, RPC détail public `get_public_event_detail`, sécurité de rétrogradation organisateur dans `admin_update_user_role`, alignement `trust proxy`, documentation README/DEPLOYMENT, 107/107 tests passants) | ✅ Validé |
+| **04/09/2026** | Frontend | Architecture frontend responsive complète : auth, portails USER/ORGANIZER/ADMIN, QR pass (commit `88166d1`) | ✅ Validé |
+| **15/09/2026** | Frontend/Fix | Correction du mapping des champs événement (`eventDate`/`capacity`) : la création et l'édition d'événement organisateur étaient rejetées à 100% par le backend (commit `e9467ed`) | ✅ Validé |
+| **15/09/2026** | Frontend/Security | QR codes des billets générés côté client avec `qrcode.react` au lieu d'un appel à `api.qrserver.com` (fuite de données billet/utilisateur vers un tiers) ; retrait des dépendances mortes `lucide-react`/`clsx`/`tailwind-merge` (commit `4252a14`) | ✅ Validé |
+| **15/09/2026** | Frontend/Fix | Suppression des données factices affichées en cas d'échec d'appel API (catalogue, réservations, billets, stats admin/organisateur, demandes organisateur) au profit d'un vrai état d'erreur avec relance ; extraction du hook `useRequireAuth` ; correction des 45 erreurs ESLint (règles React Compiler) — `npm run lint` propre (commit `083a7a0`) | ✅ Validé |
+
+**Vérifications effectuées le 15/09/2026 :** `npm run lint` (0 erreur) ; `next dev --webpack` (toutes les pages testées répondent 200, y compris `/dashboard/tickets` qui utilise désormais `qrcode.react`). `npm run build` (Turbopack, par défaut) échoue localement uniquement à cause d'un bug connu de Turbopack sur Windows (impossible de créer un point de jonction NTFS sur le disque `E:`, formaté en exFAT) dès qu'un module comme `qrcode.react` doit être résolu — bug confirmé indépendant du code de ce projet (cf. discussions GitHub vercel/next.js). Sans impact sur un déploiement Vercel/CI (Linux). Solution de contournement locale : `npx next dev --webpack`.
