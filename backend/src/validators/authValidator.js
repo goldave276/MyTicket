@@ -18,8 +18,10 @@ const signupSchema = z.object({
     email: emailSchema,
     password: z
         .string({ required_error: "Mot de passe obligatoire" })
-        .min(6, { message: "Le mot de passe doit contenir au moins 6 caracteres" })
-        .max(100, { message: "Le mot de passe ne peut pas depasser 100 caracteres" }),
+        .min(8, { message: "Le mot de passe doit contenir au moins 8 caracteres" })
+        .max(100, { message: "Le mot de passe ne peut pas depasser 100 caracteres" })
+        .regex(/[A-Za-z]/, { message: "Le mot de passe doit contenir au moins une lettre" })
+        .regex(/[0-9]/, { message: "Le mot de passe doit contenir au moins un chiffre" }),
     fullName: z
         .string()
         .trim()

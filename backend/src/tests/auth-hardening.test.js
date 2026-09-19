@@ -15,13 +15,22 @@ describe("Tests de durcissement d'authentification (Phase B0.2)", () => {
             expect(response.body.errors.email).toBeDefined();
         });
 
-        it("refuse une inscription avec un mot de passe trop court (< 6 caracteres)", async () => {
+        it("refuse une inscription avec un mot de passe trop court (< 8 caracteres)", async () => {
             const response = await request(app)
                 .post("/api/auth/signup")
-                .send({ email: "valid.user@example.com", password: "123" });
+                .send({ email: "valid.user@example.com", password: "Pass1" });
 
             expect(response.status).toBe(400);
             expect(response.body.message).toBe("Donnees d'inscription invalides");
+            expect(response.body.errors.password).toBeDefined();
+        });
+
+        it("refuse une inscription avec un mot de passe sans chiffre", async () => {
+            const response = await request(app)
+                .post("/api/auth/signup")
+                .send({ email: "valid.user@example.com", password: "PasswordOnly" });
+
+            expect(response.status).toBe(400);
             expect(response.body.errors.password).toBeDefined();
         });
 

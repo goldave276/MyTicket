@@ -96,7 +96,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 - [x] **B0.2. Authentification et accès**
   - [x] Passer le contrôle de compte bloqué en mode fail-closed lorsque la lecture de profil échoue ou est absente.
   - [x] Ajouter des limiteurs dédiés à l'inscription et à la réinitialisation de mot de passe.
-  - [x] Centraliser les schémas Zod de validation des entrées HTTP, identifiants et champs métier.
+  - [x] Centraliser les schémas Zod de validation des entrées HTTP (politique de mot de passe durcie : >=8 chars, lettre + chiffre) et protection anti-énumération d'email.
 
 - [x] **B0.3. Justificatifs organisateur**
   - [x] Vérifier que `documentPath` appartient au dossier Storage de l'utilisateur connecté et que le fichier existe ([`organizerDocumentValidator.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/validators/organizerDocumentValidator.js)).

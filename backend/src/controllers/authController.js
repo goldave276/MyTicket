@@ -84,7 +84,8 @@ async function requestPasswordReset(req, res) {
     });
 
     if (error) {
-        return res.status(400).json({ message: error.message });
+        // Enregistrer l'erreur en interne pour le suivi, tout en gardant une reponse generique anti-enumeration
+        console.error("Password reset error:", error.message);
     }
 
     return res.status(200).json({
