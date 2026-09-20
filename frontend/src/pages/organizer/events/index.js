@@ -110,12 +110,13 @@ export default function OrganizerEventsListPage() {
         <Sidebar mode="organizer" />
 
         <div className="flex-1 space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
+          <div className="page-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
+              <span className="eyebrow text-indigo-400">Organisateur</span>
+              <h1 className="page-title mt-1">
                 Mes Événements
               </h1>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+              <p className="page-subtitle">
                 Gérez vos brouillons, soumettez-les à l’administration et suivez les ventes.
               </p>
             </div>
@@ -125,7 +126,7 @@ export default function OrganizerEventsListPage() {
                 setEditingEvent(null);
                 setIsModalOpen(true);
               }}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-md transition-all"
+              className="btn-primary"
             >
               <PlusIcon className="w-5 h-5" />
               Nouveau Brouillon
@@ -133,16 +134,12 @@ export default function OrganizerEventsListPage() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex overflow-x-auto gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-3 scrollbar-none">
+          <div className="flex overflow-x-auto gap-2 border-b border-zinc-800 pb-3 scrollbar-none">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-sm'
-                    : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-                }`}
+                className={`tab-btn ${activeTab === tab.id ? 'is-active' : ''}`}
               >
                 {tab.label}
               </button>
@@ -157,61 +154,61 @@ export default function OrganizerEventsListPage() {
               onRetry={fetchEvents}
             />
           ) : filteredEvents.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
-              <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Aucun événement dans cet onglet</h3>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
+            <div className="empty-state space-y-4">
+              <h3 className="text-xl font-bold text-white">Aucun événement dans cet onglet</h3>
+              <p className="text-sm text-zinc-400 max-w-sm mx-auto">
                 Créez un nouveau brouillon pour commencer à organiser vos futurs événements.
               </p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+            <div className="table-shell">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-zinc-600 dark:text-zinc-300">
-                  <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase font-semibold text-zinc-500">
+                <table>
+                  <thead>
                     <tr>
-                      <th className="p-4">Titre</th>
-                      <th className="p-4">Date & Lieu</th>
-                      <th className="p-4">Prix</th>
-                      <th className="p-4">Places</th>
-                      <th className="p-4">Statut</th>
-                      <th className="p-4 text-right">Actions</th>
+                      <th>Titre</th>
+                      <th>Date & Lieu</th>
+                      <th>Prix</th>
+                      <th>Places</th>
+                      <th>Statut</th>
+                      <th className="text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60 font-medium">
+                  <tbody>
                     {filteredEvents.map((event) => (
-                      <tr key={event.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                        <td className="p-4 font-bold text-zinc-900 dark:text-white">
+                      <tr key={event.id}>
+                        <td className="font-bold text-white">
                           {event.title}
-                          <span className="block text-[10px] text-zinc-400 font-normal uppercase">
+                          <span className="block text-[10px] text-zinc-500 font-normal uppercase">
                             {event.eventType || event.event_type}
                           </span>
                         </td>
-                        <td className="p-4 text-xs space-y-0.5">
-                          <div className="flex items-center gap-1 font-semibold text-zinc-700 dark:text-zinc-300">
-                            <CalendarIcon className="w-3.5 h-3.5 text-indigo-500" />
+                        <td className="text-xs space-y-0.5">
+                          <div className="flex items-center gap-1 font-semibold text-zinc-300">
+                            <CalendarIcon className="w-3.5 h-3.5 text-indigo-400" />
                             {event.date || event.event_date
                               ? new Date(event.date || event.event_date).toLocaleDateString('fr-FR')
                               : 'À venir'}
                           </div>
-                          <div className="text-zinc-400 truncate max-w-[150px]">{event.location}</div>
+                          <div className="text-zinc-500 truncate max-w-[150px]">{event.location}</div>
                         </td>
-                        <td className="p-4 font-bold text-indigo-600 dark:text-indigo-400">
+                        <td className="font-bold text-indigo-400">
                           {event.price || event.ticket_price || 0} FCFA
                         </td>
-                        <td className="p-4 text-xs">
-                          <span className="font-bold text-zinc-900 dark:text-white">
+                        <td className="text-xs">
+                          <span className="font-bold text-white">
                             {event.availableTickets ?? event.available_tickets ?? 0}
                           </span>{' '}
                           / {event.totalTickets ?? event.total_tickets ?? 0}
                         </td>
-                        <td className="p-4">
+                        <td>
                           <Badge status={event.status} />
                         </td>
-                        <td className="p-4 text-right space-x-2">
+                        <td className="text-right space-x-2">
                           {(event.status === 'DRAFT' || event.status === 'REJECTED') && (
                             <button
                               onClick={() => handleSubmitEvent(event.id)}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold text-xs hover:bg-emerald-100 transition-colors"
+                              className="pill pill-emerald"
                             >
                               <CheckCircleIcon className="w-3.5 h-3.5" />
                               Soumettre
@@ -223,7 +220,7 @@ export default function OrganizerEventsListPage() {
                                 setEditingEvent(event);
                                 setIsModalOpen(true);
                               }}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs hover:bg-zinc-200 transition-colors"
+                              className="pill pill-neutral"
                             >
                               <EditIcon className="w-3.5 h-3.5" />
                               Modifier
@@ -231,14 +228,14 @@ export default function OrganizerEventsListPage() {
                           )}
                           <Link
                             href={`/organizer/events/${event.id}/reservations`}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-bold text-xs hover:bg-indigo-100 transition-colors"
+                            className="pill pill-accent"
                           >
                             Réservations
                           </Link>
                           {event.status === 'APPROVED' && (
                             <button
                               onClick={() => handleCancelEvent(event.id)}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold text-xs hover:bg-rose-100 transition-colors"
+                              className="pill pill-rose"
                             >
                               <XCircleIcon className="w-3.5 h-3.5" />
                               Annuler

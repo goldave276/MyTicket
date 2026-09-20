@@ -78,24 +78,25 @@ export default function AdminUsersPage() {
         <Sidebar mode="admin" />
 
         <div className="flex-1 space-y-6">
-          <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
+          <div className="page-header">
+            <span className="eyebrow text-indigo-400">Membres</span>
+            <h1 className="page-title mt-1">
               Gestion des Utilisateurs & Rôles
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            <p className="page-subtitle">
               Consultez la liste des membres, attribuez des permissions et gérez les accès.
             </p>
           </div>
 
           {/* Search bar */}
           <div className="relative max-w-md">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input
               type="text"
               placeholder="Rechercher par nom ou par email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              className="field-input pl-11"
             />
           </div>
 
@@ -104,52 +105,48 @@ export default function AdminUsersPage() {
           ) : error ? (
             <ErrorState title="Impossible de charger les utilisateurs" onRetry={fetchUsers} />
           ) : filteredUsers.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
-              <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Aucun utilisateur trouvé</h3>
+            <div className="empty-state space-y-4">
+              <h3 className="text-xl font-bold text-white">Aucun utilisateur trouvé</h3>
             </div>
           ) : (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+            <div className="table-shell">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-zinc-600 dark:text-zinc-300">
-                  <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase font-semibold text-zinc-500">
+                <table>
+                  <thead>
                     <tr>
-                      <th className="p-4">Utilisateur</th>
-                      <th className="p-4">Email</th>
-                      <th className="p-4">Rôle Actuel</th>
-                      <th className="p-4">Modifier le Rôle</th>
-                      <th className="p-4 text-right">Statut / Action</th>
+                      <th>Utilisateur</th>
+                      <th>Email</th>
+                      <th>Rôle Actuel</th>
+                      <th>Modifier le Rôle</th>
+                      <th className="text-right">Statut / Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60 font-medium">
+                  <tbody>
                     {filteredUsers.map((u) => (
-                      <tr key={u.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                        <td className="p-4 font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                          <UserIcon className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <tr key={u.id}>
+                        <td className="font-bold text-white flex items-center gap-2">
+                          <UserIcon className="w-4 h-4 text-indigo-400 shrink-0" />
                           {u.fullName || u.full_name || 'Utilisateur'}
                         </td>
-                        <td className="p-4 text-xs font-mono text-zinc-500">{u.email}</td>
-                        <td className="p-4">
+                        <td className="text-xs font-mono text-zinc-500">{u.email}</td>
+                        <td>
                           <Badge status={u.role || 'USER'} />
                         </td>
-                        <td className="p-4">
+                        <td>
                           <select
                             value={u.role || 'USER'}
                             onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                            className="px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-bold text-zinc-900 dark:text-white focus:outline-none"
+                            className="px-3 py-1.5 rounded-md bg-zinc-800 border border-zinc-700 text-xs font-bold text-white focus:outline-none"
                           >
                             <option value="USER">Membre (USER)</option>
                             <option value="ORGANIZER">Organisateur (ORGANIZER)</option>
                             <option value="ADMIN">Administrateur (ADMIN)</option>
                           </select>
                         </td>
-                        <td className="p-4 text-right">
+                        <td className="text-right">
                           <button
                             onClick={() => handleToggleBlock(u.id, u.isBlocked)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                              u.isBlocked
-                                ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100'
-                                : 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100'
-                            }`}
+                            className={u.isBlocked ? 'pill pill-emerald' : 'pill pill-rose'}
                           >
                             {u.isBlocked ? 'Débloquer' : 'Bloquer'}
                           </button>

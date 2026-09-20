@@ -27,14 +27,14 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
       {/* Modal Container */}
       <div
-        className={`relative w-full ${maxWidth} bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden transition-all transform scale-100 z-10`}
+        className={`relative w-full ${maxWidth} bg-zinc-900 border border-zinc-800 rounded-md shadow-lg overflow-hidden transition-all transform scale-100 z-10`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-100 dark:border-zinc-800">
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">{title}</h3>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
+          <h3 className="text-xl font-bold text-white tracking-tight">{title}</h3>
           <button
             onClick={onClose}
-            className="p-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="p-2 text-zinc-400 hover:text-zinc-200 rounded-full hover:bg-zinc-800 transition-colors"
           >
             ✕
           </button>

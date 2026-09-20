@@ -51,22 +51,22 @@ export default function CreateEventPage() {
         <Sidebar mode="organizer" />
 
         <div className="flex-1 space-y-6">
-          <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
-            <Link href="/organizer/events" className="text-xs font-bold text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200">
+          <div className="page-header">
+            <Link href="/organizer/events" className="eyebrow text-zinc-500 hover:text-zinc-200">
               ← Retour à mes événements
             </Link>
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mt-2">
+            <h1 className="page-title mt-2">
               Créer un nouvel événement
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            <p className="page-subtitle">
               Remplissez les détails. L’événement sera enregistré comme brouillon avant d’être soumis à validation.
             </p>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 shadow-md">
+          <div className="panel p-6 sm:p-8">
             <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                <label className="field-label">
                   Titre de l’événement *
                 </label>
                 <input
@@ -75,19 +75,19 @@ export default function CreateEventPage() {
                   placeholder="ex: Concert Live Afrobeat 2026"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="field-input"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label className="field-label">
                     Catégorie *
                   </label>
                   <select
                     value={formData.eventType}
                     onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="field-input"
                   >
                     <option value="CONCERT">Concert & Musique</option>
                     <option value="CONFERENCE">Conférence & Tech</option>
@@ -99,7 +99,7 @@ export default function CreateEventPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label className="field-label">
                     Date & Heure *
                   </label>
                   <input
@@ -107,13 +107,13 @@ export default function CreateEventPage() {
                     required
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="field-input"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                <label className="field-label">
                   Lieu / Salle *
                 </label>
                 <input
@@ -122,13 +122,13 @@ export default function CreateEventPage() {
                   placeholder="ex: Palais des Congrès, Lomé"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="field-input"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label className="field-label">
                     Prix du ticket (FCFA) *
                   </label>
                   <input
@@ -137,12 +137,12 @@ export default function CreateEventPage() {
                     required
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                    className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="field-input"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <label className="field-label">
                     Nombre total de places *
                   </label>
                   <input
@@ -151,13 +151,13 @@ export default function CreateEventPage() {
                     required
                     value={formData.totalTickets}
                     onChange={(e) => setFormData({ ...formData, totalTickets: Number(e.target.value) })}
-                    className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="field-input"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+                <label className="field-label">
                   Description détaillée *
                 </label>
                 <textarea
@@ -166,21 +166,21 @@ export default function CreateEventPage() {
                   placeholder="Décrivez le contenu et les temps forts de l’événement..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="field-input"
                 />
               </div>
 
-              <div className="pt-4 flex justify-end gap-3 border-t border-zinc-100 dark:border-zinc-800">
+              <div className="pt-4 flex justify-end gap-3 border-t border-zinc-800">
                 <Link
                   href="/organizer/events"
-                  className="px-5 py-3 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="px-5 py-3 rounded-md text-sm font-semibold text-zinc-400 hover:bg-zinc-800 transition-colors"
                 >
                   Annuler
                 </Link>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="btn-primary disabled:opacity-50"
                 >
                   {submitting ? 'Création...' : 'Enregistrer le Brouillon'}
                   <ArrowRightIcon className="w-4 h-4" />
