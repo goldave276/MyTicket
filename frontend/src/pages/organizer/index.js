@@ -67,19 +67,20 @@ export default function OrganizerDashboardPage() {
         <Sidebar mode="organizer" />
 
         <div className="flex-1 space-y-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-5">
+          <div className="page-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
+              <span className="eyebrow text-indigo-400">Organisateur</span>
+              <h1 className="page-title mt-1">
                 Espace Organisateur
               </h1>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+              <p className="page-subtitle">
                 Pilotez vos événements, suivez la billetterie et analysez vos réservations.
               </p>
             </div>
 
             <Link
               href="/organizer/events/create"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-lg transition-all"
+              className="btn-primary"
             >
               <PlusIcon className="w-5 h-5" />
               Créer un Événement
@@ -121,8 +122,8 @@ export default function OrganizerDashboardPage() {
               {/* Recent Events Section */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Vos Événements Récents</h3>
-                  <Link href="/organizer/events" className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                  <h3 className="text-xl font-bold text-white">Vos Événements Récents</h3>
+                  <Link href="/organizer/events" className="eyebrow text-indigo-400 hover:underline">
                     Voir tous mes événements →
                   </Link>
                 </div>

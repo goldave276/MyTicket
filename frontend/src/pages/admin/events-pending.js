@@ -80,11 +80,12 @@ export default function AdminPendingEventsPage() {
         <Sidebar mode="admin" />
 
         <div className="flex-1 space-y-6">
-          <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
+          <div className="page-header">
+            <span className="eyebrow text-indigo-400">Modération</span>
+            <h1 className="page-title mt-1">
               Modération des Événements Soumis
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            <p className="page-subtitle">
               Vérifiez la conformité des événements soumis par les organisateurs avant leur mise en ligne.
             </p>
           </div>
@@ -94,29 +95,29 @@ export default function AdminPendingEventsPage() {
           ) : error ? (
             <ErrorState title="Impossible de charger les événements à valider" onRetry={fetchPendingEvents} />
           ) : pendingEvents.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center space-y-4 bg-zinc-50/50 dark:bg-zinc-900/30">
-              <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Aucun événement à valider</h3>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
+            <div className="empty-state space-y-4">
+              <h3 className="text-xl font-bold text-white">Aucun événement à valider</h3>
+              <p className="text-sm text-zinc-400 max-w-sm mx-auto">
                 Tous les événements soumis ont été examinés par l’administration.
               </p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+            <div className="table-shell">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-zinc-600 dark:text-zinc-300">
-                  <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase font-semibold text-zinc-500">
+                <table>
+                  <thead>
                     <tr>
-                      <th className="p-4">Titre de l’événement</th>
-                      <th className="p-4">Catégorie</th>
-                      <th className="p-4">Date & Lieu</th>
-                      <th className="p-4">Prix / Places</th>
-                      <th className="p-4 text-right">Actions</th>
+                      <th>Titre de l’événement</th>
+                      <th>Catégorie</th>
+                      <th>Date & Lieu</th>
+                      <th>Prix / Places</th>
+                      <th className="text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60 font-medium">
+                  <tbody>
                     {pendingEvents.map((ev) => (
-                      <tr key={ev.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                        <td className="p-4 font-bold text-zinc-900 dark:text-white">
+                      <tr key={ev.id}>
+                        <td className="font-bold text-white">
                           {ev.title}
                           {ev.organizer && (
                             <span className="block text-xs font-normal text-zinc-400">
@@ -124,38 +125,38 @@ export default function AdminPendingEventsPage() {
                             </span>
                           )}
                         </td>
-                        <td className="p-4 font-semibold text-zinc-800 dark:text-zinc-200">
+                        <td className="font-semibold text-zinc-300">
                           {ev.eventType || ev.event_type}
                         </td>
-                        <td className="p-4 text-xs space-y-0.5">
-                          <div className="flex items-center gap-1 font-semibold text-zinc-700 dark:text-zinc-300">
-                            <CalendarIcon className="w-3.5 h-3.5 text-indigo-500" />
+                        <td className="text-xs space-y-0.5">
+                          <div className="flex items-center gap-1 font-semibold text-zinc-300">
+                            <CalendarIcon className="w-3.5 h-3.5 text-indigo-400" />
                             {ev.date || ev.event_date
                               ? new Date(ev.date || ev.event_date).toLocaleDateString('fr-FR')
                               : 'À venir'}
                           </div>
-                          <div className="flex items-center gap-1 text-zinc-400">
+                          <div className="flex items-center gap-1 text-zinc-500">
                             <MapPinIcon className="w-3.5 h-3.5" />
                             {ev.location}
                           </div>
                         </td>
-                        <td className="p-4 text-xs">
-                          <div className="font-bold text-indigo-600 dark:text-indigo-400">
+                        <td className="text-xs">
+                          <div className="font-bold text-indigo-400">
                             {ev.price || ev.ticket_price || 0} FCFA
                           </div>
-                          <div className="text-zinc-400">{ev.totalTickets || ev.total_tickets} places</div>
+                          <div className="text-zinc-500">{ev.totalTickets || ev.total_tickets} places</div>
                         </td>
-                        <td className="p-4 text-right space-x-2">
+                        <td className="text-right space-x-2">
                           <button
                             onClick={() => handleApprove(ev.id)}
-                            className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold text-xs hover:bg-emerald-100 transition-colors"
+                            className="pill pill-emerald"
                           >
                             <CheckCircleIcon className="w-3.5 h-3.5" />
                             Approuver
                           </button>
                           <button
                             onClick={() => setRejectingId(ev.id)}
-                            className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold text-xs hover:bg-rose-100 transition-colors"
+                            className="pill pill-rose"
                           >
                             <XCircleIcon className="w-3.5 h-3.5" />
                             Refuser
@@ -177,7 +178,7 @@ export default function AdminPendingEventsPage() {
           title="Refuser la publication de l’événement"
         >
           <div className="space-y-4">
-            <p className="text-sm text-zinc-600 dark:text-zinc-300">
+            <p className="text-sm text-zinc-300">
               Indiquez le motif du refus (ex: contenu non conforme, informations manquantes) :
             </p>
             <textarea
@@ -186,19 +187,19 @@ export default function AdminPendingEventsPage() {
               placeholder="Saisissez la raison du refus..."
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              className="field-input"
             />
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setRejectingId(null)}
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="px-4 py-2 rounded-md text-sm font-semibold text-zinc-400 hover:bg-zinc-800"
               >
                 Annuler
               </button>
               <button
                 onClick={handleConfirmReject}
                 disabled={submitting}
-                className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-md disabled:opacity-50"
+                className="px-5 py-2 rounded-md bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm disabled:opacity-50"
               >
                 {submitting ? 'Refus...' : 'Refuser l’événement'}
               </button>

@@ -58,11 +58,12 @@ export default function AdminDashboardPage() {
         <Sidebar mode="admin" />
 
         <div className="flex-1 space-y-8">
-          <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
+          <div className="page-header">
+            <span className="eyebrow text-indigo-400">Administration</span>
+            <h1 className="page-title mt-1">
               Administration de la Plateforme
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            <p className="page-subtitle">
               Supervisez les accréditations, la modération des événements et la gestion des utilisateurs.
             </p>
           </div>
@@ -100,38 +101,38 @@ export default function AdminDashboardPage() {
 
           {/* Action Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-md space-y-4">
-              <div className="w-12 h-12 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <div className="panel p-6 space-y-4">
+              <div className="w-12 h-12 rounded-md bg-amber-500/10 text-amber-400 flex items-center justify-center">
                 <BuildingIcon className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Demandes Organisateur</h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                <h3 className="text-xl font-bold text-white">Demandes Organisateur</h3>
+                <p className="text-sm text-zinc-400 mt-1">
                   Examinez les dossiers d’accréditation soumis par les membres et validez leurs rôles.
                 </p>
               </div>
               <Link
                 href="/admin/organizer-requests"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-sm transition-colors"
+                className="pill bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
               >
                 Gérer les demandes
                 <ArrowRightIcon className="w-4 h-4" />
               </Link>
             </div>
 
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-md space-y-4">
-              <div className="w-12 h-12 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div className="panel p-6 space-y-4">
+              <div className="w-12 h-12 rounded-md bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
                 <TicketIcon className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Modération des Événements</h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                <h3 className="text-xl font-bold text-white">Modération des Événements</h3>
+                <p className="text-sm text-zinc-400 mt-1">
                   Approuvez ou refusez la publication des événements soumis par les organisateurs.
                 </p>
               </div>
               <Link
                 href="/admin/events-pending"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold text-sm transition-colors"
+                className="pill pill-emerald"
               >
                 Valider les événements
                 <ArrowRightIcon className="w-4 h-4" />

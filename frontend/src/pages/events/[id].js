@@ -68,9 +68,9 @@ export default function EventDetailsPage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-pulse py-12">
-        <div className="h-80 bg-zinc-200 dark:bg-zinc-800 rounded-xl w-full" />
-        <div className="h-10 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2" />
-        <div className="h-20 bg-zinc-200 dark:bg-zinc-800 rounded w-full" />
+        <div className="h-80 bg-zinc-800 rounded-md w-full" />
+        <div className="h-10 bg-zinc-800 rounded w-1/2" />
+        <div className="h-20 bg-zinc-800 rounded w-full" />
       </div>
     );
   }
@@ -84,7 +84,7 @@ export default function EventDetailsPage() {
           onRetry={loadEvent}
         />
         <div className="text-center mt-6">
-          <Link href="/" className="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+          <Link href="/" className="eyebrow text-indigo-400 hover:underline">
             ← Retour au catalogue
           </Link>
         </div>
@@ -109,13 +109,13 @@ export default function EventDetailsPage() {
         {/* Back navigation */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+          className="eyebrow inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
         >
           ← Retour au catalogue
         </Link>
 
         {/* Hero Cover Image & Header */}
-        <div className="relative rounded-xl overflow-hidden h-80 sm:h-96 w-full border border-zinc-200 dark:border-zinc-800 shadow-lg bg-zinc-900">
+        <div className="frame-corners relative rounded-md overflow-hidden h-80 sm:h-96 w-full border border-zinc-800 bg-zinc-900">
           {/* eslint-disable-next-line @next/next/no-img-element -- remote Unsplash placeholder, not a next/image-optimized asset */}
           <img
             src={eventImage}
@@ -126,7 +126,7 @@ export default function EventDetailsPage() {
 
           <div className="absolute bottom-6 left-6 right-6 space-y-3 text-white">
             <div className="flex flex-wrap gap-2">
-              <span className="px-3.5 py-1 rounded-full text-xs font-semibold bg-indigo-600 uppercase tracking-wider">
+              <span className="eyebrow px-3 py-1 rounded-sm bg-indigo-400 text-zinc-950">
                 {event.event_type || event.eventType || 'Événement'}
               </span>
               <Badge status={event.status || 'APPROVED'} />
@@ -140,54 +140,58 @@ export default function EventDetailsPage() {
           {/* Left Details */}
           <div className="lg:col-span-2 space-y-8">
             {/* Specs Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                  <CalendarIcon className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-zinc-400 uppercase">Date & Heure</span>
-                  <p className="text-sm font-bold text-zinc-900 dark:text-white">
-                    {event.date || event.event_date
-                      ? new Date(event.date || event.event_date).toLocaleDateString('fr-FR', {
-                          weekday: 'long',
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })
-                      : 'Date non définie'}
-                  </p>
-                </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 bg-zinc-900/60 border border-zinc-800 rounded-md p-6">
+              <div className="spec-item">
+                <span className="spec-label">Catégorie</span>
+                <span className="spec-value">{event.event_type || event.eventType || 'Événement'}</span>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                  <MapPinIcon className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-zinc-400 uppercase">Lieu</span>
-                  <p className="text-sm font-bold text-zinc-900 dark:text-white">{event.location || 'Adresse indiquée sur le billet'}</p>
-                </div>
+              <div className="spec-item">
+                <span className="spec-label">Date</span>
+                <span className="spec-value">
+                  {event.date || event.event_date
+                    ? new Date(event.date || event.event_date).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })
+                    : 'Non définie'}
+                </span>
+              </div>
+
+              <div className="spec-item">
+                <span className="spec-label">Heure</span>
+                <span className="spec-value">
+                  {event.date || event.event_date
+                    ? new Date(event.date || event.event_date).toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    : '—'}
+                </span>
+              </div>
+
+              <div className="spec-item">
+                <span className="spec-label">Lieu</span>
+                <span className="spec-value truncate">{event.location || 'Sur le billet'}</span>
               </div>
             </div>
 
             {/* Description */}
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 shadow-sm space-y-4">
-              <h3 className="text-xl font-bold text-zinc-900 dark:text-white">À propos de cet événement</h3>
-              <p className="text-zinc-600 dark:text-zinc-300 text-base leading-relaxed whitespace-pre-line">
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-md p-6 sm:p-8 space-y-4">
+              <h3 className="eyebrow text-indigo-400">À propos de cet événement</h3>
+              <p className="text-zinc-300 text-base leading-relaxed whitespace-pre-line">
                 {event.description}
               </p>
             </div>
 
             {/* Guarantees */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+              <div className="eyebrow flex items-center gap-3 p-4 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
                 <CheckCircleIcon className="w-5 h-5 shrink-0" />
                 Confirmation Instantanée & QR Pass
               </div>
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold">
+              <div className="eyebrow flex items-center gap-3 p-4 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
                 <TicketIcon className="w-5 h-5 shrink-0" />
                 Annulation & Gestion autonome
               </div>
@@ -196,16 +200,16 @@ export default function EventDetailsPage() {
 
           {/* Right Ticket Purchase Box */}
           <div className="lg:col-span-1">
-            <div className="sticky top-28 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-lg space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-zinc-100 dark:border-zinc-800">
-                <div>
-                  <span className="text-xs font-bold uppercase text-zinc-400">Prix par place</span>
-                  <h4 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+            <div className="sticky top-28 bg-zinc-900/60 border border-zinc-800 rounded-md p-6 space-y-6">
+              <div className="flex justify-between items-center pb-4 border-b border-zinc-800">
+                <div className="spec-item">
+                  <span className="spec-label">Prix par place</span>
+                  <h4 className="text-2xl font-bold text-indigo-400">
                     {eventPrice === 0 ? 'GRATUIT' : `${eventPrice} FCFA`}
                   </h4>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                  <span className="eyebrow text-emerald-400">
                     {available} places rest.
                   </span>
                 </div>
@@ -213,20 +217,20 @@ export default function EventDetailsPage() {
 
               {!isSoldOut && (
                 <div className="space-y-3">
-                  <label className="block text-xs font-bold uppercase text-zinc-700 dark:text-zinc-300">
+                  <label className="spec-label block">
                     Nombre de places
                   </label>
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 font-bold text-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                      className="w-10 h-10 rounded-md bg-zinc-800 font-bold text-lg hover:bg-zinc-700 transition-colors"
                     >
                       -
                     </button>
                     <span className="flex-1 text-center font-bold text-lg">{quantity}</span>
                     <button
                       onClick={() => setQuantity(Math.min(available, quantity + 1))}
-                      className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 font-bold text-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                      className="w-10 h-10 rounded-md bg-zinc-800 font-bold text-lg hover:bg-zinc-700 transition-colors"
                     >
                       +
                     </button>
@@ -235,9 +239,9 @@ export default function EventDetailsPage() {
               )}
 
               {/* Total Calculation */}
-              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center text-sm font-bold">
-                <span className="text-zinc-600 dark:text-zinc-400">Montant total</span>
-                <span className="text-xl font-bold text-zinc-900 dark:text-white">
+              <div className="pt-4 border-t border-zinc-800 flex justify-between items-center">
+                <span className="spec-label">Montant total</span>
+                <span className="text-xl font-bold text-white">
                   {totalPrice === 0 ? 'GRATUIT' : `${totalPrice} FCFA`}
                 </span>
               </div>
@@ -246,11 +250,10 @@ export default function EventDetailsPage() {
               <button
                 onClick={handleBook}
                 disabled={isSoldOut || booking}
-                className={`w-full py-4 px-6 rounded-lg font-semibold text-base transition-all flex items-center justify-center gap-2 shadow-md ${
-                  isSoldOut
-                    ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed'
-                    : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                }`}
+                className={isSoldOut
+                  ? 'w-full py-4 px-6 rounded-md font-mono uppercase tracking-wider text-xs font-semibold bg-zinc-800 text-zinc-500 cursor-not-allowed flex items-center justify-center gap-2'
+                  : 'btn-primary w-full py-4'
+                }
               >
                 <TicketIcon className="w-5 h-5" />
                 {booking ? 'Réservation...' : isSoldOut ? 'Événement Complet' : 'Confirmer ma Réservation'}

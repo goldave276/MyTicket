@@ -37,9 +37,9 @@ export default function EventCard({ event, showStatus = false, onAction }) {
   const percentLeft = Math.max(0, Math.min(100, Math.round((remaining / total) * 100)));
 
   return (
-    <div className="group relative rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm hover:shadow-lg hover:border-indigo-500/30 transition-all duration-300 flex flex-col justify-between">
+    <div className="group relative rounded-md border border-zinc-800 bg-zinc-900/60 overflow-hidden hover:border-indigo-500/40 transition-all duration-300 flex flex-col justify-between">
       {/* Event Cover Image & Badge */}
-      <div className="relative h-48 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+      <div className="frame-corners relative h-48 w-full overflow-hidden bg-zinc-800">
         <img
           src={image}
           alt={title}
@@ -49,11 +49,11 @@ export default function EventCard({ event, showStatus = false, onAction }) {
             e.target.src = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80';
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
 
         {/* Category Badge */}
-        <div className="absolute top-4 left-4 flex gap-2">
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/90 dark:bg-zinc-900/90 text-zinc-900 dark:text-white backdrop-blur-md shadow-md uppercase tracking-wider">
+        <div className="absolute top-4 left-4 flex items-center gap-2">
+          <span className="eyebrow px-2.5 py-1 rounded-sm bg-zinc-950/80 text-indigo-400 backdrop-blur-md">
             {category}
           </span>
           {showStatus && status && <Badge status={status} />}
@@ -61,7 +61,7 @@ export default function EventCard({ event, showStatus = false, onAction }) {
 
         {/* Price Badge */}
         <div className="absolute bottom-4 right-4">
-          <span className="px-3.5 py-1.5 rounded-full text-sm font-bold bg-indigo-600 text-white shadow-lg">
+          <span className="eyebrow px-2.5 py-1.5 rounded-sm bg-indigo-400 text-zinc-950">
             {eventPrice === 0 ? 'GRATUIT' : `${eventPrice} FCFA`}
           </span>
         </div>
@@ -70,53 +70,56 @@ export default function EventCard({ event, showStatus = false, onAction }) {
       {/* Card Content */}
       <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
         <div>
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+          <h3 className="text-xl font-bold text-white tracking-tight line-clamp-1 group-hover:text-indigo-400 transition-colors">
             {title}
           </h3>
           {description && (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2 leading-relaxed">
+            <p className="text-sm text-zinc-400 mt-1 line-clamp-2 leading-relaxed">
               {description}
             </p>
           )}
         </div>
 
-        {/* Info Grid */}
-        <div className="space-y-2 text-xs font-medium text-zinc-600 dark:text-zinc-300 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="w-4 h-4 text-indigo-500 shrink-0" />
-            <span className="truncate">
+        {/* Spec Row */}
+        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-zinc-800">
+          <div className="spec-item">
+            <span className="spec-label flex items-center gap-1.5">
+              <CalendarIcon className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+              Date
+            </span>
+            <span className="spec-value truncate">
               {eventDateStr
                 ? new Date(eventDateStr).toLocaleDateString('fr-FR', {
-                    weekday: 'short',
                     day: 'numeric',
                     month: 'short',
                     year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
                   })
-                : 'Date à venir'}
+                : 'À venir'}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <MapPinIcon className="w-4 h-4 text-indigo-500 shrink-0" />
-            <span className="truncate">{location || 'Lieu non spécifié'}</span>
+          <div className="spec-item">
+            <span className="spec-label flex items-center gap-1.5">
+              <MapPinIcon className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+              Lieu
+            </span>
+            <span className="spec-value truncate">{location || 'Non spécifié'}</span>
           </div>
         </div>
 
         {/* Gauge & Remaining Tickets */}
         {!showStatus && (
           <div className="space-y-1.5 pt-2">
-            <div className="flex justify-between items-center text-xs font-semibold">
-              <span className="text-zinc-500 dark:text-zinc-400">Places restantes</span>
-              <span className={remaining > 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-rose-500 font-bold'}>
+            <div className="flex justify-between items-center">
+              <span className="spec-label">Places restantes</span>
+              <span className={`font-mono text-xs font-bold ${remaining > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {remaining > 0 ? `${remaining} / ${total}` : 'ÉPUISÉ'}
               </span>
             </div>
-            <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-zinc-800 h-1.5 rounded-sm overflow-hidden">
               <div
-                className={`h-full transition-all duration-500 rounded-full ${
-                  percentLeft < 15 ? 'bg-rose-500' : percentLeft < 40 ? 'bg-amber-500' : 'bg-indigo-600'
+                className={`h-full transition-all duration-500 ${
+                  percentLeft < 15 ? 'bg-rose-500' : percentLeft < 40 ? 'bg-amber-500' : 'bg-indigo-400'
                 }`}
                 style={{ width: `${percentLeft}%` }}
               />
@@ -129,18 +132,17 @@ export default function EventCard({ event, showStatus = false, onAction }) {
           {onAction ? (
             <button
               onClick={() => onAction(event)}
-              className="w-full py-3 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md"
+              className="btn-outline w-full"
             >
               Gérer l’événement
             </button>
           ) : (
             <Link
               href={`/events/${id}`}
-              className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md ${
-                remaining === 0
-                  ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-              }`}
+              className={remaining === 0
+                ? 'w-full inline-flex items-center justify-center gap-2 font-mono uppercase tracking-wider text-xs font-semibold rounded-md py-3 px-4 bg-zinc-800 text-zinc-500 cursor-not-allowed'
+                : 'btn-primary w-full'
+              }
             >
               <TicketIcon className="w-4 h-4" />
               {remaining === 0 ? 'Complet' : 'Réserver une place'}

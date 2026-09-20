@@ -16,12 +16,12 @@ export default function EventGrid({ events = [], loading = false, showStatus = f
 
   if (events.length === 0) {
     return (
-      <div className="w-full rounded-xl border border-dashed border-zinc-300 dark:border-zinc-800 p-12 text-center flex flex-col items-center justify-center space-y-4 my-8 bg-zinc-50/50 dark:bg-zinc-900/30">
-        <div className="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+      <div className="w-full rounded-md border border-dashed border-zinc-800 p-12 text-center flex flex-col items-center justify-center space-y-4 my-8 bg-zinc-900/30">
+        <div className="w-16 h-16 rounded-md bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
           <SparklesIcon className="w-8 h-8" />
         </div>
-        <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Aucun événement trouvé</h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-md">
+        <h3 className="text-xl font-bold text-white">Aucun événement trouvé</h3>
+        <p className="text-sm text-zinc-400 max-w-md">
           Aucun événement ne correspond à vos critères actuels. Essayez de modifier votre recherche ou vos filtres.
         </p>
       </div>

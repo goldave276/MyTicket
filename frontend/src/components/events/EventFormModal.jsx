@@ -55,7 +55,7 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, initialData 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Title */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+          <label className="field-label">
             Titre de l’événement *
           </label>
           <input
@@ -64,20 +64,20 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, initialData 
             placeholder="ex: Concert Live Afrobeat 2026"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            className="field-input"
           />
         </div>
 
         {/* Category & Date */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+            <label className="field-label">
               Catégorie *
             </label>
             <select
               value={formData.eventType}
               onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              className="field-input"
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat.id} value={cat.id}>
@@ -88,7 +88,7 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, initialData 
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+            <label className="field-label">
               Date & Heure *
             </label>
             <input
@@ -96,14 +96,14 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, initialData 
               required
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              className="field-input"
             />
           </div>
         </div>
 
         {/* Location */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+          <label className="field-label">
             Lieu / Adresse *
           </label>
           <input
@@ -112,14 +112,14 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, initialData 
             placeholder="ex: Palais des Congrès, Lomé"
             value={formData.location}
             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            className="field-input"
           />
         </div>
 
         {/* Price & Capacity */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+            <label className="field-label">
               Prix du ticket (FCFA) *
             </label>
             <input
@@ -128,12 +128,12 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, initialData 
               required
               value={formData.price}
               onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-              className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              className="field-input"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+            <label className="field-label">
               Nombre de tickets au total *
             </label>
             <input
@@ -142,14 +142,14 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, initialData 
               required
               value={formData.totalTickets}
               onChange={(e) => setFormData({ ...formData, totalTickets: Number(e.target.value) })}
-              className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              className="field-input"
             />
           </div>
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+          <label className="field-label">
             Description détaillée *
           </label>
           <textarea
@@ -158,23 +158,23 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, initialData 
             placeholder="Présentez le programme, les artistes, l’accès..."
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            className="field-input"
           />
         </div>
 
         {/* Submit */}
-        <div className="pt-4 flex justify-end gap-3 border-t border-zinc-100 dark:border-zinc-800">
+        <div className="pt-4 flex justify-end gap-3 border-t border-zinc-800">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="px-5 py-2.5 rounded-md text-sm font-semibold text-zinc-400 hover:bg-zinc-800 transition-colors"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition-all disabled:opacity-50"
+            className="btn-primary disabled:opacity-50"
           >
             {isSubmitting ? 'Enregistrement...' : initialData ? 'Mettre à jour' : 'Enregistrer le brouillon'}
           </button>

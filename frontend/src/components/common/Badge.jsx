@@ -26,7 +26,7 @@ export default function Badge({ status, customLabel, className = '' }) {
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${config.color} ${className}`}
+      className={`eyebrow inline-flex items-center px-2.5 py-1 rounded-sm border ${config.color} ${className}`}
     >
       {customLabel || config.label}
     </span>

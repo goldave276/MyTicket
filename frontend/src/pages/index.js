@@ -60,9 +60,11 @@ export default function Home() {
       </Head>
 
       {/* Hero Banner Section */}
-      <section className="relative overflow-hidden rounded-xl bg-zinc-900 text-white p-8 sm:p-12 lg:p-16 mb-12 border border-zinc-800">
-        <div className="max-w-3xl space-y-5">
-          <span className="text-xs font-semibold uppercase tracking-widest text-indigo-400">
+      <section className="grid-backdrop relative overflow-hidden rounded-md bg-zinc-900 text-white p-8 sm:p-12 lg:p-16 mb-12 border border-zinc-800">
+        <span className="watermark-number absolute -top-6 -left-2 text-[10rem] sm:text-[14rem] select-none">01</span>
+
+        <div className="relative max-w-3xl space-y-5">
+          <span className="eyebrow text-indigo-400">
             Billetterie en ligne
           </span>
 
@@ -75,10 +77,10 @@ export default function Home() {
           </p>
 
           {/* Quick facts */}
-          <div className="pt-4 flex flex-wrap gap-x-8 gap-y-2 border-t border-zinc-800 text-sm text-zinc-400">
-            <span>Billets sécurisés</span>
-            <span>Réservation en ligne</span>
-            <span>QR Pass à l’entrée</span>
+          <div className="pt-4 flex flex-wrap gap-x-8 gap-y-2 border-t border-zinc-800">
+            <span className="eyebrow text-zinc-400">Billets sécurisés</span>
+            <span className="eyebrow text-zinc-400">Réservation en ligne</span>
+            <span className="eyebrow text-zinc-400">QR Pass à l’entrée</span>
           </div>
         </div>
       </section>
@@ -87,17 +89,18 @@ export default function Home() {
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
+            <span className="eyebrow text-indigo-400">Catalogue</span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
               Événements à l’affiche
             </h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            <p className="text-sm text-zinc-400 mt-1">
               Explorez les événements validés et ouverts à la réservation.
             </p>
           </div>
 
           <Link
             href="/dashboard/become-organizer"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-sm font-bold transition-colors"
+            className="btn-outline"
           >
             <TicketIcon className="w-4 h-4" />
             Organiser un événement

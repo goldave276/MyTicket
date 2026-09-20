@@ -1,26 +1,373 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------ */
+/* Dark mode is now permanent: `dark:` utilities apply whenever an     */
+/* ancestor carries the `.dark` class. `_document.js` stamps `.dark`   */
+/* on <html>, so every existing dark: className in the app is always   */
+/* active — no more prefers-color-scheme, no light variant shipped.    */
+/* ------------------------------------------------------------------ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Brand accent — reassigning the whole `indigo` color scale means every
+     existing indigo utility class (bg, text, border, ring) already used
+     across the app repaints to this cyan without touching each file. */
+  --color-indigo-50: #ecfeff;
+  --color-indigo-100: #cffafe;
+  --color-indigo-200: #a5f3fc;
+  --color-indigo-300: #67e8f9;
+  --color-indigo-400: #22d3ee;
+  --color-indigo-500: #06b6d4;
+  --color-indigo-600: #0891b2;
+  --color-indigo-700: #0e7490;
+  --color-indigo-800: #155e75;
+  --color-indigo-900: #164e63;
+  --color-indigo-950: #083344;
+
+  /* Sharper, "technical drawing" corners app-wide. */
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.375rem;
+  --radius-2xl: 0.5rem;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b0d0c;
+  --background-elevated: #121512;
+  --foreground: #f2f4f2;
+  --accent: #22d3ee;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-feature-settings: "ss01" 1;
+}
+
+::selection {
+  background: var(--accent);
+  color: #06181b;
+}
+
+/* Thin, technical scrollbar to match the rest of the chrome. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2f2a;
+  border: 2px solid var(--background);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a413a;
+}
+
+@layer components {
+  /* Small uppercase, tracked, monospace label used above headlines,
+     section titles and spec values — the "technical" signature of the
+     reference design. */
+  .eyebrow {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.6875rem;
+    font-weight: 600;
+  }
+
+  /* Corner-bracket frame, drawn with four small L-shapes over the
+     element's padding-box — the "blueprint" motif around media. */
+  .frame-corners {
+    position: relative;
+  }
+  .frame-corners::before,
+  .frame-corners::after,
+  .frame-corners > .frame-corner-tr,
+  .frame-corners > .frame-corner-bl {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .frame-corners::before {
+    top: 10px;
+    left: 10px;
+    border-left: 2px solid var(--accent);
+    border-top: 2px solid var(--accent);
+  }
+  .frame-corners::after {
+    bottom: 10px;
+    right: 10px;
+    border-right: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+  }
+
+  /* Faint blueprint grid backdrop for hero / feature sections. */
+  .grid-backdrop {
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--foreground) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 6%, transparent) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Oversized watermark digit used as a background flourish. */
+  .watermark-number {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    color: color-mix(in oklab, var(--foreground) 5%, transparent);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    background: var(--accent);
+    color: #06181b;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.25rem;
+    transition: filter 150ms ease, transform 150ms ease;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.08);
+  }
+  .btn-primary:disabled {
+    filter: grayscale(0.6) brightness(0.7);
+    cursor: not-allowed;
+  }
+
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    background: transparent;
+    color: var(--foreground);
+    border: 1px solid color-mix(in oklab, var(--foreground) 25%, transparent);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.25rem;
+    transition: border-color 150ms ease, background 150ms ease;
+  }
+  .btn-outline:hover {
+    border-color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+  }
+
+  /* Labelled spec value — the ACTIVE / PACK / CLASS / MAX-ORDER pattern. */
+  .spec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .spec-item .spec-label {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: color-mix(in oklab, var(--foreground) 45%, transparent);
+  }
+  .spec-item .spec-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  /* ---- Admin / organizer back-office surfaces ------------------------ */
+
+  .page-header {
+    border-bottom: 1px solid #27272a;
+    padding-bottom: 1.25rem;
+  }
+  .page-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--foreground);
+  }
+  .page-subtitle {
+    font-size: 0.875rem;
+    color: color-mix(in oklab, var(--foreground) 55%, transparent);
+    margin-top: 0.25rem;
+  }
+
+  .panel {
+    background: color-mix(in oklab, var(--foreground) 4%, transparent);
+    border: 1px solid #27272a;
+    border-radius: var(--radius-md);
+  }
+
+  .empty-state {
+    border: 1px dashed #3f3f46;
+    border-radius: var(--radius-md);
+    background: color-mix(in oklab, var(--foreground) 3%, transparent);
+    padding: 3rem;
+    text-align: center;
+  }
+
+  /* Data table shell: header row in mono/uppercase, hairline separators. */
+  .table-shell {
+    background: color-mix(in oklab, var(--foreground) 4%, transparent);
+    border: 1px solid #27272a;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .table-shell table {
+    width: 100%;
+    text-align: left;
+    font-size: 0.875rem;
+  }
+  .table-shell thead {
+    background: color-mix(in oklab, var(--foreground) 3%, transparent);
+    border-bottom: 1px solid #27272a;
+  }
+  .table-shell th {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: color-mix(in oklab, var(--foreground) 45%, transparent);
+    padding: 1rem;
+  }
+  .table-shell tbody {
+    color: color-mix(in oklab, var(--foreground) 80%, transparent);
+  }
+  .table-shell tbody tr {
+    border-bottom: 1px solid color-mix(in oklab, var(--foreground) 6%, transparent);
+    transition: background 150ms ease;
+  }
+  .table-shell tbody tr:last-child {
+    border-bottom: none;
+  }
+  .table-shell tbody tr:hover {
+    background: color-mix(in oklab, var(--foreground) 3%, transparent);
+  }
+  .table-shell td {
+    padding: 1rem;
+  }
+
+  /* Form field: label + input pairing used across create/edit forms. */
+  .field-label {
+    display: block;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: color-mix(in oklab, var(--foreground) 60%, transparent);
+    margin-bottom: 0.375rem;
+  }
+  .field-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    background: color-mix(in oklab, black 30%, var(--background));
+    border: 1px solid #3f3f46;
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .field-input::placeholder {
+    color: color-mix(in oklab, var(--foreground) 35%, transparent);
+  }
+  .field-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  /* Small uppercase mono action pills — approve / reject / neutral / accent. */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.1875rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    transition: background 150ms ease;
+  }
+  .pill-emerald {
+    background: color-mix(in oklab, #10b981 12%, transparent);
+    color: #34d399;
+  }
+  .pill-emerald:hover {
+    background: color-mix(in oklab, #10b981 22%, transparent);
+  }
+  .pill-rose {
+    background: color-mix(in oklab, #f43f5e 12%, transparent);
+    color: #fb7185;
+  }
+  .pill-rose:hover {
+    background: color-mix(in oklab, #f43f5e 22%, transparent);
+  }
+  .pill-neutral {
+    background: #27272a;
+    color: #d4d4d8;
+  }
+  .pill-neutral:hover {
+    background: #3f3f46;
+  }
+  .pill-accent {
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+    color: var(--accent);
+  }
+  .pill-accent:hover {
+    background: color-mix(in oklab, var(--accent) 22%, transparent);
+  }
+
+  /* Filter / status tabs. */
+  .tab-btn {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.1875rem;
+    white-space: nowrap;
+    transition: all 150ms ease;
+    color: color-mix(in oklab, var(--foreground) 50%, transparent);
+  }
+  .tab-btn:hover {
+    background: #27272a;
+  }
+  .tab-btn.is-active {
+    background: var(--accent);
+    color: #06181b;
+  }
+  .tab-btn.is-active:hover {
+    background: var(--accent);
+  }
 }
