@@ -8,9 +8,6 @@
 
 create extension if not exists pg_cron with schema extensions;
 
-grant usage on schema cron to postgres;
-grant all privileges on all tables in schema cron to postgres;
-
 -- Nettoyer tout job existant portant le meme nom pour eviter les doublons
 do $$
 begin
