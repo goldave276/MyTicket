@@ -6,7 +6,7 @@
 -- Les privileges d'execution de la fonction etant revoques a anon et authenticated,
 -- l'appel est effectue dans le contexte securise du superutilisateur/postgres.
 
-create extension if not exists pg_cron with schema extensions;
+-- L'extension pg_cron est deja activee/geree nativement par Supabase.
 
 -- Nettoyer tout job existant portant le meme nom pour eviter les doublons
 do $$

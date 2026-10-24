@@ -220,7 +220,6 @@ describe("Invariants SQL, RLS et Validations Safe BigInt (Phase B0.5)", () => {
                 "utf8"
             );
 
-            expect(migration0013).toContain("create extension if not exists pg_cron");
             expect(migration0013).toContain("cron.schedule(");
             expect(migration0013).toContain("'finish-expired-events-hourly'");
             expect(migration0013).toContain("'0 * * * *'");
