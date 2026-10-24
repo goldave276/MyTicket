@@ -12,7 +12,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | :--- | :---: | :---: | :--- |
 | **Backend (API Express)** | 🟢 Validé & Durci | 100% (hors paiements) | Auth, rôles, catalogue, cycle de vie événement, détail public et RLS durcis |
 | **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0011 | RLS `DRAFT`, trigger invariants, annulation atomique, disponibilité publique et RPC sécurisées |
-| **DevOps & Tests** | 🟢 Validé | 107/107 tests validés | Dockerfile, Vitest (unit & http), CI GitHub Actions, guide de déploiement et configuration proxy |
+| **DevOps & Tests** | 🟢 Validé | 108/108 tests validés | Dockerfile, Vitest (unit & http) déterministe (indépendant du `.env` local), guide de déploiement et configuration proxy ; CI GitHub Actions retirée (commit `0527f05`), à réintroduire |
 | **Frontend (Next.js / React)** | 🟡 Fonctionnel, à finaliser | ~80% (hors upload justificatif & paiements) | Interface Utilisateur, Espace Organisateur, Dashboard Admin construits et durcis ; `npm run lint` propre |
 
 ---
@@ -111,7 +111,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 - [x] Dockerfile de production optimisé (Node Alpine, multi-stage/non-root)
 - [x] Orchestration Docker Compose
 - [x] Tests unitaires & intégration avec Vitest (`npm test`)
-- [x] CI GitHub Actions (`.github/workflows/backend-ci.yml`)
+- [ ] CI GitHub Actions (`.github/workflows/backend-ci.yml` retiré au commit `0527f05` ; réintroduction prévue après stabilisation des tests)
 - [x] Déploiement Cloud du Backend (Guide [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md) & [`.env.example`](file:///c:/Users/MSI/Desktop/myticket/backend/.env.example))
 - [ ] Déploiement Vercel du Frontend
 
@@ -147,4 +147,8 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **19/09/2026** | Security/Refactoring | Audit complet & durcissement de l'authentification : renforcement politique mot de passe (Zod >=8 caractères avec lettre et chiffre), protection anti-énumération d'email sur réinitialisation mot de passe, validation sessions/rate limiting et absence d'exposition de secret frontend. 140/140 tests passés (HTTP & unit). | ✅ Validé |
 
 **Vérifications effectuées le 19/09/2026 :** `npm run test:http` (79/79 tests validés) ; `npm run test:unit` (61/61 tests validés). Total 140 tests d'intégration et unitaires passants sans régression.
+
+| Date | Auteur / Réf | Étape / Modifications majeures | Statut |
+| :--- | :---: | :--- | :---: |
+| **24/10/2026** | Tests/CORS | Étape 1 (HANDOFF P0) : tests CORS alignés sur le port officiel 3333 (au lieu de 3001), fichier `src/tests/setup-env.js` chargé par Vitest (`setupFiles`) qui impose `FRONTEND_URL`/`NODE_ENV` et fournit des valeurs Supabase factices si absentes, correction de la casse `require("../App")` (compatibilité Linux), origine CORS par défaut de `App.js` réduite à `http://localhost:3333`. `npm test` : 108/108 ; 108/108 également avec une `FRONTEND_URL` volontairement erronée. | ✅ Validé |
 

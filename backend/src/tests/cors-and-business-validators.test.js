@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const request = require("supertest");
-const app = require("../app");
+const app = require("../App");
 const { validateEventInput, validateEventId } = require("../validators/eventValidator");
 const {
     validateReservationInput,
@@ -13,21 +13,21 @@ describe("Securite CORS et en-tetes HTTP (Action A5)", () => {
     it("autorise les requetes provenant d'une origine declaree dans FRONTEND_URL", async () => {
         const response = await request(app)
             .get("/api/health")
-            .set("Origin", "http://localhost:3001");
+            .set("Origin", "http://localhost:3333");
 
         expect(response.statusCode).toBe(200);
-        expect(response.headers["access-control-allow-origin"]).toBe("http://localhost:3001");
+        expect(response.headers["access-control-allow-origin"]).toBe("http://localhost:3333");
         expect(response.headers["vary"]).toContain("Origin");
     });
 
     it("autorise les pre-vols OPTIONS avec les en-tetes autorises", async () => {
         const response = await request(app)
             .options("/api/health")
-            .set("Origin", "http://localhost:3001")
+            .set("Origin", "http://localhost:3333")
             .set("Access-Control-Request-Method", "GET");
 
         expect([200, 204]).toContain(response.statusCode);
-        expect(response.headers["access-control-allow-origin"]).toBe("http://localhost:3001");
+        expect(response.headers["access-control-allow-origin"]).toBe("http://localhost:3333");
     });
 
     it("rejette avec 403 toute requete provenant d'une origine non declaree", async () => {

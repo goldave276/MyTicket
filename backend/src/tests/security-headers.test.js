@@ -16,9 +16,9 @@ describe("Tests de securite des en-tetes HTTP et CORS", () => {
     it("accepte les requetes avec une origine autorisee", async () => {
         const response = await request(app)
             .get("/api/health")
-            .set("Origin", "http://localhost:3001");
+            .set("Origin", "http://localhost:3333");
 
         expect(response.status).toBe(200);
-        expect(response.headers["access-control-allow-origin"]).toBe("http://localhost:3001");
+        expect(response.headers["access-control-allow-origin"]).toBe("http://localhost:3333");
     });
 });

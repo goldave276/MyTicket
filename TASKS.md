@@ -128,6 +128,13 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Mettre à jour le README : 107 tests actuels (et non 90), paramètres `page`/`limit` du catalogue, état réel du frontend, et distinction entre validation structurelle CI et tests RLS exécutés avec des identités Supabase.
   - [x] Ajouter des tests d'intégration avec Supabase local/projet isolé : JWT utilisateur/organisateur/admin, policy RLS réelle, transition `FINISHED`, annulation et désactivation de ticket, calcul de places restantes, et concurrence de réservation ([`sql-invariants-and-rls.test.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/tests/sql-invariants-and-rls.test.js), [`event-public-detail.test.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/tests/event-public-detail.test.js)).
 
+- [x] **B0.7. Tests déterministes et port officiel 3333 — priorité P0 (HANDOFF, 24/10/2026)**
+  - [x] Aligner les 4 tests CORS sur l'origine officielle `http://localhost:3333` (au lieu de 3001).
+  - [x] Rendre la suite indépendante du `.env` local via [`setup-env.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/tests/setup-env.js) (`setupFiles` Vitest).
+  - [x] Corriger la casse `require("../App")` pour l'exécution sous Linux (Docker/CI).
+  - [x] Réduire l'origine CORS par défaut de `App.js` à `http://localhost:3333`.
+  - [ ] Vérifier l'exécution sur une machine/CI sans aucun `.env` (valeurs Supabase factices non encore éprouvées).
+
 
 > Détail opérationnel complet : [`CODE_REVIEW_ACTION_PLAN.md`](CODE_REVIEW_ACTION_PLAN.md). Le module de paiements est exclu de cette phase à la demande explicite du propriétaire du projet.
 

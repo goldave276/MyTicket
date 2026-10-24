@@ -27,10 +27,10 @@ describe("API health", () => {
     it("autorise l'origine du frontend local", async () => {
         const response = await request(app)
             .get("/api/health")
-            .set("Origin", "http://localhost:3001");
+            .set("Origin", "http://localhost:3333");
 
         expect(response.headers["access-control-allow-origin"])
-            .toBe("http://localhost:3001");
+            .toBe("http://localhost:3333");
     });
 
     it("refuse l'acces a /api/auth/me sans token", async () => {
