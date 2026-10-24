@@ -116,14 +116,15 @@ Docker permettra d'executer l'application dans des environnements reproductibles
 Le MVP backend est valide. Il comprend l'authentification, les roles
 `USER`, `ORGANIZER` et `ADMIN`, les demandes d'organisateur, la gestion des
 evenements, les reservations, les annulations, les tickets, les politiques
-RLS Supabase et les migrations PostgreSQL.
+RLS Supabase et les migrations PostgreSQL (0001 à 0013).
 
-Aucune integration continue GitHub Actions n'est active pour le moment.
-Executer manuellement `npm test` dans `backend/` avant chaque push.
+L'intégration continue GitHub Actions (`.github/workflows/backend-ci.yml`) valide
+automatiquement les tests, la construction Docker et l'application des migrations SQL
+à chaque push et pull request.
 
-Les paiements reels Stripe, PayPal et Mobile Money restent volontairement
-reportes. Les routes et la structure de paiement sont conservees pour une
-integration ulterieure.
+Le mode de paiement sur place (`ON_SITE`) est géré dans le MVP avec confirmation par
+l'administrateur (`/admin/payments`) qui déclenche l'émission atomique des billets.
+Les paiements en ligne Stripe et Mobile Money restent prévus post-MVP.
 
 ## Demarrage du backend
 
@@ -142,7 +143,7 @@ Pour executer les tests :
 
 ```powershell
 cd backend
-npm test          # Suite complete de tests (107 tests)
+npm test          # Suite complete de tests (112 tests)
 npm run test:unit # Tests unitaires et validateurs de schemas Zod
 npm run test:http # Tests d'integration HTTP, securite CORS et guards
 ```
@@ -170,8 +171,9 @@ configurees dans le gestionnaire de secrets de la plateforme d'hebergement.
 - [ ] `GET /api/health` repond correctement depuis l'hebergement.
 - [ ] Les logs et alertes de la plateforme sont consultables.
 
-Aucun workflow GitHub Actions n'est actif : `npm test` et la construction
-Docker doivent etre verifies manuellement avant chaque push.
+Les pushes et pull requests vers `main` déclenchent le workflow GitHub Actions
+`.github/workflows/backend-ci.yml`, qui exécute automatiquement les 112 tests du backend,
+la construction de l'image Docker et la validation de l'ensemble des migrations SQL sur PostgreSQL 16.
 
 ## Regles metier principales
 
@@ -295,7 +297,8 @@ Authorization: Bearer <access_token_supabase>
 | POST | `/api/organizer-requests` | Oui | Envoyer une demande |
 | GET | `/api/organizer-requests` | Oui | Voir ses demandes |
 
-Le corps de la creation contient `eventType` et `documentPath`.
+Le corps de la creation contient `eventType`, `description` (20-1000 caractères)
+et le fichier justificatif `file` (PDF, JPG, PNG, max 5 Mo) téléversé dans le bucket Supabase `organizer-documents`.
 
 ### Evenements
 
@@ -344,3 +347,6 @@ confirmee genere ses tickets via la fonction PostgreSQL transactionnelle.
 | PATCH | `/api/admin/users/:userId/block` | Oui | ADMIN | Bloquer ou debloquer un utilisateur |
 | PATCH | `/api/admin/events/:eventId/approve` | Oui | ADMIN | Approuver un evenement |
 | PATCH | `/api/admin/events/:eventId/reject` | Oui | ADMIN | Refuser un evenement |
+| GET | `/api/admin/payments/pending` | Oui | ADMIN | Lister les paiements sur place en attente |
+| PATCH | `/api/admin/payments/:paymentId/confirm-on-site` | Oui | ADMIN | Confirmer le paiement sur place et emettre les billets |
+

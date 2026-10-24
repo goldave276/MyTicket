@@ -154,6 +154,12 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Migration SQL [`0013_schedule_finish_expired_events.sql`](file:///c:/Users/MSI/Desktop/myticket/backend/supabase/migrations/0013_schedule_finish_expired_events.sql) activant l'extension `pg_cron` et planifiant l'exécution horaire (`0 * * * *`) de `finish_expired_events()`.
   - [x] Tests unitaires d'invariants SQL validant la structure de la migration 0013 (112/112 tests validés).
 
+- [x] **B0.11. Réintroduction de la CI GitHub Actions & Documentation — priorité P2 (HANDOFF, 24/10/2026)**
+  - [x] Workflow GitHub Actions [`.github/workflows/backend-ci.yml`](file:///c:/Users/MSI/Desktop/myticket/.github/workflows/backend-ci.yml) (112 tests Vitest, construction de l'image Docker et validation des migrations 0001 à 0013 sur PostgreSQL 16).
+  - [x] Stubs du schéma `cron` dans [`backend/supabase/test-bootstrap.sql`](file:///c:/Users/MSI/Desktop/myticket/backend/supabase/test-bootstrap.sql) pour tester la migration 0013 en isolation CI.
+  - [x] Synchronisation de la documentation ([`README.md`](file:///c:/Users/MSI/Desktop/myticket/README.md), [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md), [`backend/supabase/README.md`](file:///c:/Users/MSI/Desktop/myticket/backend/supabase/README.md)).
+
+
 
 
 > Détail opérationnel complet : [`CODE_REVIEW_ACTION_PLAN.md`](CODE_REVIEW_ACTION_PLAN.md). Le module de paiements est exclu de cette phase à la demande explicite du propriétaire du projet.

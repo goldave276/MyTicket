@@ -29,6 +29,9 @@ Assurez-vous que toutes les migrations du dossier `backend/supabase/migrations/`
 9. `0009_performance_indexes.sql` (Index PostgreSQL & bucket `organizer-documents`)
 10. `0010_sql_invariants_and_rls.sql` (Invariants SQL, RLS insertion 'DRAFT' et sécurisation de la RPC `create_reservation`)
 11. `0011_event_lifecycle_and_public_details.sql` (Cycle de vie, trigger invariants, annulation atomique, disponibilité publique et protection du rôle organisateur)
+12. `0012_organizer_request_description.sql` (Persistance de la description de candidature organisateur 20-1000 caractères)
+13. `0013_schedule_finish_expired_events.sql` (Planification automatique horaire du passage à l'état FINISHED via pg_cron)
+
 
 ---
 

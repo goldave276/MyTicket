@@ -49,3 +49,28 @@ stable
 as $$
     select null::uuid;
 $$;
+
+-- Objets cron minimaux requis par la migration 0013.
+create schema if not exists cron;
+create table if not exists cron.job (
+    jobid bigint primary key generated always as identity,
+    jobname text unique,
+    schedule text,
+    command text
+);
+create or replace function cron.unschedule(job_name text)
+returns boolean
+language sql
+as $$
+    delete from cron.job where jobname = job_name;
+    select true;
+$$;
+create or replace function cron.schedule(job_name text, schedule_expr text, cmd text)
+returns bigint
+language sql
+as $$
+    insert into cron.job (jobname, schedule, command)
+    values (job_name, schedule_expr, cmd)
+    returning jobid;
+$$;
+

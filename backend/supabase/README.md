@@ -14,47 +14,28 @@ supabase/migrations/202609060001_add_event_indexes.sql
 
 Les migrations doivent etre appliquees dans l'ordre et ne doivent pas modifier les anciennes migrations deja partagees.
 
-## Etat actuel
+## Migrations disponibles
 
-La base Supabase a ete construite dans le SQL Editor avant la mise en place de ce dossier. Le schema existant doit donc etre exporte ou recopie avec precaution avant de creer la migration initiale.
+Le dossier `migrations/` contient l'ensemble ordonne des migrations PostgreSQL du projet :
 
-Cette etape est volontairement separee du code applicatif : une migration initiale incomplete serait plus dangereuse qu'une documentation claire.
+1. `0001_initial_schema.sql` : Schema initial (tables `profiles`, `organizer_requests`, `events`, `reservations`, `tickets`, `payments` et politiques RLS).
+2. `0002_rpc_functions.sql` : Fonctions RPC transactionnelles (`create_reservation`, `submit_event`, `approve_event`, etc.).
+3. `0003_organizer_event_reservations.sql` : Consultation securisee des reservations pour l'organisateur.
+4. `0004_cancel_event.sql` : Annulation d'evenement par son organisateur.
+5. `0005_profile_and_currency.sql` : Devise XOF et mise a jour de profil.
+6. `0006_update_event.sql` : Modification d'evenement par l'organisateur.
+7. `0007_statistics.sql` : Fonctions statistiques RPC (organisateur et admin).
+8. `0008_admin_users.sql` : Administration des utilisateurs (role, blocage).
+9. `0009_performance_indexes.sql` : Index de performance et bucket storage `organizer-documents`.
+10. `0010_sql_invariants_and_rls.sql` : Invariants SQL, RLS insertion `DRAFT` et securisation de `create_reservation`.
+11. `0011_event_lifecycle_and_public_details.sql` : Cycle de vie, trigger invariants, annulation atomique, disponibilite publique et protection du role organisateur.
+12. `0012_organizer_request_description.sql` : Persistance de la description de candidature organisateur (20-1000 caracteres).
+13. `0013_schedule_finish_expired_events.sql` : Planification horaire via `pg_cron` de la finalisation des evenements expirés (`finish_expired_events()`).
 
-## Ne pas appliquer sur le projet actuel
+## Validation en Integration Continue (CI)
 
-Les fichiers `0001_initial_schema.sql` et `0002_rpc_functions.sql` sont
-destines a un projet Supabase vide ou de test. Ne pas les executer directement
-sur le projet qui contient deja les tables MyTicket.
+Le workflow GitHub Actions (`.github/workflows/backend-ci.yml`) teste automatiquement ces migrations sur une base PostgreSQL 16 vide. Il execute d'abord `test-bootstrap.sql` pour instancier les schemas minimaux (`auth`, `storage`, `cron`), puis applique l'ensemble des fichiers SQL avec `ON_ERROR_STOP=1`. Cela permet de detecter toute regression de syntaxe ou d'invariants sans affecter l'environnement de production.
 
-Pour les tester sans risque :
-
-1. Creer un projet Supabase de test separe.
-2. Executer `0001_initial_schema.sql`.
-3. Executer `0002_rpc_functions.sql`.
-4. Verifier les tables, politiques, fonctions et trigger avec les scripts d'audit.
-5. Executer les tests d'integration uniquement avec les variables du projet de test.
-
-Le workflow GitHub Actions contient aussi un test automatique sur PostgreSQL 16
-vide. Il utilise `test-bootstrap.sql` pour simuler uniquement les objets
-`auth` necessaires aux migrations, puis applique tous les fichiers SQL avec
-`ON_ERROR_STOP=1`. Cela ne remplace pas un projet Supabase vide, mais detecte
-les erreurs SQL et verifie les tables, RPC et RLS sans toucher a la production.
-
-Pour le projet actuel, les evolutions futures doivent etre des migrations
-incrementales, par exemple `0003_add_organizer_reservation_view.sql`, et non une
-seconde execution de la migration initiale.
-
-## Procedure pour la migration initiale
-
-1. Executer `supabase/inspect-schema.sql` dans le SQL Editor Supabase.
-2. Executer `supabase/inspect-rpc-and-triggers.sql` pour obtenir les signatures RPC, triggers et relations.
-3. Executer `supabase/check-ticket-generation.sql` pour verifier que les tickets ne sont generes deux fois pour les reservations `CONFIRMED`.
-4. Recuperer aussi les index et les extensions activees si le projet en utilise.
-5. Exporter le schema actuel, y compris les tables, fonctions RPC, index, triggers et politiques RLS.
-6. Le placer dans un fichier `0001_initial_schema.sql`.
-7. Tester la migration sur un projet Supabase de test.
-8. Comparer les tables et les permissions avec le projet actuel.
-9. Seulement ensuite, utiliser ce fichier comme base de travail partagee.
 
 ## Consequence pour le backend
 

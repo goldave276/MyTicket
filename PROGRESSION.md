@@ -12,7 +12,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | :--- | :---: | :---: | :--- |
 | **Backend (API Express)** | 🟢 Validé & Durci | 100% (hors paiements) | Auth, rôles, catalogue, cycle de vie événement, détail public et RLS durcis |
 | **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0013 | RLS `DRAFT`, trigger invariants, persistance description (0012), planification pg_cron horaire (0013), RPC sécurisées |
-| **DevOps & Tests** | 🟢 Validé | 112/112 tests validés | Dockerfile, Vitest (unit & http) déterministe (indépendant du `.env` local), guide de déploiement et configuration proxy ; CI GitHub Actions retirée (commit `0527f05`), à réintroduire |
+| **DevOps & Tests** | 🟢 Validé | 112/112 tests validés | Dockerfile, Vitest (unit & http) déterministe (indépendant du `.env` local), CI GitHub Actions réintroduite (`.github/workflows/backend-ci.yml`), guide de déploiement et configuration proxy |
 | **Frontend (Next.js / React)** | 🟢 Fonctionnel & Complet | ~95% (hors paiements en ligne Stripe/MoMo) | Interface Utilisateur, Espace Organisateur, Dashboard Admin, Upload justificatif et Interface caisse paiements sur place ; `npm run lint` propre |
 
 ---
@@ -113,7 +113,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 - [x] Dockerfile de production optimisé (Node Alpine, multi-stage/non-root)
 - [x] Orchestration Docker Compose
 - [x] Tests unitaires & intégration avec Vitest (`npm test`)
-- [ ] CI GitHub Actions (`.github/workflows/backend-ci.yml` retiré au commit `0527f05` ; réintroduction prévue après stabilisation des tests)
+- [x] CI GitHub Actions (`.github/workflows/backend-ci.yml` réintroduite : exécution automatique des 112 tests, construction Docker et validation PostgreSQL 16 des migrations 0001 à 0013)
 - [x] Déploiement Cloud du Backend (Guide [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md) & [`.env.example`](file:///c:/Users/MSI/Desktop/myticket/backend/.env.example))
 - [ ] Déploiement Vercel du Frontend
 
@@ -157,4 +157,6 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **24/10/2026** | Fullstack/Storage | Étape 3 (HANDOFF P1) : Téléversement réel du justificatif organisateur (PDF, JPG, PNG, max 5 Mo) et consultation signée admin. Validateur `validateOrganizerUploadedFile`, contrôleur `createOrganizerRequest` gérant le flux d'upload dans `organizer-documents`, limite Express `10mb`, composant file input client avec validation dans `become-organizer.js`, lien signé d'ouverture dans `admin/organizer-requests.js`. 111/111 tests validés, lint frontend propre. | ✅ Validé |
 | **24/10/2026** | Frontend/Admin | Étape 4 (HANDOFF P1) : Interface d'administration et confirmation des paiements sur place (`/admin/payments`). Service `getPendingPayments`/`confirmOnSitePayment` dans `adminService.js`, navigation `Sidebar.jsx`, modale de confirmation d'encaissement et émission des billets. `npm run lint` propre. | ✅ Validé |
 | **24/10/2026** | Database/Cron | Étape 5 (HANDOFF P1) : Automatisation de la clôture des événements expirés via pg_cron. Migration `0013_schedule_finish_expired_events.sql` (extension pg_cron, job horaire `finish-expired-events-hourly` appelant `public.finish_expired_events()`). 112/112 tests validés. | ✅ Validé |
+| **24/10/2026** | CI/Docs | Étape 6 (HANDOFF P2) : Réintroduction du workflow GitHub Actions (`.github/workflows/backend-ci.yml`), simulation minimale de `cron` dans `test-bootstrap.sql`, synchronisation de la documentation (`README.md`, `DEPLOYMENT.md`, `backend/supabase/README.md`) et validation de l'intégralité des 112 tests. | ✅ Validé |
+
 
