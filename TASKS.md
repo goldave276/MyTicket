@@ -44,7 +44,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 - [x] **F2.4. Profil & Demande Organisateur**
   - [x] Page "Mon Profil" (`/dashboard/profile`) : modification du nom complet et consultation de son rôle.
   - [x] Formulaire "Devenir Organisateur" (`/dashboard/become-organizer`) : type d'événement ciblé, justificatif et description de l'activité (persistée et contrainte à 20-1000 caractères).
-  - [ ] Téléversement réel du justificatif vers Supabase Storage : le champ ne demande aujourd'hui que le nom du fichier déjà déposé côté serveur (le chemin `<uuid>/fichier` est construit automatiquement) ; l'upload direct navigateur → Storage reste à implémenter (nécessite `@supabase/supabase-js` côté client, hors périmètre du chantier "frontend" en cours).
+  - [x] Téléversement réel du justificatif vers Supabase Storage (PDF, JPG, PNG, max 5 Mo) avec préfixe utilisateur sécurisé, vérification de type/taille et stockage dans `organizer-documents`.
   - [x] Suivi en direct du statut de la demande (`PENDING`, `APPROVED`, `REJECTED`).
 
 ---
@@ -70,7 +70,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 - [x] **F4.1. Modération des Demandes d'Organisateurs**
   - [x] Page de gestion (`/admin/organizer-requests`) : liste des demandes en attente (`PENDING`).
   - [x] Visualisation et lecture de la description détaillée de l'activité du demandeur dans la liste admin.
-  - [ ] Visualisation du justificatif officiel fourni par le demandeur (l'URL signée backend existe ; le frontend n'affiche pour l'instant que le nom du fichier, pas de lien de consultation).
+  - [x] Visualisation et ouverture du justificatif officiel fourni par le demandeur grâce au lien signé temporaire (1 heure).
   - [x] Actions "Approuver" (passage du rôle en `ORGANIZER`) et "Refuser" avec motif.
 
 - [x] **F4.2. Validation des Événements**
@@ -141,6 +141,14 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Validation côté backend dans [`organizerDocumentValidator.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/validators/organizerDocumentValidator.js) et insertion dans [`organizerRequestController.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/controllers/organizerRequestController.js).
   - [x] Frontend : compteur de caractères et contraintes min/max dans [`become-organizer.js`](file:///c:/Users/MSI/Desktop/myticket/frontend/src/pages/dashboard/become-organizer.js) ; affichage complet multi-lignes dans [`admin/organizer-requests.js`](file:///c:/Users/MSI/Desktop/myticket/frontend/src/pages/admin/organizer-requests.js).
   - [x] Tests unitaires associés et vérification des invariants SQL (109/109 tests validés).
+
+- [x] **B0.9. Téléversement réel du justificatif organisateur et lien signé admin — priorité P1 (HANDOFF, 24/10/2026)**
+  - [x] Fonction de validation de fichier téléversé [`validateOrganizerUploadedFile`](file:///c:/Users/MSI/Desktop/myticket/backend/src/validators/organizerDocumentValidator.js) (formats PDF, JPG, PNG, max 5 Mo).
+  - [x] Téléversement automatique vers Supabase Storage `organizer-documents` avec préfixe `<userId>/<timestamp>_<filename>` dans [`organizerRequestController.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/controllers/organizerRequestController.js).
+  - [x] Support des requêtes JSON jusqu'à 10 Mo dans [`App.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/App.js).
+  - [x] Interface de téléversement avec sélecteur de fichier dans [`become-organizer.js`](file:///c:/Users/MSI/Desktop/myticket/frontend/src/pages/dashboard/become-organizer.js).
+  - [x] Bouton/lien sécurisé d'ouverture du justificatif (URL signée 1h) dans [`admin/organizer-requests.js`](file:///c:/Users/MSI/Desktop/myticket/frontend/src/pages/admin/organizer-requests.js).
+  - [x] Tests unitaires d'upload et contrôleur (111/111 tests validés).
 
 
 > Détail opérationnel complet : [`CODE_REVIEW_ACTION_PLAN.md`](CODE_REVIEW_ACTION_PLAN.md). Le module de paiements est exclu de cette phase à la demande explicite du propriétaire du projet.

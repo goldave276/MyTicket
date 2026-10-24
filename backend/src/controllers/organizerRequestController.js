@@ -1,5 +1,6 @@
 const {
-    validateOrganizerRequestInput
+    validateOrganizerRequestInput,
+    validateOrganizerUploadedFile
 } = require("../validators/organizerDocumentValidator");
 
 /**
@@ -47,7 +48,49 @@ async function createOrganizerRequest(req, res) {
         });
     }
 
-    const validation = validateOrganizerRequestInput(req.body, userId);
+    let finalDocumentPath = req.body?.documentPath;
+
+    // Si un fichier est téléversé directement (file: { filename, mimeType, base64Data })
+    if (req.body?.file) {
+        const fileValidation = validateOrganizerUploadedFile(req.body.file);
+        if (!fileValidation.isValid) {
+            return res.status(400).json({
+                message: fileValidation.error
+            });
+        }
+
+        // Nom unique pour éviter les collisions : <timestamp>_<filename>
+        const timestamp = Date.now();
+        const safeFilename = `${timestamp}_${fileValidation.filename}`;
+        const targetPath = `${userId}/${safeFilename}`;
+
+        if (req.supabase?.storage?.from) {
+            try {
+                const { error: uploadError } = await req.supabase.storage
+                    .from("organizer-documents")
+                    .upload(targetPath, fileValidation.buffer, {
+                        contentType: fileValidation.mimeType,
+                        upsert: false
+                    });
+
+                if (uploadError) {
+                    return res.status(500).json({
+                        message: "Echec du televersement du document dans le stockage"
+                    });
+                }
+
+                finalDocumentPath = targetPath;
+            } catch (err) {
+                return res.status(500).json({
+                    message: "Erreur service lors du televersement du document"
+                });
+            }
+        } else {
+            finalDocumentPath = targetPath;
+        }
+    }
+
+    const validation = validateOrganizerRequestInput({ ...req.body, documentPath: finalDocumentPath }, userId);
     if (!validation.isValid) {
         return res.status(400).json({
             message: validation.error
@@ -56,8 +99,8 @@ async function createOrganizerRequest(req, res) {
 
     const { eventType, description, documentPath, filename } = validation.value;
 
-    // Vérification de la présence réelle du fichier dans le bucket Storage si l'API Storage est disponible
-    if (req.supabase?.storage?.from) {
+    // Si aucun nouveau fichier n'a été uploadé dans cette requête (chemin préexistant), vérifier sa présence
+    if (!req.body?.file && req.supabase?.storage?.from) {
         try {
             const { data: fileList, error: storageError } = await req.supabase.storage
                 .from("organizer-documents")

@@ -131,9 +131,24 @@ export default function AdminOrganizerRequestsPage() {
                           {req.eventType || req.event_type}
                         </td>
                         <td className="text-xs font-mono">
-                          <span className="px-2 py-1 rounded-sm bg-zinc-800 text-indigo-400 font-semibold truncate max-w-[120px] inline-block">
-                            📄 {req.documentPath || req.document_path || 'Document'}
-                          </span>
+                          {req.signed_document_url || req.signedDocumentUrl ? (
+                            <a
+                              href={req.signed_document_url || req.signedDocumentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 font-semibold transition-all border border-indigo-500/20"
+                              title="Ouvrir le justificatif dans un nouvel onglet"
+                            >
+                              <span>📄 Voir justificatif</span>
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          ) : (
+                            <span className="px-2 py-1 rounded-sm bg-zinc-800 text-zinc-500 font-semibold truncate max-w-[120px] inline-block" title={req.documentPath || req.document_path}>
+                              📄 {req.documentPath || req.document_path || 'Document'}
+                            </span>
+                          )}
                         </td>
                         <td className="text-xs text-zinc-400 max-w-xs">
                           {req.description ? (

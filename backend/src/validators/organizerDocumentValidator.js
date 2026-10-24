@@ -145,11 +145,90 @@ function validateOrganizerRequestInput(body, userId) {
     };
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 Mo
+
+const MIME_TO_EXT = {
+    "application/pdf": [".pdf"],
+    "image/jpeg": [".jpg", ".jpeg"],
+    "image/png": [".png"]
+};
+
+/**
+ * Valide un fichier justificatif téléversé (base64)
+ * @param {object} filePayload - { filename: string, mimeType: string, base64Data: string }
+ * @returns {{ isValid: boolean, error?: string, buffer?: Buffer, filename?: string, mimeType?: string }}
+ */
+function validateOrganizerUploadedFile(filePayload) {
+    if (!filePayload || typeof filePayload !== "object") {
+        return { isValid: false, error: "Le fichier justificatif est obligatoire" };
+    }
+
+    const { filename, mimeType, base64Data } = filePayload;
+
+    if (!filename || typeof filename !== "string") {
+        return { isValid: false, error: "Le nom du fichier est requis" };
+    }
+
+    if (!base64Data || typeof base64Data !== "string") {
+        return { isValid: false, error: "Le contenu du fichier est requis" };
+    }
+
+    const trimmedFilename = filename.trim();
+    const cleanFilename = trimmedFilename.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const lowerFilename = cleanFilename.toLowerCase();
+
+    const allowedUploadExts = [".pdf", ".jpg", ".jpeg", ".png"];
+    const ext = allowedUploadExts.find(e => lowerFilename.endsWith(e));
+    if (!ext) {
+        return {
+            isValid: false,
+            error: "Format de fichier non autorise. Formats acceptes : PDF, JPG, PNG"
+        };
+    }
+
+    const lowerMime = (mimeType || "").toLowerCase().trim();
+    if (lowerMime && !MIME_TO_EXT[lowerMime]) {
+        return {
+            isValid: false,
+            error: "Type MIME non autorise. Formats acceptes : PDF, JPG, PNG"
+        };
+    }
+
+    let buffer;
+    try {
+        const rawBase64 = base64Data.includes(",") ? base64Data.split(",")[1] : base64Data;
+        buffer = Buffer.from(rawBase64, "base64");
+    } catch {
+        return { isValid: false, error: "Format d'encodage base64 invalide" };
+    }
+
+    if (!buffer || buffer.length === 0) {
+        return { isValid: false, error: "Le fichier est vide" };
+    }
+
+    if (buffer.length > MAX_FILE_SIZE) {
+        return { isValid: false, error: "La taille du fichier depasse la limite maximale autorisee (5 Mo)" };
+    }
+
+    const detectedMime = lowerMime || (ext === ".pdf" ? "application/pdf" : ext === ".png" ? "image/png" : "image/jpeg");
+
+    return {
+        isValid: true,
+        buffer,
+        filename: cleanFilename,
+        mimeType: detectedMime,
+        size: buffer.length
+    };
+}
+
 module.exports = {
     ALLOWED_EXTENSIONS,
     MAX_PATH_LENGTH,
     MIN_DESCRIPTION_LENGTH,
     MAX_DESCRIPTION_LENGTH,
+    MAX_FILE_SIZE,
     validateOrganizerDocumentPath,
-    validateOrganizerRequestInput
+    validateOrganizerRequestInput,
+    validateOrganizerUploadedFile
 };
+

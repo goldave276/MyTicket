@@ -22,7 +22,7 @@ export default function BecomeOrganizerPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const [eventType, setEventType] = useState('CONCERT');
-  const [documentPath, setDocumentPath] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
   const [description, setDescription] = useState('');
 
   const fetchRequests = useCallback(async () => {
@@ -42,17 +42,64 @@ export default function BecomeOrganizerPage() {
     if (ready) queueMicrotask(() => fetchRequests());
   }, [ready, fetchRequests]);
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+
+    const maxBytes = 5 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      showToast('Le fichier dépasse la taille maximale autorisée (5 Mo)', 'error');
+      e.target.value = '';
+      setSelectedFile(null);
+      return;
+    }
+
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      showToast('Format non supporté. Formats acceptés : PDF, JPG, PNG', 'error');
+      e.target.value = '';
+      setSelectedFile(null);
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!selectedFile) {
+      showToast('Veuillez sélectionner un fichier justificatif', 'error');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
+      const base64Data = await fileToBase64(selectedFile);
+
       await reservationService.submitOrganizerRequest({
         eventType,
-        documentPath: `${user.id}/${documentPath}`,
         description,
+        file: {
+          filename: selectedFile.name,
+          mimeType: selectedFile.type,
+          base64Data,
+        },
       });
       showToast('Votre demande d’organisateur a été soumise à l’administration !', 'success');
+      setSelectedFile(null);
       fetchRequests();
     } catch (err) {
       showToast(err.message || 'Impossible de soumettre la demande', 'error');
@@ -154,18 +201,17 @@ export default function BecomeOrganizerPage() {
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Nom du fichier justificatif déjà déposé *
+                    Document justificatif officiel *
                   </label>
                   <input
-                    type="text"
+                    type="file"
                     required
-                    placeholder="ex: autorisation-prefecture.pdf"
-                    value={documentPath}
-                    onChange={(e) => setDocumentPath(e.target.value)}
-                    className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                    onChange={handleFileChange}
+                    className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 file:cursor-pointer"
                   />
                   <p className="text-xs text-zinc-400 mt-1.5">
-                    Le document doit d’abord être déposé dans votre espace de stockage sécurisé personnel ; indiquez uniquement son nom de fichier ici.
+                    Formats acceptés : PDF, JPG, PNG (taille maximale : 5 Mo). Le document est stocké dans votre coffre privé et chiffré.
                   </p>
                 </div>
 

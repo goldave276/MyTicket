@@ -12,8 +12,8 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | :--- | :---: | :---: | :--- |
 | **Backend (API Express)** | 🟢 Validé & Durci | 100% (hors paiements) | Auth, rôles, catalogue, cycle de vie événement, détail public et RLS durcis |
 | **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0012 | RLS `DRAFT`, trigger invariants, persistance description candidature (0012), RPC sécurisées |
-| **DevOps & Tests** | 🟢 Validé | 109/109 tests validés | Dockerfile, Vitest (unit & http) déterministe (indépendant du `.env` local), guide de déploiement et configuration proxy ; CI GitHub Actions retirée (commit `0527f05`), à réintroduire |
-| **Frontend (Next.js / React)** | 🟡 Fonctionnel, à finaliser | ~80% (hors upload justificatif & paiements) | Interface Utilisateur, Espace Organisateur, Dashboard Admin construits et durcis ; `npm run lint` propre |
+| **DevOps & Tests** | 🟢 Validé | 111/111 tests validés | Dockerfile, Vitest (unit & http) déterministe (indépendant du `.env` local), guide de déploiement et configuration proxy ; CI GitHub Actions retirée (commit `0527f05`), à réintroduire |
+| **Frontend (Next.js / React)** | 🟢 Fonctionnel, à finaliser | ~88% (hors paiements réels) | Interface Utilisateur, Espace Organisateur, Dashboard Admin, Upload justificatif et consultation signée admin ; `npm run lint` propre |
 
 ---
 
@@ -94,7 +94,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - [x] Réservation de billets (sélection de quantité, confirmation)
   - [x] Page "Mes Réservations" et "Mes Billets" avec QR Pass généré côté client (`qrcode.react`)
   - [x] Page "Mon Profil" & formulaire "Devenir Organisateur"
-  - [ ] Upload réel du justificatif vers Supabase Storage (le formulaire demande aujourd'hui le nom du fichier déjà déposé ; l'upload direct navigateur → Storage reste à implémenter)
+  - [x] Upload réel du justificatif vers Supabase Storage (PDF, JPG, PNG, max 5 Mo) avec encodage base64 direct et validation côté serveur.
 - [x] **Espace Organisateur (`ORGANIZER`)**
   - [x] Dashboard Organisateur (statistiques réelles, liste des événements par statut)
   - [x] Formulaire de création / édition d'événement (mapping des champs corrigé le 15/09/2026, cf. journal)
@@ -153,4 +153,5 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | :--- | :---: | :--- | :---: |
 | **24/10/2026** | Tests/CORS | Étape 1 (HANDOFF P0) : tests CORS alignés sur le port officiel 3333 (au lieu de 3001), fichier `src/tests/setup-env.js` chargé par Vitest (`setupFiles`) qui impose `FRONTEND_URL`/`NODE_ENV` et fournit des valeurs Supabase factices si absentes, correction de la casse `require("../App")` (compatibilité Linux), origine CORS par défaut de `App.js` réduite à `http://localhost:3333`. `npm test` : 108/108 ; 108/108 également avec une `FRONTEND_URL` volontairement erronée. | ✅ Validé |
 | **24/10/2026** | Backend/Database/Frontend | Étape 2 (HANDOFF P1) : Persistance et affichage de la description de candidature organisateur. Migration `0012_organizer_request_description.sql` (colonne `description`, check 20-1000 chars, RLS check `description is not null`), validateur backend (`organizerDocumentValidator.js`), contrôleur (`organizerRequestController.js`), validation et compteur dans `become-organizer.js`, affichage multi-lignes dans `admin/organizer-requests.js`. 109/109 tests validés, lint frontend propre. | ✅ Validé |
+| **24/10/2026** | Fullstack/Storage | Étape 3 (HANDOFF P1) : Téléversement réel du justificatif organisateur (PDF, JPG, PNG, max 5 Mo) et consultation signée admin. Validateur `validateOrganizerUploadedFile`, contrôleur `createOrganizerRequest` gérant le flux d'upload dans `organizer-documents`, limite Express `10mb`, composant file input client avec validation dans `become-organizer.js`, lien signé d'ouverture dans `admin/organizer-requests.js`. 111/111 tests validés, lint frontend propre. | ✅ Validé |
 

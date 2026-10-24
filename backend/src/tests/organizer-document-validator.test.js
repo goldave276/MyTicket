@@ -2,7 +2,8 @@ require("dotenv").config();
 
 const {
     validateOrganizerDocumentPath,
-    validateOrganizerRequestInput
+    validateOrganizerRequestInput,
+    validateOrganizerUploadedFile
 } = require("../validators/organizerDocumentValidator");
 
 const {
@@ -120,10 +121,96 @@ describe("Validateur de Justificatifs Organisateur (organizerDocumentValidator)"
         expect(validateOrganizerRequestInput({ ...validBody, description: "a".repeat(1001) }, validUserId).isValid).toBe(false);
         expect(validateOrganizerRequestInput({ ...validBody, description: "   " + "b".repeat(20) + "   " }, validUserId).isValid).toBe(true);
     });
+
+    it("valide les fichiers televerses (PDF, JPG, PNG, max 5 Mo)", () => {
+        const dummyPdfBase64 = Buffer.from("%PDF-1.4 dummy content").toString("base64");
+        
+        // Fichier valide
+        const validPdf = validateOrganizerUploadedFile({
+            filename: "registre.pdf",
+            mimeType: "application/pdf",
+            base64Data: dummyPdfBase64
+        });
+        expect(validPdf.isValid).toBe(true);
+        expect(validPdf.filename).toBe("registre.pdf");
+        expect(validPdf.mimeType).toBe("application/pdf");
+
+        // Fichier extension invalide (.exe)
+        const invalidExt = validateOrganizerUploadedFile({
+            filename: "malware.exe",
+            mimeType: "application/octet-stream",
+            base64Data: dummyPdfBase64
+        });
+        expect(invalidExt.isValid).toBe(false);
+        expect(invalidExt.error).toContain("Format de fichier non autorise");
+
+        // Fichier trop volumineux (> 5 Mo)
+        const hugeBuffer = Buffer.alloc(5 * 1024 * 1024 + 100);
+        const hugeFile = validateOrganizerUploadedFile({
+            filename: "trop_lourd.pdf",
+            mimeType: "application/pdf",
+            base64Data: hugeBuffer.toString("base64")
+        });
+        expect(hugeFile.isValid).toBe(false);
+        expect(hugeFile.error).toContain("taille du fichier depasse la limite maximale");
+    });
 });
 
 describe("Contrôleur de Demandes Organisateur durci (organizerRequestController)", () => {
     const validUserId = "123e4567-e89b-12d3-a456-426614174000";
+
+    it("televerse et insere directement le document avec payload file", async () => {
+        const response = createResponse();
+        let uploadedTarget = null;
+        let insertedData = null;
+
+        const fakeSupabase = {
+            storage: {
+                from: (bucket) => ({
+                    upload: async (targetPath, buffer, options) => {
+                        expect(bucket).toBe("organizer-documents");
+                        uploadedTarget = targetPath;
+                        return { data: { path: targetPath }, error: null };
+                    }
+                })
+            },
+            from: (table) => ({
+                insert: (data) => {
+                    insertedData = data;
+                    return {
+                        select: () => ({
+                            single: async () => ({
+                                data: { id: 10, ...data, status: "PENDING" },
+                                error: null
+                            })
+                        })
+                    };
+                }
+            })
+        };
+
+        const dummyPdfBase64 = Buffer.from("%PDF-1.4 test").toString("base64");
+        const req = {
+            user: { id: validUserId },
+            body: {
+                eventType: "CONCERT",
+                description: "Association musicale organisant des tournees.",
+                file: {
+                    filename: "justificatif.pdf",
+                    mimeType: "application/pdf",
+                    base64Data: dummyPdfBase64
+                }
+            },
+            supabase: fakeSupabase
+        };
+
+        await createOrganizerRequest(req, response);
+
+        expect(response.statusCode).toBe(201);
+        expect(uploadedTarget).toContain(`${validUserId}/`);
+        expect(uploadedTarget).toContain("justificatif.pdf");
+        expect(insertedData.document_path).toBe(uploadedTarget);
+    });
 
     it("rejette la creation si le fichier est introuvable dans le bucket Storage", async () => {
         const response = createResponse();
