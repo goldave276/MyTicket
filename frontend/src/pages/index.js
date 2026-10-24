@@ -19,6 +19,8 @@ export default function Home() {
     location: '',
     minPrice: '',
     maxPrice: '',
+    dateFrom: '',
+    dateTo: '',
   });
 
   const fetchEvents = useCallback(async () => {
@@ -50,6 +52,8 @@ export default function Home() {
       location: '',
       minPrice: '',
       maxPrice: '',
+      dateFrom: '',
+      dateTo: '',
     });
   };
 

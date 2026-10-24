@@ -33,7 +33,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 - [x] **F2.2. Catalogue & Découverte des Événements**
   - [x] Page d'accueil (`/`) : Affichage de la liste des événements approuvés et futurs, avec état d'erreur réel (plus de données factices depuis le 15/09/2026).
   - [x] Barre de recherche et filtres combinés (Recherche texte, Type d'événement, Lieu, Fourchette de prix).
-  - [ ] Filtres de dates (`dateFrom`/`dateTo`, pourtant supportés par l'API) non exposés dans `EventFilters`.
+  - [x] Filtres de dates (`dateFrom`/`dateTo`) intégrés dans `EventFilters` et connectés au catalogue public.
   - [x] Page détail d'un événement (`/events/[id]`) avec détails, places restantes, lieu, prix en XOF.
 
 - [x] **F2.3. Réservations & Billetterie**

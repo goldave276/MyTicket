@@ -17,7 +17,7 @@ export default function EventFilters({ filters, onChange, onReset }) {
   };
 
   const hasActiveFilters = Boolean(
-    filters.search || filters.eventType || filters.location || filters.minPrice || filters.maxPrice
+    filters.search || filters.eventType || filters.location || filters.minPrice || filters.maxPrice || filters.dateFrom || filters.dateTo
   );
 
   return (
@@ -55,14 +55,32 @@ export default function EventFilters({ filters, onChange, onReset }) {
       </div>
 
       {/* Advanced Filter Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-4 border-t border-zinc-800/80 items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 pt-4 border-t border-zinc-800/80 items-center">
         {/* Location input */}
         <input
           type="text"
-          placeholder="Lieu (ex: Lomé, Palais)"
+          placeholder="Lieu (ex: Lomé)"
           value={filters.location || ''}
           onChange={(e) => handleChange('location', e.target.value)}
           className="w-full px-4 py-2.5 rounded-md bg-zinc-950/40 border border-zinc-700/60 text-white placeholder-zinc-500 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-400"
+        />
+
+        {/* Date From */}
+        <input
+          type="date"
+          aria-label="Date de début"
+          value={filters.dateFrom || ''}
+          onChange={(e) => handleChange('dateFrom', e.target.value)}
+          className="w-full px-3 py-2 rounded-md bg-zinc-950/40 border border-zinc-700/60 text-white text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-400 [color-scheme:dark]"
+        />
+
+        {/* Date To */}
+        <input
+          type="date"
+          aria-label="Date de fin"
+          value={filters.dateTo || ''}
+          onChange={(e) => handleChange('dateTo', e.target.value)}
+          className="w-full px-3 py-2 rounded-md bg-zinc-950/40 border border-zinc-700/60 text-white text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-400 [color-scheme:dark]"
         />
 
         {/* Min Price */}
@@ -89,7 +107,7 @@ export default function EventFilters({ filters, onChange, onReset }) {
             onClick={onReset}
             className="eyebrow w-full py-2.5 px-4 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors flex items-center justify-center gap-1.5"
           >
-            Réinitialiser les filtres
+            Réinitialiser
           </button>
         )}
       </div>

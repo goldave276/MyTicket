@@ -89,7 +89,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - [x] Navigation, Header, Footer et Layouts conditionnels par rôle
   - [ ] Rafraîchissement automatique du token avant expiration (actuellement : nettoyage réactif sur 401 uniquement)
 - [x] **Espace Public & Utilisateur (`USER`)**
-  - [x] Page d'accueil avec catalogue d'événements & barre de recherche/filtres
+  - [x] Page d'accueil avec catalogue d'événements & barre de recherche/filtres complets (texte, catégorie, lieu, prix min/max et dates début/fin)
   - [x] Page détail d'un événement (avec état d'erreur réel si l'événement est introuvable)
   - [x] Pages Auth : Connexion, Inscription, Mot de passe oublié
   - [x] Réservation de billets (sélection de quantité, confirmation)
@@ -158,5 +158,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **24/10/2026** | Frontend/Admin | Étape 4 (HANDOFF P1) : Interface d'administration et confirmation des paiements sur place (`/admin/payments`). Service `getPendingPayments`/`confirmOnSitePayment` dans `adminService.js`, navigation `Sidebar.jsx`, modale de confirmation d'encaissement et émission des billets. `npm run lint` propre. | ✅ Validé |
 | **24/10/2026** | Database/Cron | Étape 5 (HANDOFF P1) : Automatisation de la clôture des événements expirés via pg_cron. Migration `0013_schedule_finish_expired_events.sql` (extension pg_cron, job horaire `finish-expired-events-hourly` appelant `public.finish_expired_events()`). 112/112 tests validés. | ✅ Validé |
 | **24/10/2026** | CI/Docs | Étape 6 (HANDOFF P2) : Réintroduction du workflow GitHub Actions (`.github/workflows/backend-ci.yml`), simulation minimale de `cron` dans `test-bootstrap.sql`, synchronisation de la documentation (`README.md`, `DEPLOYMENT.md`, `backend/supabase/README.md`) et validation de l'intégralité des 112 tests. | ✅ Validé |
+| **24/10/2026** | Frontend/Filters | Intégration des filtres de dates (`dateFrom` / `dateTo`) dans `EventFilters.jsx` et `index.js`, validation du build de production Next.js (24/24 pages). Linting validé. | ✅ Validé |
+
 
 
