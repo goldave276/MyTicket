@@ -77,9 +77,9 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Page de modération (`/admin/events-pending`) : liste des événements soumis en attente de validation.
   - [x] Revue des détails de l'événement et actions "Valider" (`APPROVED`) ou "Refuser" (`REJECTED`).
 
-- [ ] **F4.3. Gestion des Paiements sur Place**
-  - [ ] Page des paiements en attente (`/admin/payments`) : filtrage des paiements `ON_SITE` en attente. *(Hors périmètre — chantier paiements explicitement reporté)*
-  - [ ] Action "Confirmer le paiement" (génération et activation des tickets définitifs).
+- [x] **F4.3. Gestion des Paiements sur Place**
+  - [x] Page des paiements en attente (`/admin/payments`) : filtrage des paiements `ON_SITE` en attente.
+  - [x] Action "Confirmer le paiement" (génération et activation des tickets définitifs).
 
 - [x] **F4.4. Tableau de Bord Global Admin**
   - [x] Vue synthétique (`/admin`) : nombre d'utilisateurs inscrits, événements actifs, demandes/événements en attente.

@@ -13,7 +13,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **Backend (API Express)** | 🟢 Validé & Durci | 100% (hors paiements) | Auth, rôles, catalogue, cycle de vie événement, détail public et RLS durcis |
 | **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0012 | RLS `DRAFT`, trigger invariants, persistance description candidature (0012), RPC sécurisées |
 | **DevOps & Tests** | 🟢 Validé | 111/111 tests validés | Dockerfile, Vitest (unit & http) déterministe (indépendant du `.env` local), guide de déploiement et configuration proxy ; CI GitHub Actions retirée (commit `0527f05`), à réintroduire |
-| **Frontend (Next.js / React)** | 🟢 Fonctionnel, à finaliser | ~88% (hors paiements réels) | Interface Utilisateur, Espace Organisateur, Dashboard Admin, Upload justificatif et consultation signée admin ; `npm run lint` propre |
+| **Frontend (Next.js / React)** | 🟢 Fonctionnel & Complet | ~95% (hors paiements en ligne Stripe/MoMo) | Interface Utilisateur, Espace Organisateur, Dashboard Admin, Upload justificatif et Interface caisse paiements sur place ; `npm run lint` propre |
 
 ---
 
@@ -104,7 +104,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - [x] Interface d'examen des demandes organisateurs
   - [x] Interface de validation des événements soumis
   - [x] Gestion des utilisateurs (rôles, blocage)
-  - [ ] Interface de confirmation des paiements sur place (dépend du chantier paiements, hors périmètre)
+  - [x] Interface de confirmation des paiements sur place (`/admin/payments`) : validation de l'encaissement et émission des billets avec QR code.
 
 ---
 
@@ -154,4 +154,5 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **24/10/2026** | Tests/CORS | Étape 1 (HANDOFF P0) : tests CORS alignés sur le port officiel 3333 (au lieu de 3001), fichier `src/tests/setup-env.js` chargé par Vitest (`setupFiles`) qui impose `FRONTEND_URL`/`NODE_ENV` et fournit des valeurs Supabase factices si absentes, correction de la casse `require("../App")` (compatibilité Linux), origine CORS par défaut de `App.js` réduite à `http://localhost:3333`. `npm test` : 108/108 ; 108/108 également avec une `FRONTEND_URL` volontairement erronée. | ✅ Validé |
 | **24/10/2026** | Backend/Database/Frontend | Étape 2 (HANDOFF P1) : Persistance et affichage de la description de candidature organisateur. Migration `0012_organizer_request_description.sql` (colonne `description`, check 20-1000 chars, RLS check `description is not null`), validateur backend (`organizerDocumentValidator.js`), contrôleur (`organizerRequestController.js`), validation et compteur dans `become-organizer.js`, affichage multi-lignes dans `admin/organizer-requests.js`. 109/109 tests validés, lint frontend propre. | ✅ Validé |
 | **24/10/2026** | Fullstack/Storage | Étape 3 (HANDOFF P1) : Téléversement réel du justificatif organisateur (PDF, JPG, PNG, max 5 Mo) et consultation signée admin. Validateur `validateOrganizerUploadedFile`, contrôleur `createOrganizerRequest` gérant le flux d'upload dans `organizer-documents`, limite Express `10mb`, composant file input client avec validation dans `become-organizer.js`, lien signé d'ouverture dans `admin/organizer-requests.js`. 111/111 tests validés, lint frontend propre. | ✅ Validé |
+| **24/10/2026** | Frontend/Admin | Étape 4 (HANDOFF P1) : Interface d'administration et confirmation des paiements sur place (`/admin/payments`). Service `getPendingPayments`/`confirmOnSitePayment` dans `adminService.js`, navigation `Sidebar.jsx`, modale de confirmation d'encaissement et émission des billets. `npm run lint` propre. | ✅ Validé |
 

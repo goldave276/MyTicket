@@ -56,6 +56,16 @@ export const adminService = {
       body: JSON.stringify({ isBlocked }),
     });
   },
+
+  async getPendingPayments() {
+    return apiFetch('/admin/payments/pending');
+  },
+
+  async confirmOnSitePayment(paymentId) {
+    return apiFetch(`/admin/payments/${paymentId}/confirm-onsite`, {
+      method: 'PATCH',
+    });
+  },
 };
 
 export default adminService;

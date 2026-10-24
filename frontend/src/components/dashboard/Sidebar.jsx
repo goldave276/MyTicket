@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
-import { TicketIcon, QrCodeIcon, BuildingIcon, UserIcon, ShieldIcon, BarChartIcon, PlusIcon } from '../common/Icons';
+import { TicketIcon, QrCodeIcon, BuildingIcon, UserIcon, ShieldIcon, BarChartIcon, PlusIcon, CurrencyIcon } from '../common/Icons';
 
 export default function Sidebar({ mode = 'user' }) {
   const router = useRouter();
@@ -25,6 +25,7 @@ export default function Sidebar({ mode = 'user' }) {
     { href: '/admin', label: 'Statistiques Globales', icon: BarChartIcon },
     { href: '/admin/organizer-requests', label: 'Demandes Organisateur', icon: BuildingIcon },
     { href: '/admin/events-pending', label: 'Événements à approuver', icon: TicketIcon },
+    { href: '/admin/payments', label: 'Paiements sur Place', icon: CurrencyIcon },
     { href: '/admin/users', label: 'Utilisateurs & Rôles', icon: ShieldIcon },
   ];
 
