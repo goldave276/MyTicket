@@ -150,6 +150,11 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Bouton/lien sécurisé d'ouverture du justificatif (URL signée 1h) dans [`admin/organizer-requests.js`](file:///c:/Users/MSI/Desktop/myticket/frontend/src/pages/admin/organizer-requests.js).
   - [x] Tests unitaires d'upload et contrôleur (111/111 tests validés).
 
+- [x] **B0.10. Automatisation de la clôture des événements expirés via pg_cron — priorité P1 (HANDOFF, 24/10/2026)**
+  - [x] Migration SQL [`0013_schedule_finish_expired_events.sql`](file:///c:/Users/MSI/Desktop/myticket/backend/supabase/migrations/0013_schedule_finish_expired_events.sql) activant l'extension `pg_cron` et planifiant l'exécution horaire (`0 * * * *`) de `finish_expired_events()`.
+  - [x] Tests unitaires d'invariants SQL validant la structure de la migration 0013 (112/112 tests validés).
+
+
 
 > Détail opérationnel complet : [`CODE_REVIEW_ACTION_PLAN.md`](CODE_REVIEW_ACTION_PLAN.md). Le module de paiements est exclu de cette phase à la demande explicite du propriétaire du projet.
 

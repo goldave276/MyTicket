@@ -213,6 +213,19 @@ describe("Invariants SQL, RLS et Validations Safe BigInt (Phase B0.5)", () => {
             expect(migration0012).toContain("create policy \"Users can create own pending organizer request\"");
             expect(migration0012).toContain("description is not null");
         });
+
+        it("planifie l'execution horaire de finish_expired_events via pg_cron dans la migration 0013", () => {
+            const migration0013 = fs.readFileSync(
+                path.join(__dirname, "../../supabase/migrations/0013_schedule_finish_expired_events.sql"),
+                "utf8"
+            );
+
+            expect(migration0013).toContain("create extension if not exists pg_cron");
+            expect(migration0013).toContain("cron.schedule(");
+            expect(migration0013).toContain("'finish-expired-events-hourly'");
+            expect(migration0013).toContain("'0 * * * *'");
+            expect(migration0013).toContain("public.finish_expired_events()");
+        });
     });
 });
 

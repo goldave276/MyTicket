@@ -11,8 +11,8 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | Module | Statut | Progression | Description |
 | :--- | :---: | :---: | :--- |
 | **Backend (API Express)** | 🟢 Validé & Durci | 100% (hors paiements) | Auth, rôles, catalogue, cycle de vie événement, détail public et RLS durcis |
-| **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0012 | RLS `DRAFT`, trigger invariants, persistance description candidature (0012), RPC sécurisées |
-| **DevOps & Tests** | 🟢 Validé | 111/111 tests validés | Dockerfile, Vitest (unit & http) déterministe (indépendant du `.env` local), guide de déploiement et configuration proxy ; CI GitHub Actions retirée (commit `0527f05`), à réintroduire |
+| **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0013 | RLS `DRAFT`, trigger invariants, persistance description (0012), planification pg_cron horaire (0013), RPC sécurisées |
+| **DevOps & Tests** | 🟢 Validé | 112/112 tests validés | Dockerfile, Vitest (unit & http) déterministe (indépendant du `.env` local), guide de déploiement et configuration proxy ; CI GitHub Actions retirée (commit `0527f05`), à réintroduire |
 | **Frontend (Next.js / React)** | 🟢 Fonctionnel & Complet | ~95% (hors paiements en ligne Stripe/MoMo) | Interface Utilisateur, Espace Organisateur, Dashboard Admin, Upload justificatif et Interface caisse paiements sur place ; `npm run lint` propre |
 
 ---
@@ -77,6 +77,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - `0010_sql_invariants_and_rls.sql` (invariants SQL, RLS insertion 'DRAFT' et RPC create_reservation)
   - `0011_event_lifecycle_and_public_details.sql` (cycle de vie événement, trigger invariants, annulation atomique, disponibilité publique et rétrogradation organisateur)
   - `0012_organizer_request_description.sql` (colonne description avec contrainte 20-1000 caractères et RLS d'insertion)
+  - `0013_schedule_finish_expired_events.sql` (activation de pg_cron et planification horaire de finish_expired_events)
 
 ---
 
@@ -155,4 +156,5 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **24/10/2026** | Backend/Database/Frontend | Étape 2 (HANDOFF P1) : Persistance et affichage de la description de candidature organisateur. Migration `0012_organizer_request_description.sql` (colonne `description`, check 20-1000 chars, RLS check `description is not null`), validateur backend (`organizerDocumentValidator.js`), contrôleur (`organizerRequestController.js`), validation et compteur dans `become-organizer.js`, affichage multi-lignes dans `admin/organizer-requests.js`. 109/109 tests validés, lint frontend propre. | ✅ Validé |
 | **24/10/2026** | Fullstack/Storage | Étape 3 (HANDOFF P1) : Téléversement réel du justificatif organisateur (PDF, JPG, PNG, max 5 Mo) et consultation signée admin. Validateur `validateOrganizerUploadedFile`, contrôleur `createOrganizerRequest` gérant le flux d'upload dans `organizer-documents`, limite Express `10mb`, composant file input client avec validation dans `become-organizer.js`, lien signé d'ouverture dans `admin/organizer-requests.js`. 111/111 tests validés, lint frontend propre. | ✅ Validé |
 | **24/10/2026** | Frontend/Admin | Étape 4 (HANDOFF P1) : Interface d'administration et confirmation des paiements sur place (`/admin/payments`). Service `getPendingPayments`/`confirmOnSitePayment` dans `adminService.js`, navigation `Sidebar.jsx`, modale de confirmation d'encaissement et émission des billets. `npm run lint` propre. | ✅ Validé |
+| **24/10/2026** | Database/Cron | Étape 5 (HANDOFF P1) : Automatisation de la clôture des événements expirés via pg_cron. Migration `0013_schedule_finish_expired_events.sql` (extension pg_cron, job horaire `finish-expired-events-hourly` appelant `public.finish_expired_events()`). 112/112 tests validés. | ✅ Validé |
 
