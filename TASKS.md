@@ -43,7 +43,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 
 - [x] **F2.4. Profil & Demande Organisateur**
   - [x] Page "Mon Profil" (`/dashboard/profile`) : modification du nom complet et consultation de son rôle.
-  - [x] Formulaire "Devenir Organisateur" (`/dashboard/become-organizer`) : type d'événement ciblé et nom du justificatif.
+  - [x] Formulaire "Devenir Organisateur" (`/dashboard/become-organizer`) : type d'événement ciblé, justificatif et description de l'activité (persistée et contrainte à 20-1000 caractères).
   - [ ] Téléversement réel du justificatif vers Supabase Storage : le champ ne demande aujourd'hui que le nom du fichier déjà déposé côté serveur (le chemin `<uuid>/fichier` est construit automatiquement) ; l'upload direct navigateur → Storage reste à implémenter (nécessite `@supabase/supabase-js` côté client, hors périmètre du chantier "frontend" en cours).
   - [x] Suivi en direct du statut de la demande (`PENDING`, `APPROVED`, `REJECTED`).
 
@@ -69,6 +69,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 ### 🛡️ Phase F4 : Espace Administrateur (`ADMIN`)
 - [x] **F4.1. Modération des Demandes d'Organisateurs**
   - [x] Page de gestion (`/admin/organizer-requests`) : liste des demandes en attente (`PENDING`).
+  - [x] Visualisation et lecture de la description détaillée de l'activité du demandeur dans la liste admin.
   - [ ] Visualisation du justificatif officiel fourni par le demandeur (l'URL signée backend existe ; le frontend n'affiche pour l'instant que le nom du fichier, pas de lien de consultation).
   - [x] Actions "Approuver" (passage du rôle en `ORGANIZER`) et "Refuser" avec motif.
 
@@ -134,6 +135,12 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Corriger la casse `require("../App")` pour l'exécution sous Linux (Docker/CI).
   - [x] Réduire l'origine CORS par défaut de `App.js` à `http://localhost:3333`.
   - [ ] Vérifier l'exécution sur une machine/CI sans aucun `.env` (valeurs Supabase factices non encore éprouvées).
+
+- [x] **B0.8. Persistance et validation de la description de candidature organisateur — priorité P1 (HANDOFF, 24/10/2026)**
+  - [x] Migration SQL [`0012_organizer_request_description.sql`](file:///c:/Users/MSI/Desktop/myticket/backend/supabase/migrations/0012_organizer_request_description.sql) (colonne `description`, contrainte `CHECK` 20 à 1000 caractères, policy RLS insertion).
+  - [x] Validation côté backend dans [`organizerDocumentValidator.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/validators/organizerDocumentValidator.js) et insertion dans [`organizerRequestController.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/controllers/organizerRequestController.js).
+  - [x] Frontend : compteur de caractères et contraintes min/max dans [`become-organizer.js`](file:///c:/Users/MSI/Desktop/myticket/frontend/src/pages/dashboard/become-organizer.js) ; affichage complet multi-lignes dans [`admin/organizer-requests.js`](file:///c:/Users/MSI/Desktop/myticket/frontend/src/pages/admin/organizer-requests.js).
+  - [x] Tests unitaires associés et vérification des invariants SQL (109/109 tests validés).
 
 
 > Détail opérationnel complet : [`CODE_REVIEW_ACTION_PLAN.md`](CODE_REVIEW_ACTION_PLAN.md). Le module de paiements est exclu de cette phase à la demande explicite du propriétaire du projet.

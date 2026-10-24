@@ -2,6 +2,8 @@ const ALLOWED_EXTENSIONS = [".pdf", ".jpg", ".jpeg", ".png", ".webp"];
 const MAX_PATH_LENGTH = 500;
 const MAX_EVENT_TYPE_LENGTH = 50;
 const MIN_EVENT_TYPE_LENGTH = 2;
+const MIN_DESCRIPTION_LENGTH = 20;
+const MAX_DESCRIPTION_LENGTH = 1000;
 
 /**
  * Valide le chemin du document de justificatif organisateur
@@ -91,14 +93,14 @@ function validateOrganizerDocumentPath(documentPath, userId) {
  * 
  * @param {object} body - Corps de requete
  * @param {string} userId - UUID de l'utilisateur connecte
- * @returns {{ isValid: boolean, error?: string, value?: { eventType: string, documentPath: string, filename: string } }}
+ * @returns {{ isValid: boolean, error?: string, value?: { eventType: string, description: string, documentPath: string, filename: string } }}
  */
 function validateOrganizerRequestInput(body, userId) {
     if (!body || typeof body !== "object") {
         return { isValid: false, error: "Corps de requete manquant ou invalide" };
     }
 
-    const { eventType, documentPath } = body;
+    const { eventType, documentPath, description } = body;
 
     if (!eventType || typeof eventType !== "string" || !eventType.trim()) {
         return { isValid: false, error: "Le type d'evenement et le document sont obligatoires" };
@@ -112,6 +114,21 @@ function validateOrganizerRequestInput(body, userId) {
         };
     }
 
+    if (typeof description !== "string") {
+        return { isValid: false, error: "La description de votre activite est obligatoire" };
+    }
+
+    const trimmedDescription = description.trim();
+    if (
+        trimmedDescription.length < MIN_DESCRIPTION_LENGTH ||
+        trimmedDescription.length > MAX_DESCRIPTION_LENGTH
+    ) {
+        return {
+            isValid: false,
+            error: `La description doit comporter entre ${MIN_DESCRIPTION_LENGTH} et ${MAX_DESCRIPTION_LENGTH} caracteres`
+        };
+    }
+
     const docValidation = validateOrganizerDocumentPath(documentPath, userId);
     if (!docValidation.isValid) {
         return { isValid: false, error: docValidation.error };
@@ -121,6 +138,7 @@ function validateOrganizerRequestInput(body, userId) {
         isValid: true,
         value: {
             eventType: trimmedEventType,
+            description: trimmedDescription,
             documentPath: docValidation.sanitizedPath,
             filename: docValidation.filename
         }
@@ -130,6 +148,8 @@ function validateOrganizerRequestInput(body, userId) {
 module.exports = {
     ALLOWED_EXTENSIONS,
     MAX_PATH_LENGTH,
+    MIN_DESCRIPTION_LENGTH,
+    MAX_DESCRIPTION_LENGTH,
     validateOrganizerDocumentPath,
     validateOrganizerRequestInput
 };

@@ -54,7 +54,7 @@ async function createOrganizerRequest(req, res) {
         });
     }
 
-    const { eventType, documentPath, filename } = validation.value;
+    const { eventType, description, documentPath, filename } = validation.value;
 
     // Vérification de la présence réelle du fichier dans le bucket Storage si l'API Storage est disponible
     if (req.supabase?.storage?.from) {
@@ -89,6 +89,7 @@ async function createOrganizerRequest(req, res) {
         .insert({
             user_id: userId,
             event_type: eventType,
+            description,
             document_path: documentPath
         })
         .select()

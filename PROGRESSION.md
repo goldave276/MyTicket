@@ -11,8 +11,8 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | Module | Statut | Progression | Description |
 | :--- | :---: | :---: | :--- |
 | **Backend (API Express)** | 🟢 Validé & Durci | 100% (hors paiements) | Auth, rôles, catalogue, cycle de vie événement, détail public et RLS durcis |
-| **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0011 | RLS `DRAFT`, trigger invariants, annulation atomique, disponibilité publique et RPC sécurisées |
-| **DevOps & Tests** | 🟢 Validé | 108/108 tests validés | Dockerfile, Vitest (unit & http) déterministe (indépendant du `.env` local), guide de déploiement et configuration proxy ; CI GitHub Actions retirée (commit `0527f05`), à réintroduire |
+| **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0012 | RLS `DRAFT`, trigger invariants, persistance description candidature (0012), RPC sécurisées |
+| **DevOps & Tests** | 🟢 Validé | 109/109 tests validés | Dockerfile, Vitest (unit & http) déterministe (indépendant du `.env` local), guide de déploiement et configuration proxy ; CI GitHub Actions retirée (commit `0527f05`), à réintroduire |
 | **Frontend (Next.js / React)** | 🟡 Fonctionnel, à finaliser | ~80% (hors upload justificatif & paiements) | Interface Utilisateur, Espace Organisateur, Dashboard Admin construits et durcis ; `npm run lint` propre |
 
 ---
@@ -76,6 +76,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - `0009_performance_indexes.sql` (index PostgreSQL et règles storage)
   - `0010_sql_invariants_and_rls.sql` (invariants SQL, RLS insertion 'DRAFT' et RPC create_reservation)
   - `0011_event_lifecycle_and_public_details.sql` (cycle de vie événement, trigger invariants, annulation atomique, disponibilité publique et rétrogradation organisateur)
+  - `0012_organizer_request_description.sql` (colonne description avec contrainte 20-1000 caractères et RLS d'insertion)
 
 ---
 
@@ -151,4 +152,5 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | Date | Auteur / Réf | Étape / Modifications majeures | Statut |
 | :--- | :---: | :--- | :---: |
 | **24/10/2026** | Tests/CORS | Étape 1 (HANDOFF P0) : tests CORS alignés sur le port officiel 3333 (au lieu de 3001), fichier `src/tests/setup-env.js` chargé par Vitest (`setupFiles`) qui impose `FRONTEND_URL`/`NODE_ENV` et fournit des valeurs Supabase factices si absentes, correction de la casse `require("../App")` (compatibilité Linux), origine CORS par défaut de `App.js` réduite à `http://localhost:3333`. `npm test` : 108/108 ; 108/108 également avec une `FRONTEND_URL` volontairement erronée. | ✅ Validé |
+| **24/10/2026** | Backend/Database/Frontend | Étape 2 (HANDOFF P1) : Persistance et affichage de la description de candidature organisateur. Migration `0012_organizer_request_description.sql` (colonne `description`, check 20-1000 chars, RLS check `description is not null`), validateur backend (`organizerDocumentValidator.js`), contrôleur (`organizerRequestController.js`), validation et compteur dans `become-organizer.js`, affichage multi-lignes dans `admin/organizer-requests.js`. 109/109 tests validés, lint frontend propre. | ✅ Validé |
 

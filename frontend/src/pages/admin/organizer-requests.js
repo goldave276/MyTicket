@@ -135,8 +135,14 @@ export default function AdminOrganizerRequestsPage() {
                             📄 {req.documentPath || req.document_path || 'Document'}
                           </span>
                         </td>
-                        <td className="text-xs text-zinc-500 max-w-xs truncate">
-                          {req.description || 'Aucune description'}
+                        <td className="text-xs text-zinc-400 max-w-xs">
+                          {req.description ? (
+                            <p className="whitespace-pre-line line-clamp-4" title={req.description}>
+                              {req.description}
+                            </p>
+                          ) : (
+                            <span className="text-zinc-500">Aucune description</span>
+                          )}
                         </td>
                         <td>
                           <Badge status={req.status} />

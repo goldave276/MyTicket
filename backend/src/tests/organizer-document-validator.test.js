@@ -99,17 +99,26 @@ describe("Validateur de Justificatifs Organisateur (organizerDocumentValidator)"
     it("valide l'ensemble du payload de creation de demande", () => {
         const validBody = {
             eventType: "FESTIVAL",
+            description: "Organisation de festivals culturels et musicaux a Lome.",
             documentPath: `${validUserId}/kbis.pdf`
         };
         const validation = validateOrganizerRequestInput(validBody, validUserId);
         expect(validation.isValid).toBe(true);
         expect(validation.value.eventType).toBe("FESTIVAL");
+        expect(validation.value.description).toBe("Organisation de festivals culturels et musicaux a Lome.");
 
         const invalidEventType = {
             eventType: "",
+            description: "Organisation de festivals culturels et musicaux a Lome.",
             documentPath: `${validUserId}/kbis.pdf`
         };
         expect(validateOrganizerRequestInput(invalidEventType, validUserId).isValid).toBe(false);
+
+        // Validation description
+        expect(validateOrganizerRequestInput({ ...validBody, description: undefined }, validUserId).isValid).toBe(false);
+        expect(validateOrganizerRequestInput({ ...validBody, description: "Trop court" }, validUserId).isValid).toBe(false);
+        expect(validateOrganizerRequestInput({ ...validBody, description: "a".repeat(1001) }, validUserId).isValid).toBe(false);
+        expect(validateOrganizerRequestInput({ ...validBody, description: "   " + "b".repeat(20) + "   " }, validUserId).isValid).toBe(true);
     });
 });
 
@@ -137,6 +146,7 @@ describe("Contrôleur de Demandes Organisateur durci (organizerRequestController
             user: { id: validUserId },
             body: {
                 eventType: "CONCERT",
+                description: "Association d'evenements artistiques et musicaux d'envergure.",
                 documentPath: `${validUserId}/mon_document.pdf`
             },
             supabase: fakeSupabase
@@ -185,6 +195,7 @@ describe("Contrôleur de Demandes Organisateur durci (organizerRequestController
             user: { id: validUserId },
             body: {
                 eventType: "CONCERT",
+                description: "Association d'evenements artistiques et musicaux d'envergure.",
                 documentPath: `${validUserId}/mon_document.pdf`
             },
             supabase: fakeSupabase
@@ -194,6 +205,7 @@ describe("Contrôleur de Demandes Organisateur durci (organizerRequestController
 
         expect(response.statusCode).toBe(201);
         expect(insertedData.user_id).toBe(validUserId);
+        expect(insertedData.description).toBe("Association d'evenements artistiques et musicaux d'envergure.");
         expect(insertedData.document_path).toBe(`${validUserId}/mon_document.pdf`);
     });
 

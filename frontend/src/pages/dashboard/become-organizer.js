@@ -176,11 +176,19 @@ export default function BecomeOrganizerPage() {
                   <textarea
                     rows="4"
                     required
+                    minLength={20}
+                    maxLength={1000}
                     placeholder="Présentez brièvement vos projets d’événements et votre organisation..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   />
+                  <p className="flex justify-between text-xs text-zinc-400 mt-1.5">
+                    <span>Entre 20 et 1000 caractères.</span>
+                    <span className={description.trim().length < 20 ? 'text-amber-500' : ''}>
+                      {description.trim().length} / 1000
+                    </span>
+                  </p>
                 </div>
 
                 <button

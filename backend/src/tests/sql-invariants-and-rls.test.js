@@ -200,6 +200,19 @@ describe("Invariants SQL, RLS et Validations Safe BigInt (Phase B0.5)", () => {
             expect(migration0011).toContain("where r.event_id = e.id");
             expect(migration0011).toContain("and r.status in ('PENDING', 'CONFIRMED')");
         });
+
+        it("garantit la persistance de la description et sa validation dans la migration 0012", () => {
+            const migration0012 = fs.readFileSync(
+                path.join(__dirname, "../../supabase/migrations/0012_organizer_request_description.sql"),
+                "utf8"
+            );
+
+            expect(migration0012).toContain("add column if not exists description text;");
+            expect(migration0012).toContain("add constraint organizer_requests_description_length_check");
+            expect(migration0012).toContain("char_length(btrim(description)) between 20 and 1000");
+            expect(migration0012).toContain("create policy \"Users can create own pending organizer request\"");
+            expect(migration0012).toContain("description is not null");
+        });
     });
 });
 
