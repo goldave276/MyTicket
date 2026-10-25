@@ -25,6 +25,9 @@ export default function UserReservationsPage() {
       const data = await reservationService.getMyReservations();
       setReservations(Array.isArray(data) ? data : data.reservations || []);
     } catch (err) {
+      if (err.status === 401 || err.message?.includes('Authentification')) {
+        return;
+      }
       setError(true);
       showToast(err.message || 'Impossible de charger vos réservations', 'error');
     } finally {

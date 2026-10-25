@@ -14,6 +14,15 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+function clearAuthStorageAndNotify() {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('myticket_token');
+    localStorage.removeItem('myticket_refresh_token');
+    localStorage.removeItem('myticket_user');
+    window.dispatchEvent(new CustomEvent('myticket_auth_expired'));
+  }
+}
+
 /**
  * Universal fetch wrapper with authorization header injection, transparent token refresh and error handling.
  */
@@ -91,27 +100,25 @@ export async function apiFetch(endpoint, options = {}, isRetry = false) {
             isRefreshing = false;
 
             // Retry original request with new token
-            return apiFetch(endpoint, options, true);
+            const retryHeaders = {
+              ...(options.headers || {}),
+              Authorization: `Bearer ${newToken}`,
+            };
+            return apiFetch(endpoint, { ...options, headers: retryHeaders }, true);
           } else {
             // Refresh failed (invalid/expired refresh token)
-            localStorage.removeItem('myticket_token');
-            localStorage.removeItem('myticket_refresh_token');
-            localStorage.removeItem('myticket_user');
+            clearAuthStorageAndNotify();
             processQueue(new Error('Session expirée'));
             isRefreshing = false;
           }
         } catch (refreshErr) {
-          localStorage.removeItem('myticket_token');
-          localStorage.removeItem('myticket_refresh_token');
-          localStorage.removeItem('myticket_user');
+          clearAuthStorageAndNotify();
           processQueue(refreshErr);
           isRefreshing = false;
         }
       } else {
         // No refresh token available
-        localStorage.removeItem('myticket_token');
-        localStorage.removeItem('myticket_refresh_token');
-        localStorage.removeItem('myticket_user');
+        clearAuthStorageAndNotify();
       }
     }
 

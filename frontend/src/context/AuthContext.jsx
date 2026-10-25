@@ -35,6 +35,14 @@ export function AuthProvider({ children }) {
     // Deferred to a microtask so the effect doesn't call setState
     // synchronously (refreshUser sets `loading` before its first `await`).
     queueMicrotask(() => refreshUser());
+
+    const handleAuthExpired = () => {
+      setUser(null);
+      setLoading(false);
+    };
+
+    window.addEventListener('myticket_auth_expired', handleAuthExpired);
+    return () => window.removeEventListener('myticket_auth_expired', handleAuthExpired);
   }, [refreshUser]);
 
   const login = async (credentials) => {

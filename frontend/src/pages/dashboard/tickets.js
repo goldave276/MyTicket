@@ -25,6 +25,9 @@ export default function UserTicketsPage() {
       const data = await ticketService.getMyTickets();
       setTickets(Array.isArray(data) ? data : data.tickets || []);
     } catch (err) {
+      if (err.status === 401 || err.message?.includes('Authentification')) {
+        return;
+      }
       setError(true);
       showToast(err.message || 'Impossible de charger vos billets', 'error');
     } finally {

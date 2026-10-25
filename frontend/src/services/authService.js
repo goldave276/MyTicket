@@ -115,6 +115,12 @@ export const authService = {
   getStoredUser() {
     if (typeof window === 'undefined') return null;
     try {
+      const token = localStorage.getItem('myticket_token');
+      if (!token) {
+        localStorage.removeItem('myticket_user');
+        localStorage.removeItem('myticket_refresh_token');
+        return null;
+      }
       const stored = localStorage.getItem('myticket_user');
       return stored ? JSON.parse(stored) : null;
     } catch {
