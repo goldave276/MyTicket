@@ -50,6 +50,12 @@ Configurez les variables suivantes dans le tableau de bord de votre hébergeur (
 | `PASSWORD_RESET_REDIRECT_URL`| Redirection mot de passe | `https://myticket.vercel.app/auth/reset-password` |
 | `STRIPE_SECRET_KEY` | Clé secrète Stripe pour paiements CB | `sk_live_...` (optionnelle en dev/simulation) |
 | `STRIPE_WEBHOOK_SECRET` | Clé secrète de vérification du webhook Stripe | `whsec_...` (optionnelle en dev) |
+| `SMTP_HOST` | Serveur SMTP (Brevo, Resend, SendGrid) | `smtp-relay.brevo.com` (optionnelle, simulation auto) |
+| `SMTP_PORT` | Port SMTP | `587` ou `465` |
+| `SMTP_USER` | Identifiant de connexion SMTP | `votre-compte-smtp` |
+| `SMTP_PASS` | Mot de passe ou clé API SMTP | `votre-cle-smtp` |
+| `SMTP_FROM` | Adresse d'expédition des billets | `"MyTicket" <billetterie@votre-domaine.com>` |
+
 
 > 🔒 **Règle CORS de production :** L'utilisation de `*` dans `FRONTEND_URL` est strictement interdite lorsque `NODE_ENV=production` et provoquera l'arrêt immédiat du serveur au démarrage pour des raisons de sécurité liées à `credentials: true`.
 >

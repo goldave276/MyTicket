@@ -12,7 +12,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | :--- | :---: | :---: | :--- |
 | **Backend (API Express)** | 🟢 Validé & Durci | 100% (Paiements & Scanner) | Auth, rôles, catalogue, cycle de vie, détail public, RLS durcis, passerelles de paiement (Stripe/MoMo) et API check-in/scanner |
 | **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0015 | RLS `DRAFT`, trigger invariants, description (0012), pg_cron (0013), RPC `confirm_online_payment` (0014), RPC `scan_and_checkin_ticket` (0015) |
-| **DevOps & Tests** | 🟢 Validé | 125/125 tests validés | Dockerfile, Vitest (125 tests déterministes sans `.env`), CI Pipeline GitHub Actions fullstack (backend, docker, pg16, frontend), guides de déploiement |
+| **DevOps & Tests** | 🟢 Validé | 128/128 tests validés | Dockerfile, Vitest (128 tests déterministes sans `.env`), CI Pipeline GitHub Actions fullstack (backend, docker, pg16, frontend), guides de déploiement |
 | **Frontend (Next.js / React)** | 🟢 Fonctionnel & Complet | 100% (Paiements & Scanner mobile) | Interface Utilisateur, Espace Organisateur avec Scanner Caméra (`/organizer/events/[id]/scanner`), Dashboard Admin, Paiements en ligne ; `npm run lint` et `npm run build` (27/27 pages) |
 
 ---
@@ -50,6 +50,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - [x] Création d'intention de paiement (`POST /`)
   - [x] Consultation de ses paiements (`GET /me`)
   - [x] Intégration passerelle réelle : Stripe Checkout (CB) et Mobile Money Togo (Flooz / T-Money) avec webhooks et confirmation RPC atomique
+  - [x] Service d'emails transactionnels automatique (`emailService.js`) avec template HTML responsive, envoi des billets et codes d'accès en arrière-plan non-bloquant
 - [x] **Espace Administration (`/api/admin`)**
   - [x] Liste & approbation/rejet des demandes organisateurs
   - [x] Liste & validation/refus des événements en attente
@@ -167,6 +168,8 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **25/10/2026** | Fullstack/Payments | Étape 4 (Option 4 - B3) : Passerelles de paiement réel (Stripe Checkout & Mobile Money Togo Flooz/T-Money). Migration `0014_confirm_online_payment.sql` (RPC atomique et idempotente), connecteurs `paymentService.js`, endpoints `POST /api/payments/checkout` et webhooks sécurisés, sélecteur frontend dynamique sur `/events/[id]`, pages `/payment/success` et `/payment/cancel`. 120/120 tests validés, build Next.js (26/26 pages). | ✅ Validé |
 | **25/10/2026** | Fullstack/Check-in | Étape 5 (Priorité #1 Produit) : Scanner mobile de billets et check-in organisateur. Migration `0015_ticket_checkin_and_scanner.sql` (statut `USED`, `scanned_at`/`scanned_by`, RPC `scan_and_checkin_ticket`), contrôleur `ticketController.js` (`POST /api/tickets/scan`, `GET /api/tickets/events/:eventId/checkin-summary`), interface mobile caméra/saisie (`/organizer/events/[id]/scanner`), alertes anti-fraude et bouton d'accès rapide sur `/organizer/events/[id]/reservations`. 125/125 tests validés, build Next.js (27/27 pages). Pushé sur `origin/main` (commit `ce9d442`). | ✅ Validé & Poussé |
 | **25/10/2026** | Frontend/Features | Étape 6 (Complétude Billetterie & Partage) : Export CSV des réservations (UTF-8 BOM compatible Excel), impression haute fidélité / export PDF du billet (`@media print` optimisé pass A4 sans gaspillage d'encre), téléchargement PNG direct de l'image QR code, balises OpenGraph/Twitter Cards et boutons de partage social (Web Share API & WhatsApp). Compilation Turbopack validée sur 27/27 pages avec 0 erreur ESLint. Pushé sur `origin/main` (commit `cef6532`). | ✅ Validé & Poussé |
+| **25/10/2026** | Backend/Email | Étape 7 (Service d'Emails Transactionnels) : Service de messagerie universel `emailService.js` (nodemailer, Brevo, Resend, SMTP) avec gabarit HTML responsive sombre/cyan, déclenchement automatique et non-bloquant sur les paiements en ligne (Stripe, Mobile Money) et confirmations sur place admin, simulation automatique sécurisée en environnement dev/test. 128/128 tests backend validés. | ✅ Validé |
+
 
 
 

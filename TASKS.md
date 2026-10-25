@@ -205,6 +205,12 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Webhook `POST /api/payments/webhook/stripe` pour basculer les réservations en `CONFIRMED` et générer les billets.
   - [x] Frontend : sélecteur de paiement dynamique sur la page détail d'événement (`/events/[id]`), redirection Checkout et pages de retour (`/payment/success`, `/payment/cancel`).
 
+- [x] **B3.3. Service d'Emails Transactionnels de Billetterie**
+  - [x] Service universel SMTP (`emailService.js` avec nodemailer) supportant Brevo, Resend, Sendgrid ou SMTP personnalisé.
+  - [x] Gabarit HTML responsive aux couleurs de MyTicket avec détails de l'événement et récapitulatif des billets (codes UUID).
+  - [x] Déclenchement automatique non-bloquant lors des paiements en ligne (Stripe, Mobile Money) et confirmations sur place admin.
+
+
 ---
 
 ## 🌐 PARTIE 3 : DÉPLOIEMENT & ENVIRONNEMENT

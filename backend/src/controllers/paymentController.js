@@ -104,6 +104,9 @@ async function confirmOnSitePayment(req, res) {
         });
     }
 
+    // Trigger ticket confirmation email in background (fail-safe)
+    triggerTicketEmailAsync(req.supabase, { paymentId: idValidation.value });
+
     return res.status(200).json({
         message: "Paiement sur place confirme",
         payment: data
@@ -115,6 +118,49 @@ const {
     initiateMobileMoneyPayment,
     confirmOnlinePayment
 } = require("../services/paymentService");
+const { sendTicketConfirmationEmail } = require("../services/emailService");
+
+async function triggerTicketEmailAsync(supabase, { paymentId, recipientEmail, recipientName }) {
+    if (!paymentId || !supabase || typeof supabase.from !== "function") return;
+    try {
+        const { data: payment } = await supabase
+            .from("payments")
+            .select("id, amount, currency, reservation_id, metadata")
+            .eq("id", paymentId)
+            .maybeSingle();
+
+        if (!payment) return;
+
+        const { data: reservation } = await supabase
+            .from("reservations")
+            .select("id, event:events(title, event_date, location), tickets(id, ticket_code)")
+            .eq("id", payment.reservation_id)
+            .maybeSingle();
+
+        const to = recipientEmail || payment.metadata?.customerEmail;
+        if (!to) return;
+
+        const name = recipientName || payment.metadata?.customerName || "Participant";
+        const eventTitle = reservation?.event?.title || "Événement MyTicket";
+        const eventDate = reservation?.event?.event_date;
+        const eventLocation = reservation?.event?.location;
+        const tickets = reservation?.tickets || [];
+
+        await sendTicketConfirmationEmail({
+            to,
+            userName: name,
+            eventTitle,
+            eventDate,
+            eventLocation,
+            tickets,
+            totalAmount: payment.amount,
+            currency: payment.currency || "XOF",
+        });
+    } catch (err) {
+        console.warn("[paymentController] Notice: non-blocking email trigger skipped:", err.message);
+    }
+}
+
 
 async function initiateCheckout(req, res) {
     const reservationId = Number(req.body.reservationId);
@@ -227,6 +273,13 @@ async function handleStripeWebhook(req, res) {
                 metadata: req.body
             });
 
+            // Envoi d'email de confirmation asynchrone non-bloquant
+            triggerTicketEmailAsync(req.supabase, {
+                paymentId: Number(paymentId),
+                recipientEmail: req.body?.customerEmail || req.body?.email,
+                recipientName: req.body?.customerName
+            });
+
             return res.status(200).json({
                 message: "Paiement confirme avec succes",
                 payment: updatedPayment
@@ -253,6 +306,13 @@ async function handleMobileMoneyWebhook(req, res) {
                 providerPaymentId: transactionRef || `mm_evt_${Date.now()}`,
                 provider: "MOBILE_MONEY",
                 metadata: req.body
+            });
+
+            // Envoi d'email de confirmation asynchrone non-bloquant
+            triggerTicketEmailAsync(req.supabase, {
+                paymentId: Number(paymentId),
+                recipientEmail: req.body?.customerEmail || req.body?.email,
+                recipientName: req.body?.customerName
             });
 
             return res.status(200).json({
