@@ -42,6 +42,61 @@ export default function EventReservationsListPage() {
     }
   }, [id, showToast]);
 
+  const handleExportCSV = () => {
+    if (!reservations || reservations.length === 0) {
+      showToast('Aucune réservation à exporter', 'info');
+      return;
+    }
+
+    const headers = [
+      'ID Réservation',
+      'Participant',
+      'Email',
+      'Quantité Billets',
+      'Statut',
+      'Date de Réservation',
+      'Événement',
+    ];
+
+    const rows = reservations.map((res) => {
+      const participant = res.user?.fullName || res.user?.full_name || res.userName || 'Participant';
+      const email = res.user?.email || res.userEmail || '-';
+      const qty = res.quantity || 1;
+      const status = res.status || 'CONFIRMED';
+      const date = (res.createdAt || res.created_at)
+        ? new Date(res.createdAt || res.created_at).toLocaleString('fr-FR')
+        : '-';
+      const eventTitle = eventDetails?.title || 'Événement';
+
+      return [
+        `"${String(res.id).replace(/"/g, '""')}"`,
+        `"${participant.replace(/"/g, '""')}"`,
+        `"${email.replace(/"/g, '""')}"`,
+        qty,
+        `"${status}"`,
+        `"${date}"`,
+        `"${eventTitle.replace(/"/g, '""')}"`,
+      ].join(';');
+    });
+
+    // \uFEFF BOM forces Microsoft Excel and other spreadsheet software to parse UTF-8 accents correctly
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const safeTitle = (eventDetails?.title || 'evenement')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '-')
+      .replace(/-+/g, '-');
+    link.href = url;
+    link.download = `reservations-${safeTitle}-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showToast('Export CSV téléchargé avec succès', 'success');
+  };
+
   useEffect(() => {
     // Deferred to a microtask so this effect doesn't call setState synchronously.
     if (ready) queueMicrotask(() => fetchEventReservations());
@@ -71,15 +126,27 @@ export default function EventReservationsListPage() {
                 Liste complète des personnes ayant réservé leur billet pour cet événement.
               </p>
             </div>
-            {id && (
-              <Link
-                href={`/organizer/events/${id}/scanner`}
-                className="btn-primary shrink-0 flex items-center gap-2 self-start sm:self-auto"
-              >
-                <span>📷</span>
-                <span>Scanner les entrées</span>
-              </Link>
-            )}
+            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+              {reservations.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleExportCSV}
+                  className="px-4 py-2.5 rounded-sm bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-xs font-semibold flex items-center gap-2 border border-zinc-700 transition-colors"
+                >
+                  <span>📥</span>
+                  <span>Exporter en CSV</span>
+                </button>
+              )}
+              {id && (
+                <Link
+                  href={`/organizer/events/${id}/scanner`}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <span>📷</span>
+                  <span>Scanner les entrées</span>
+                </Link>
+              )}
+            </div>
           </div>
 
           {loading ? (

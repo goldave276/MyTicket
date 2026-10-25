@@ -110,6 +110,33 @@ export default function EventDetailsPage() {
     }
   };
 
+  const handleShare = async () => {
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const shareData = {
+      title: event?.title || 'Événement MyTicket',
+      text: `Découvrez "${event?.title}" sur MyTicket !`,
+      url: shareUrl,
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        showToast('Lien copié dans le presse-papier !', 'success');
+      } catch {
+        showToast('Impossible de copier le lien', 'error');
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-pulse py-12">
@@ -144,20 +171,56 @@ export default function EventDetailsPage() {
   const eventImage =
     event.image_url || event.imageUrl || getEventImage(event.event_type || event.eventType);
 
+  const cleanDescription = (event.description || `Réservez votre place pour ${event.title} sur MyTicket.`).slice(0, 160);
+
   return (
     <>
       <Head>
         <title>{event.title} - MyTicket</title>
+        <meta name="description" content={cleanDescription} />
+        {/* OpenGraph / WhatsApp / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={`${event.title} | MyTicket`} />
+        <meta property="og:description" content={cleanDescription} />
+        <meta property="og:image" content={eventImage} />
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${event.title} | MyTicket`} />
+        <meta name="twitter:description" content={cleanDescription} />
+        <meta name="twitter:image" content={eventImage} />
       </Head>
 
       <div className="max-w-5xl mx-auto space-y-8">
-        {/* Back navigation */}
-        <Link
-          href="/"
-          className="eyebrow inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
-        >
-          ← Retour au catalogue
-        </Link>
+        {/* Top bar with back navigation & social share */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link
+            href="/"
+            className="eyebrow inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
+          >
+            ← Retour au catalogue
+          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleShare}
+              className="px-3 py-1.5 rounded-sm bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 font-mono text-xs flex items-center gap-1.5 border border-zinc-700 transition-colors"
+              title="Copier le lien ou partager"
+            >
+              <span>🔗</span>
+              <span>Partager</span>
+            </button>
+            <a
+              href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Découvre "${event.title}" sur MyTicket : ${typeof window !== 'undefined' ? window.location.href : ''}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-sm bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-400 font-mono text-xs flex items-center gap-1.5 border border-emerald-800/50 transition-colors"
+              title="Partager sur WhatsApp"
+            >
+              <span>💬</span>
+              <span>WhatsApp</span>
+            </a>
+          </div>
+        </div>
 
         {/* Hero Cover Image & Header */}
         <div className="frame-corners relative rounded-md overflow-hidden h-80 sm:h-96 w-full border border-zinc-800 bg-zinc-900">

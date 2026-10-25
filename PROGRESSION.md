@@ -93,16 +93,16 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - [x] Rafraîchissement automatique du token avant expiration (`POST /api/auth/refresh`, stockage `refreshToken` et interception 401 avec retry)
 - [x] **Espace Public & Utilisateur (`USER`)**
   - [x] Page d'accueil avec catalogue d'événements & barre de recherche/filtres complets (texte, catégorie, lieu, prix min/max et dates début/fin)
-  - [x] Page détail d'un événement (avec état d'erreur réel si l'événement est introuvable)
+  - [x] Page détail d'un événement (avec métadonnées OpenGraph/Twitter Cards, boutons de partage Web Share API et WhatsApp)
   - [x] Pages Auth : Connexion, Inscription, Mot de passe oublié
   - [x] Réservation de billets (sélection de quantité, confirmation)
-  - [x] Page "Mes Réservations" et "Mes Billets" avec QR Pass généré côté client (`qrcode.react`)
+  - [x] Page "Mes Réservations" et "Mes Billets" avec QR Pass généré côté client (`qrcode.react`), impression haute fidélité (`@media print` optimisé PDF) et téléchargement PNG de l'image QR
   - [x] Page "Mon Profil" & formulaire "Devenir Organisateur"
   - [x] Upload réel du justificatif vers Supabase Storage (PDF, JPG, PNG, max 5 Mo) avec encodage base64 direct et validation côté serveur.
 - [x] **Espace Organisateur (`ORGANIZER`)**
   - [x] Dashboard Organisateur (statistiques réelles, liste des événements par statut)
   - [x] Formulaire de création / édition d'événement (mapping des champs corrigé le 15/09/2026, cf. journal)
-  - [x] Suivi des participants / réservations par événement
+  - [x] Suivi des participants / réservations par événement avec bouton d'export CSV compatible Excel (UTF-8 BOM)
   - [x] Scanner mobile de billets et check-in temps réel (`/organizer/events/[id]/scanner`) : caméra en direct, saisie manuelle de secours, alertes haute visibilité et barre de progression des entrées.
 - [x] **Espace Administrateur (`ADMIN`)**
   - [x] Dashboard de statistiques globales
@@ -166,6 +166,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **25/10/2026** | DevOps/CI | Étape 3 (Option 3 - B0.7 & CI) : Vérification d'autonomie des 115 tests sans fichier `.env` (valeurs par défaut de `setup-env.js`). Intégration du job `frontend` (lint + build Next.js Turbopack) dans le pipeline GitHub Actions (`.github/workflows/backend-ci.yml`) pour validation continue fullstack (backend tests, docker build, migrations PostgreSQL 16 et frontend). | ✅ Validé |
 | **25/10/2026** | Fullstack/Payments | Étape 4 (Option 4 - B3) : Passerelles de paiement réel (Stripe Checkout & Mobile Money Togo Flooz/T-Money). Migration `0014_confirm_online_payment.sql` (RPC atomique et idempotente), connecteurs `paymentService.js`, endpoints `POST /api/payments/checkout` et webhooks sécurisés, sélecteur frontend dynamique sur `/events/[id]`, pages `/payment/success` et `/payment/cancel`. 120/120 tests validés, build Next.js (26/26 pages). | ✅ Validé |
 | **25/10/2026** | Fullstack/Check-in | Étape 5 (Priorité #1 Produit) : Scanner mobile de billets et check-in organisateur. Migration `0015_ticket_checkin_and_scanner.sql` (statut `USED`, `scanned_at`/`scanned_by`, RPC `scan_and_checkin_ticket`), contrôleur `ticketController.js` (`POST /api/tickets/scan`, `GET /api/tickets/events/:eventId/checkin-summary`), interface mobile caméra/saisie (`/organizer/events/[id]/scanner`), alertes anti-fraude et bouton d'accès rapide sur `/organizer/events/[id]/reservations`. 125/125 tests validés, build Next.js (27/27 pages). Pushé sur `origin/main` (commit `ce9d442`). | ✅ Validé & Poussé |
+| **25/10/2026** | Frontend/Features | Étape 6 (Complétude Billetterie & Partage) : Export CSV des réservations (UTF-8 BOM compatible Excel), impression haute fidélité / export PDF du billet (`@media print` optimisé pass A4 sans gaspillage d'encre), téléchargement PNG direct de l'image QR code, balises OpenGraph/Twitter Cards et boutons de partage social (Web Share API & WhatsApp). Compilation Turbopack validée sur 27/27 pages avec 0 erreur ESLint. | ✅ Validé |
 
 
 

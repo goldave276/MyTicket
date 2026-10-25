@@ -371,3 +371,60 @@ body {
     background: var(--accent);
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* High-fidelity Ticket Print & PDF Export Styles                     */
+/* ------------------------------------------------------------------ */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide app chrome, navigation, headers, footers and interactive buttons */
+  header,
+  footer,
+  nav,
+  aside,
+  button,
+  .no-print,
+  [role="dialog"] > div:first-child, /* modal backdrop */
+  [data-sonner-toaster],
+  .page-header,
+  .tab-btn {
+    display: none !important;
+  }
+
+  /* Reset modal container so only the ticket pass prints */
+  [role="dialog"] {
+    position: static !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .ticket-print-card {
+    display: block !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 20px auto !important;
+    padding: 24px !important;
+    border: 2px dashed #000000 !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    page-break-inside: avoid !important;
+  }
+
+  .ticket-print-card * {
+    color: #000000 !important;
+    border-color: #cccccc !important;
+    background: transparent !important;
+  }
+}

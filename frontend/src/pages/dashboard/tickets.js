@@ -115,13 +115,27 @@ export default function UserTicketsPage() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => setSelectedTicket(ticket)}
-                    className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2"
-                  >
-                    <QrCodeIcon className="w-4 h-4" />
-                    Afficher le QR Code
-                  </button>
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTicket(ticket)}
+                      className="py-2.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <QrCodeIcon className="w-4 h-4" />
+                      Voir QR
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedTicket(ticket);
+                        setTimeout(() => window.print(), 300);
+                      }}
+                      className="py-2.5 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold text-xs border border-zinc-700 transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <TicketIcon className="w-4 h-4 text-indigo-400" />
+                      Imprimer PDF
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

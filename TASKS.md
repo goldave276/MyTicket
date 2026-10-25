@@ -35,10 +35,12 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Barre de recherche et filtres combinés (Recherche texte, Type d'événement, Lieu, Fourchette de prix).
   - [x] Filtres de dates (`dateFrom`/`dateTo`) intégrés dans `EventFilters` et connectés au catalogue public.
   - [x] Page détail d'un événement (`/events/[id]`) avec détails, places restantes, lieu, prix en XOF.
+  - [x] Balises OpenGraph & Twitter Cards enrichies (`og:title`, `og:image`, `og:description`, `twitter:card`) et boutons interactifs de partage social (Web Share API, WhatsApp et copie de lien).
 
 - [x] **F2.3. Réservations & Billetterie**
   - [x] Réservation : sélection de la quantité de places (paiement `ON_SITE` implicite, pas de paiement réel — hors périmètre).
   - [x] Page "Mes Billets" (`/dashboard/tickets`) : tickets avec QR Pass généré **côté client** (`qrcode.react`, corrigé le 15/09/2026 — n'envoie plus les données du billet à un service tiers).
+  - [x] Impression haute fidélité & export PDF du billet (`@media print` optimisé pour ticket/pass A4 propre sans encre superflue) et téléchargement direct de l'image QR Code en PNG.
   - [x] Page "Mes Réservations" (`/dashboard`) : historique des commandes avec statut et bouton d'annulation.
 
 - [x] **F2.4. Profil & Demande Organisateur**
@@ -63,6 +65,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 
 - [x] **F3.3. Gestion des Participants**
   - [x] Vue détaillée des réservations par événement (`/organizer/events/[id]/reservations`) : noms des acheteurs, quantités, statuts.
+  - [x] Export des réservations au format CSV UTF-8 BOM compatible Excel avec bouton d'export direct en en-tête.
 
 - [x] **F3.4. Contrôle d'accès & Scanner Mobile des Billets**
   - [x] Page scanner mobile pour l'organisateur (`/organizer/events/[id]/scanner`) avec caméra vidéo et saisie manuelle de secours.
