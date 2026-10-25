@@ -31,7 +31,12 @@ export default function SignupPage() {
       showToast('Votre compte a été créé avec succès !', 'success');
       router.push('/dashboard');
     } catch (err) {
-      setError(err.message || 'Impossible de créer le compte. Vérifiez les informations saisies.');
+      if (err.data?.errors) {
+        const errorDetails = Object.values(err.data.errors).join('. ');
+        setError(errorDetails || err.message || 'Impossible de créer le compte.');
+      } else {
+        setError(err.message || 'Impossible de créer le compte. Vérifiez les informations saisies.');
+      }
     } finally {
       setLoading(false);
     }
@@ -104,12 +109,15 @@ export default function SignupPage() {
               <input
                 type="password"
                 required
-                minLength={6}
-                placeholder="•••••••• (6 caractères min.)"
+                minLength={8}
+                placeholder="•••••••• (8 car. min, 1 lettre, 1 chiffre)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
+              <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                8 caractères minimum, comprenant au moins 1 lettre et 1 chiffre.
+              </p>
             </div>
 
             <button

@@ -214,14 +214,65 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 
 ---
 
-## 🌐 PARTIE 3 : DÉPLOIEMENT & ENVIRONNEMENT
+## 🌐 PARTIE 3 : DÉPLOIEMENT & ENVIRONNEMENT HAUTE DISPONIBILITÉ
 
-- [x] **D1. Déploiement Backend**
-  - [x] Documentation complète du déploiement Docker multi-environnements ([`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md)).
-  - [x] Configuration des variables de production et politique CORS multi-origines ([`.env.example`](file:///c:/Users/MSI/Desktop/myticket/backend/.env.example)).
-  - [x] Point de santé et tests de sécurité validés (`GET /api/health`).
+### ☁️ Phase D1 : Hébergement Découplé & Infrastructure
+- [x] **D1.1. Architecture Découplée Validée**
+  - [x] Frontend SPA Next.js 16 (Pages router, Client-Side Rendering pur, zéro `getServerSideProps`) hébergé sur le CDN Edge mondial **Cloudflare Pages**.
+  - [x] Backend API REST Express 5 conteneurisé sous Alpine Linux (`backend/Dockerfile`) déployé sur PaaS managé (**Render** ou **Railway**).
+  - [x] Base de données, Auth et Storage hébergés sur **Supabase Cloud** (PostgreSQL 16 managé avec RLS et 19 RPCs).
+- [ ] **D1.2. Déploiement Frontend sur Cloudflare Pages**
+  - [x] Configuration des scripts de build Cloudflare (`pages:build` via `@cloudflare/next-on-pages`) dans `frontend/package.json`.
+  - [x] En-têtes de sécurité HTTP déclarés dans `frontend/public/_headers` (anti-clickjacking, nosniff, permissions caméra pour le scanner mobile).
+  - [x] Guide pas-à-pas de configuration Cloudflare Pages documenté dans [`CLOUDFLARE_PAGES.md`](file:///c:/Users/MSI/Desktop/myticket/CLOUDFLARE_PAGES.md).
+  - [ ] Connexion du dépôt GitHub `goldave276/MyTicket` sur le dashboard Cloudflare Pages et configuration des variables (`NODE_VERSION=20`, `NEXT_PUBLIC_API_URL`).
+- [ ] **D1.3. Déploiement Backend Docker sur Render**
+  - [x] Image Docker Alpine multi-stage sécurisée avec utilisateur non-root `nodeapp` et healthcheck natif (`backend/Dockerfile`).
+  - [x] Guide de déploiement Web Service Render rédigé dans [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md).
+  - [ ] Création du Web Service sur Render lié au sous-dossier `backend/` avec injection des variables d'environnement (`NODE_ENV=production`, `PORT=3000`, `TRUST_PROXY=1`, etc.).
 
-- [x] **D2. Déploiement Frontend**
-  - [x] Guide de déploiement Vercel rédigé avec checklist E2E ([`frontend/DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/frontend/DEPLOYMENT.md)).
-  - [x] Configuration Vercel et headers de sécurité HTTP ([`frontend/vercel.json`](file:///c:/Users/MSI/Desktop/myticket/frontend/vercel.json)).
-  - [x] Documentation des variables d'environnement (`NEXT_PUBLIC_API_URL` dans [`frontend/.env.example`](file:///c:/Users/MSI/Desktop/myticket/frontend/.env.example)).
+---
+
+### 🔒 Phase D2 : Sécurité Réseau, HTTPS & Noms de Domaine
+- [x] **D2.1. Politique HTTPS & Chiffrement de Bout en Bout**
+  - [x] Certificats SSL/TLS automatiques et renouvelés sans coupure gérés par Cloudflare (Frontend) et Render (Backend).
+  - [x] Forçage automatique des redirections HTTP vers HTTPS sur l'ensemble des routes.
+- [x] **D2.2. Politique CORS Stricte & Protection Proxy**
+  - [x] Interdiction formelle du wildcard `*` dans `FRONTEND_URL` en environnement de production dans `backend/src/app.js`.
+  - [x] Prise en charge de `TRUST_PROXY=1` pour garantir que le limiteur anti-bruteforce (`express-rate-limit`) identifie fidèlement les adresses IP réelles derrière le reverse proxy Cloudflare/Render.
+- [ ] **D2.3. Configuration des Domaines Personnalisés (Optionnel)**
+  - [ ] Liaison d'un domaine personnalisé (ex: `billetterie.mondomaine.com`) sur Cloudflare Pages avec propagation DNS instantanée.
+  - [ ] Mise à jour correspondante de la variable `FRONTEND_URL` sur le backend pour autoriser le nouveau domaine.
+
+---
+
+### 💾 Phase D3 : Sauvegardes & Résilience des Données
+- [x] **D3.1. Sauvegardes Automatisées Supabase**
+  - [x] Sauvegardes quotidiennes managées par Supabase Cloud avec rétention automatique des états de la base PostgreSQL.
+  - [x] Protection des données critiques (invariants SQL, contraintes de clés étrangères `ON DELETE RESTRICT` sur réservations et paiements).
+- [ ] **D3.2. Procédure de Sauvegarde Logique Externe (Disaster Recovery)**
+  - [ ] Documentation et mise en place d'un script de dump périodique (`pg_dump` ou Supabase CLI) des schémas et données pour archivage hors-site.
+  - [ ] Vérification du verrouillage et de l'accès privé au bucket de stockage Supabase `organizer-documents`.
+
+---
+
+### 📊 Phase D4 : Surveillance, Observabilité & Alerting
+- [x] **D4.1. Point de Santé Applicatif**
+  - [x] Endpoint `GET /api/health` opérationnel (vérifie la disponibilité du serveur Express).
+- [ ] **D4.2. Sonde d'Uptime & Monitoring Externe**
+  - [ ] Configuration d'une sonde de disponibilité gratuite (ex: **BetterStack**, **UptimeRobot**) surveillant `https://votre-backend.onrender.com/api/health` toutes les 60 secondes.
+  - [ ] Alerte automatique par email / Discord / Slack en cas de latence anormale ou d'indisponibilité.
+- [ ] **D4.3. Centralisation & Suivi des Logs**
+  - [ ] Suivi des logs en temps réel sur la console Render (`morgan` en format `combined` en production).
+  - [ ] Traçabilité des erreurs HTTP 400/401/429/500 et des webhooks de paiement Stripe.
+
+---
+
+### 🧪 Phase D5 : Recette Finale & Tests en Production
+- [ ] **D5.1. Checklist de Validation Post-Déploiement (E2E)**
+  - [ ] **Authentification & Session** : Création de compte (`/auth/signup`), connexion (`/auth/login`), fermeture/réouverture du navigateur pour valider le renouvellement automatique sans déconnexion via `POST /api/auth/refresh`.
+  - [ ] **Catalogue Public** : Consultation de la liste des événements approuvés (`/`), filtres par catégorie/date, affichage de la page détail (`/events/[id]`).
+  - [ ] **Réservation & Paiement** : Création d'une réservation, redirection Stripe Checkout réelle/test, confirmation par webhook et génération atomique des billets.
+  - [ ] **Emails Transactionnels** : Réception de l'email de confirmation stylisé avec récapitulatif des billets et QR codes.
+  - [ ] **Accès Billets & Export** : Visualisation sur `/dashboard/tickets`, téléchargement PNG du QR code, test d'impression pass A4 (`@media print`).
+  - [ ] **Contrôle d'Accès Scanner** : Test du scanner caméra mobile (`/organizer/events/[id]/scanner`) pour valider l'accès caméra et le check-in en direct (statut `USED`).

@@ -44,10 +44,10 @@ Configurez les variables suivantes dans le tableau de bord de votre hébergeur (
 | :--- | :--- | :--- |
 | `NODE_ENV` | Environnement d'exécution | `production` |
 | `PORT` | Port d'écoute du serveur | `3000` (ou fourni par l'hébergeur) |
-| `FRONTEND_URL` | Origine(s) autorisée(s) par CORS (séparées par virgule) | `https://myticket.vercel.app` *(interdiction du wildcard `*` en production)* |
+| `FRONTEND_URL` | Origine(s) autorisée(s) par CORS (séparées par virgule) | `https://myticket.pages.dev` *(interdiction du wildcard `*` en production)* |
 | `SUPABASE_URL` | URL de votre instance Supabase | `https://xyzproject.supabase.co` |
 | `SUPABASE_PUBLISHABLE_KEY` | Clé Anon / Publishable Supabase | `eyJhbGciOi...` |
-| `PASSWORD_RESET_REDIRECT_URL`| Redirection mot de passe | `https://myticket.vercel.app/auth/reset-password` |
+| `PASSWORD_RESET_REDIRECT_URL`| Redirection mot de passe | `https://myticket.pages.dev/auth/reset-password` |
 | `STRIPE_SECRET_KEY` | Clé secrète Stripe pour paiements CB | `sk_live_...` (optionnelle en dev/simulation) |
 | `STRIPE_WEBHOOK_SECRET` | Clé secrète de vérification du webhook Stripe | `whsec_...` (optionnelle en dev) |
 | `SMTP_HOST` | Serveur SMTP (Brevo, Resend, SendGrid) | `smtp-relay.brevo.com` (optionnelle, simulation auto) |
