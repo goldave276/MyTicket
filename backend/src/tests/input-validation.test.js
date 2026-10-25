@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const { login } = require("../controllers/authController");
+const { login, refreshSession } = require("../controllers/authController");
 const {
     createOrganizerRequest,
     rejectOrganizerRequest
@@ -34,6 +34,17 @@ describe("Validation des entrees des controllers", () => {
         expect(response.statusCode).toBe(400);
         expect(response.body.message).toBe(
             "Donnees de connexion invalides"
+        );
+    });
+
+    it("refuse un rafraichissement de session sans token valide", async () => {
+        const response = createResponse();
+
+        await refreshSession({ body: {} }, response);
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.message).toBe(
+            "Donnees de rafraichissement invalides"
         );
     });
 

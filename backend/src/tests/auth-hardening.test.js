@@ -42,6 +42,26 @@ describe("Tests de durcissement d'authentification (Phase B0.2)", () => {
             expect(response.status).toBe(400);
             expect(response.body.errors.email).toBeDefined();
         });
+
+        it("refuse un rafraichissement de session avec un token absent ou vide", async () => {
+            const response = await request(app)
+                .post("/api/auth/refresh")
+                .send({});
+
+            expect(response.status).toBe(400);
+            expect(response.body.message).toBe("Donnees de rafraichissement invalides");
+            expect(response.body.errors.refreshToken).toBeDefined();
+        });
+
+        it("refuse un rafraichissement de session avec un token trop court", async () => {
+            const response = await request(app)
+                .post("/api/auth/refresh")
+                .send({ refreshToken: "short" });
+
+            expect(response.status).toBe(400);
+            expect(response.body.message).toBe("Donnees de rafraichissement invalides");
+            expect(response.body.errors.refreshToken).toBeDefined();
+        });
     });
 
     describe("Limiteurs de debit (Rate Limiting)", () => {

@@ -31,7 +31,8 @@ Assurez-vous que toutes les migrations du dossier `backend/supabase/migrations/`
 11. `0011_event_lifecycle_and_public_details.sql` (Cycle de vie, trigger invariants, annulation atomique, disponibilité publique et protection du rôle organisateur)
 12. `0012_organizer_request_description.sql` (Persistance de la description de candidature organisateur 20-1000 caractères)
 13. `0013_schedule_finish_expired_events.sql` (Planification automatique horaire du passage à l'état FINISHED via pg_cron)
-
+14. `0014_confirm_online_payment.sql` (Fonction RPC confirm_online_payment pour validation et émission automatique de billets via webhooks Stripe et Mobile Money)
+15. `0015_ticket_checkin_and_scanner.sql` (Statut 'USED', colonnes de scan et fonction RPC scan_and_checkin_ticket pour le contrôle d'accès organisateur)
 
 ---
 
@@ -47,6 +48,8 @@ Configurez les variables suivantes dans le tableau de bord de votre hébergeur (
 | `SUPABASE_URL` | URL de votre instance Supabase | `https://xyzproject.supabase.co` |
 | `SUPABASE_PUBLISHABLE_KEY` | Clé Anon / Publishable Supabase | `eyJhbGciOi...` |
 | `PASSWORD_RESET_REDIRECT_URL`| Redirection mot de passe | `https://myticket.vercel.app/auth/reset-password` |
+| `STRIPE_SECRET_KEY` | Clé secrète Stripe pour paiements CB | `sk_live_...` (optionnelle en dev/simulation) |
+| `STRIPE_WEBHOOK_SECRET` | Clé secrète de vérification du webhook Stripe | `whsec_...` (optionnelle en dev) |
 
 > 🔒 **Règle CORS de production :** L'utilisation de `*` dans `FRONTEND_URL` est strictement interdite lorsque `NODE_ENV=production` et provoquera l'arrêt immédiat du serveur au démarrage pour des raisons de sécurité liées à `credentials: true`.
 >

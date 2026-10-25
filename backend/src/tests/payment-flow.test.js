@@ -143,4 +143,106 @@ describe("Contrat du flux de paiement", () => {
             payment: { id: 3, status: "SUCCEEDED" }
         });
     });
+
+    describe("Passerelle de paiement en ligne (Phase B3)", () => {
+        const {
+            validateTogoPhoneNumber,
+            initiateStripeCheckout,
+            initiateMobileMoneyPayment
+        } = require("../services/paymentService");
+        const {
+            initiateCheckout,
+            handleStripeWebhook,
+            handleMobileMoneyWebhook
+        } = require("../controllers/paymentController");
+
+        it("valide les numeros de telephone Flooz et T-Money Togo", () => {
+            expect(validateTogoPhoneNumber("90 12 34 56")).toEqual({
+                isValid: true,
+                cleanNumber: "90123456",
+                network: "FLOOZ"
+            });
+            expect(validateTogoPhoneNumber("+228 70 99 88 77")).toEqual({
+                isValid: true,
+                cleanNumber: "70998877",
+                network: "TMONEY"
+            });
+            expect(validateTogoPhoneNumber("01234567").isValid).toBe(false);
+            expect(validateTogoPhoneNumber("short").isValid).toBe(false);
+        });
+
+        it("initialise un checkout Stripe (simulation ou reel)", async () => {
+            const result = await initiateStripeCheckout({
+                payment: { id: 42, amount: 5000, currency: "XOF" },
+                reservation: { id: 10, quantity: 2 },
+                event: { title: "Concert", price: 2500 },
+                frontendUrl: "http://localhost:3333"
+            });
+
+            expect(result.checkoutUrl).toBeDefined();
+            expect(result.providerPaymentId).toBeDefined();
+        });
+
+        it("initialise un paiement Mobile Money Togo avec instructions", async () => {
+            const result = await initiateMobileMoneyPayment({
+                payment: { id: 50, amount: 10000, currency: "XOF" },
+                reservation: { id: 12, quantity: 1 },
+                event: { title: "Festival", price: 10000 },
+                phoneNumber: "+228 92 11 22 33"
+            });
+
+            expect(result.network).toBe("FLOOZ");
+            expect(result.amount).toBe(10000);
+            expect(result.instructions).toContain("92112233");
+        });
+
+        it("confirme un paiement en ligne via handleStripeWebhook", async () => {
+            const response = createResponse();
+            const calls = [];
+            const supabase = {
+                rpc(name, payload) {
+                    calls.push([name, payload]);
+                    return Promise.resolve({
+                        data: { id: 42, status: "SUCCEEDED" },
+                        error: null
+                    });
+                }
+            };
+
+            await handleStripeWebhook({
+                body: { paymentId: 42, providerPaymentId: "cs_test_123", status: "SUCCEEDED" },
+                supabase
+            }, response);
+
+            expect(calls[0][0]).toBe("confirm_online_payment");
+            expect(calls[0][1].p_payment_id).toBe(42);
+            expect(response.statusCode).toBe(200);
+            expect(response.body.payment.status).toBe("SUCCEEDED");
+        });
+
+        it("confirme un paiement Mobile Money via handleMobileMoneyWebhook", async () => {
+            const response = createResponse();
+            const calls = [];
+            const supabase = {
+                rpc(name, payload) {
+                    calls.push([name, payload]);
+                    return Promise.resolve({
+                        data: { id: 55, status: "SUCCEEDED" },
+                        error: null
+                    });
+                }
+            };
+
+            await handleMobileMoneyWebhook({
+                body: { paymentId: 55, transactionRef: "MM_TG_90112233", status: "SUCCESS" },
+                supabase
+            }, response);
+
+            expect(calls[0][0]).toBe("confirm_online_payment");
+            expect(calls[0][1].p_payment_id).toBe(55);
+            expect(response.statusCode).toBe(200);
+            expect(response.body.payment.status).toBe("SUCCEEDED");
+        });
+    });
 });
+

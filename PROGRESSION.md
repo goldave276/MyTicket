@@ -10,10 +10,10 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 
 | Module | Statut | Progression | Description |
 | :--- | :---: | :---: | :--- |
-| **Backend (API Express)** | 🟢 Validé & Durci | 100% (hors paiements) | Auth, rôles, catalogue, cycle de vie événement, détail public et RLS durcis |
-| **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0013 | RLS `DRAFT`, trigger invariants, persistance description (0012), planification pg_cron horaire (0013), RPC sécurisées |
-| **DevOps & Tests** | 🟢 Validé | 112/112 tests validés | Dockerfile, Vitest (unit & http) déterministe (indépendant du `.env` local), CI GitHub Actions réintroduite (`.github/workflows/backend-ci.yml`), guide de déploiement et configuration proxy |
-| **Frontend (Next.js / React)** | 🟢 Fonctionnel & Complet | ~95% (hors paiements en ligne Stripe/MoMo) | Interface Utilisateur, Espace Organisateur, Dashboard Admin, Upload justificatif et Interface caisse paiements sur place ; `npm run lint` propre |
+| **Backend (API Express)** | 🟢 Validé & Durci | 100% (Paiements & Scanner) | Auth, rôles, catalogue, cycle de vie, détail public, RLS durcis, passerelles de paiement (Stripe/MoMo) et API check-in/scanner |
+| **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0015 | RLS `DRAFT`, trigger invariants, description (0012), pg_cron (0013), RPC `confirm_online_payment` (0014), RPC `scan_and_checkin_ticket` (0015) |
+| **DevOps & Tests** | 🟢 Validé | 125/125 tests validés | Dockerfile, Vitest (125 tests déterministes sans `.env`), CI Pipeline GitHub Actions fullstack (backend, docker, pg16, frontend), guides de déploiement |
+| **Frontend (Next.js / React)** | 🟢 Fonctionnel & Complet | 100% (Paiements & Scanner mobile) | Interface Utilisateur, Espace Organisateur avec Scanner Caméra (`/organizer/events/[id]/scanner`), Dashboard Admin, Paiements en ligne ; `npm run lint` et `npm run build` (27/27 pages) |
 
 ---
 
@@ -45,10 +45,11 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - [x] Consultation de ses réservations (`GET /reservations/me`)
   - [x] Annulation de réservation (`PATCH /reservations/:reservationId/cancel`)
   - [x] Consultation de ses tickets avec UUID unique (`GET /tickets/me`)
+  - [x] Scan et validation en direct des billets à l'entrée (`POST /api/tickets/scan`) et rapport de check-in (`GET /api/tickets/events/:eventId/checkin-summary`)
 - [x] **Paiements (`/api/payments`)**
   - [x] Création d'intention de paiement (`POST /`)
   - [x] Consultation de ses paiements (`GET /me`)
-  - [ ] Intégration passerelle réelle (Stripe / Mobile Money Togo) *(Reporté post-MVP)*
+  - [x] Intégration passerelle réelle : Stripe Checkout (CB) et Mobile Money Togo (Flooz / T-Money) avec webhooks et confirmation RPC atomique
 - [x] **Espace Administration (`/api/admin`)**
   - [x] Liste & approbation/rejet des demandes organisateurs
   - [x] Liste & validation/refus des événements en attente
@@ -78,6 +79,8 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - `0011_event_lifecycle_and_public_details.sql` (cycle de vie événement, trigger invariants, annulation atomique, disponibilité publique et rétrogradation organisateur)
   - `0012_organizer_request_description.sql` (colonne description avec contrainte 20-1000 caractères et RLS d'insertion)
   - `0013_schedule_finish_expired_events.sql` (activation de pg_cron et planification horaire de finish_expired_events)
+  - `0014_confirm_online_payment.sql` (fonction RPC confirm_online_payment pour validation idempotente et émission de billets)
+  - `0015_ticket_checkin_and_scanner.sql` (statut tickets `USED`, colonnes de traçabilité `scanned_at`/`scanned_by` et RPC sécurisée `scan_and_checkin_ticket`)
 
 ---
 
@@ -87,7 +90,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - [x] Context d'authentification et état utilisateur (`AuthProvider`) + hook `useRequireAuth` pour les routes protégées par rôle
   - [x] Système de design Tailwind (thème, composants UI communs : `Badge`, `Modal`, `Skeleton`, `ErrorState`)
   - [x] Navigation, Header, Footer et Layouts conditionnels par rôle
-  - [ ] Rafraîchissement automatique du token avant expiration (actuellement : nettoyage réactif sur 401 uniquement)
+  - [x] Rafraîchissement automatique du token avant expiration (`POST /api/auth/refresh`, stockage `refreshToken` et interception 401 avec retry)
 - [x] **Espace Public & Utilisateur (`USER`)**
   - [x] Page d'accueil avec catalogue d'événements & barre de recherche/filtres complets (texte, catégorie, lieu, prix min/max et dates début/fin)
   - [x] Page détail d'un événement (avec état d'erreur réel si l'événement est introuvable)
@@ -100,6 +103,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - [x] Dashboard Organisateur (statistiques réelles, liste des événements par statut)
   - [x] Formulaire de création / édition d'événement (mapping des champs corrigé le 15/09/2026, cf. journal)
   - [x] Suivi des participants / réservations par événement
+  - [x] Scanner mobile de billets et check-in temps réel (`/organizer/events/[id]/scanner`) : caméra en direct, saisie manuelle de secours, alertes haute visibilité et barre de progression des entrées.
 - [x] **Espace Administrateur (`ADMIN`)**
   - [x] Dashboard de statistiques globales
   - [x] Interface d'examen des demandes organisateurs
@@ -157,8 +161,11 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **24/10/2026** | Fullstack/Storage | Étape 3 (HANDOFF P1) : Téléversement réel du justificatif organisateur (PDF, JPG, PNG, max 5 Mo) et consultation signée admin. Validateur `validateOrganizerUploadedFile`, contrôleur `createOrganizerRequest` gérant le flux d'upload dans `organizer-documents`, limite Express `10mb`, composant file input client avec validation dans `become-organizer.js`, lien signé d'ouverture dans `admin/organizer-requests.js`. 111/111 tests validés, lint frontend propre. | ✅ Validé |
 | **24/10/2026** | Frontend/Admin | Étape 4 (HANDOFF P1) : Interface d'administration et confirmation des paiements sur place (`/admin/payments`). Service `getPendingPayments`/`confirmOnSitePayment` dans `adminService.js`, navigation `Sidebar.jsx`, modale de confirmation d'encaissement et émission des billets. `npm run lint` propre. | ✅ Validé |
 | **24/10/2026** | Database/Cron | Étape 5 (HANDOFF P1) : Automatisation de la clôture des événements expirés via pg_cron. Migration `0013_schedule_finish_expired_events.sql` (extension pg_cron, job horaire `finish-expired-events-hourly` appelant `public.finish_expired_events()`). 112/112 tests validés. | ✅ Validé |
-| **24/10/2026** | CI/Docs | Étape 6 (HANDOFF P2) : Réintroduction du workflow GitHub Actions (`.github/workflows/backend-ci.yml`), simulation minimale de `cron` dans `test-bootstrap.sql`, synchronisation de la documentation (`README.md`, `DEPLOYMENT.md`, `backend/supabase/README.md`) et validation de l'intégralité des 112 tests. | ✅ Validé |
-| **24/10/2026** | Frontend/Filters | Intégration des filtres de dates (`dateFrom` / `dateTo`) dans `EventFilters.jsx` et `index.js`, validation du build de production Next.js (24/24 pages). Linting validé. | ✅ Validé |
+| **25/10/2026** | Fullstack/Auth | Étape 1 (Option 1 - F1.1) : Rafraîchissement automatique des tokens. Validation Zod `refreshTokenSchema`, contrôleur `refreshSession`, route `POST /api/auth/refresh` avec limiteur dédié, intercepteur `apiFetch` avec file d'attente et retry transparent sur 401, purge de session synchronisée. 115/115 tests validés. | ✅ Validé |
+| **25/10/2026** | Frontend/DevOps | Étape 2 (Option 2 - D2) : Préparation et configuration du déploiement Frontend sur Vercel. Fichier `frontend/vercel.json` (en-têtes de sécurité HTTP), variables d'environnement (`frontend/.env.example`), guide complet pas à pas (`frontend/DEPLOYMENT.md`) et validation de la compilation Turbopack (24/24 pages). | ✅ Validé |
+| **25/10/2026** | DevOps/CI | Étape 3 (Option 3 - B0.7 & CI) : Vérification d'autonomie des 115 tests sans fichier `.env` (valeurs par défaut de `setup-env.js`). Intégration du job `frontend` (lint + build Next.js Turbopack) dans le pipeline GitHub Actions (`.github/workflows/backend-ci.yml`) pour validation continue fullstack (backend tests, docker build, migrations PostgreSQL 16 et frontend). | ✅ Validé |
+| **25/10/2026** | Fullstack/Payments | Étape 4 (Option 4 - B3) : Passerelles de paiement réel (Stripe Checkout & Mobile Money Togo Flooz/T-Money). Migration `0014_confirm_online_payment.sql` (RPC atomique et idempotente), connecteurs `paymentService.js`, endpoints `POST /api/payments/checkout` et webhooks sécurisés, sélecteur frontend dynamique sur `/events/[id]`, pages `/payment/success` et `/payment/cancel`. 120/120 tests validés, build Next.js (26/26 pages). | ✅ Validé |
+| **25/10/2026** | Fullstack/Check-in | Étape 5 (Priorité #1 Produit) : Scanner mobile de billets et check-in organisateur. Migration `0015_ticket_checkin_and_scanner.sql` (statut `USED`, `scanned_at`/`scanned_by`, RPC `scan_and_checkin_ticket`), contrôleur `ticketController.js` (`POST /api/tickets/scan`, `GET /api/tickets/events/:eventId/checkin-summary`), interface mobile caméra/saisie (`/organizer/events/[id]/scanner`), alertes anti-fraude et bouton d'accès rapide sur `/organizer/events/[id]/reservations`. 125/125 tests validés, build Next.js (27/27 pages). | ✅ Validé |
 
 
 

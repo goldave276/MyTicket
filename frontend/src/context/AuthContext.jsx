@@ -23,6 +23,7 @@ export function AuthProvider({ children }) {
       // Token invalid or session expired
       setUser(null);
       localStorage.removeItem('myticket_token');
+      localStorage.removeItem('myticket_refresh_token');
       localStorage.removeItem('myticket_user');
     } finally {
       setLoading(false);

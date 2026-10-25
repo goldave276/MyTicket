@@ -59,16 +59,27 @@ export default function EventReservationsListPage() {
         <Sidebar mode="organizer" />
 
         <div className="flex-1 space-y-6">
-          <div className="page-header">
-            <Link href="/organizer/events" className="eyebrow text-zinc-500 hover:text-zinc-200">
-              ← Retour à la liste de mes événements
-            </Link>
-            <h1 className="page-title mt-2">
-              Réservations : {eventDetails?.title || 'Chargement...'}
-            </h1>
-            <p className="page-subtitle">
-              Liste complète des personnes ayant réservé leur billet pour cet événement.
-            </p>
+          <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <Link href="/organizer/events" className="eyebrow text-zinc-500 hover:text-zinc-200">
+                ← Retour à la liste de mes événements
+              </Link>
+              <h1 className="page-title mt-2">
+                Réservations : {eventDetails?.title || 'Chargement...'}
+              </h1>
+              <p className="page-subtitle">
+                Liste complète des personnes ayant réservé leur billet pour cet événement.
+              </p>
+            </div>
+            {id && (
+              <Link
+                href={`/organizer/events/${id}/scanner`}
+                className="btn-primary shrink-0 flex items-center gap-2 self-start sm:self-auto"
+              >
+                <span>📷</span>
+                <span>Scanner les entrées</span>
+              </Link>
+            )}
           </div>
 
           {loading ? (

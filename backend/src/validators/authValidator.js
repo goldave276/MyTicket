@@ -43,6 +43,12 @@ const updateProfileSchema = z.object({
         .max(100, { message: "Le nom complet ne peut pas depasser 100 caracteres" })
 });
 
+const refreshTokenSchema = z.object({
+    refreshToken: z
+        .string({ required_error: "Refresh token obligatoire" })
+        .min(10, { message: "Refresh token invalide" })
+});
+
 function formatZodErrors(error) {
     const errors = {};
     if (error && error.issues) {
@@ -59,5 +65,6 @@ module.exports = {
     signupSchema,
     passwordResetSchema,
     updateProfileSchema,
+    refreshTokenSchema,
     formatZodErrors
 };

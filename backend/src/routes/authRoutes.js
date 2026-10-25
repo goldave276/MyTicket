@@ -7,7 +7,8 @@ const {
     requestPasswordReset,
     logout,
     updateProfile,
-    getMe
+    getMe,
+    refreshSession
 } = require("../controllers/authController");
 
 
@@ -43,9 +44,20 @@ const passwordResetLimiter = rateLimit({
     }
 });
 
+const refreshLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 30,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    message: {
+        message: "Trop de demandes de rafraichissement, reessayez plus tard"
+    }
+});
+
 router.post("/login", loginLimiter, login);
 router.post("/signup", signupLimiter, signup);
 router.post("/password-reset", passwordResetLimiter, requestPasswordReset);
+router.post("/refresh", refreshLimiter, refreshSession);
 
 router.get("/me", requireAuth, getMe);
 router.patch("/profile", requireAuth, updateProfile);

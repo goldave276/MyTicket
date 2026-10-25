@@ -1,9 +1,23 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 /**
- * Universal fetch wrapper with authorization header injection and error handling.
+ * Universal fetch wrapper with authorization header injection, transparent token refresh and error handling.
  */
-export async function apiFetch(endpoint, options = {}) {
+export async function apiFetch(endpoint, options = {}, isRetry = false) {
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
 
   const headers = {
@@ -27,10 +41,76 @@ export async function apiFetch(endpoint, options = {}) {
   try {
     const response = await fetch(url, config);
 
-    // If session expired or unauthorized, clean token if 401
-    if (response.status === 401 && typeof window !== 'undefined') {
-      if (!endpoint.includes('/auth/login') && !endpoint.includes('/auth/signup')) {
+    // If 401 Unauthorized and not already retrying or on auth endpoints
+    if (
+      response.status === 401 &&
+      !isRetry &&
+      typeof window !== 'undefined' &&
+      !endpoint.includes('/auth/login') &&
+      !endpoint.includes('/auth/signup') &&
+      !endpoint.includes('/auth/refresh')
+    ) {
+      const storedRefreshToken = localStorage.getItem('myticket_refresh_token');
+
+      if (storedRefreshToken) {
+        if (isRefreshing) {
+          // Queue the request until refresh finishes
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          }).then(token => {
+            options.headers = {
+              ...options.headers,
+              Authorization: `Bearer ${token}`
+            };
+            return apiFetch(endpoint, options, true);
+          });
+        }
+
+        isRefreshing = true;
+
+        try {
+          const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken: storedRefreshToken }),
+          });
+
+          if (refreshRes.ok) {
+            const refreshData = await refreshRes.json();
+            const newToken = refreshData.accessToken;
+            if (newToken) {
+              localStorage.setItem('myticket_token', newToken);
+            }
+            if (refreshData.refreshToken) {
+              localStorage.setItem('myticket_refresh_token', refreshData.refreshToken);
+            }
+            if (refreshData.user) {
+              localStorage.setItem('myticket_user', JSON.stringify(refreshData.user));
+            }
+            processQueue(null, newToken);
+            isRefreshing = false;
+
+            // Retry original request with new token
+            return apiFetch(endpoint, options, true);
+          } else {
+            // Refresh failed (invalid/expired refresh token)
+            localStorage.removeItem('myticket_token');
+            localStorage.removeItem('myticket_refresh_token');
+            localStorage.removeItem('myticket_user');
+            processQueue(new Error('Session expirée'));
+            isRefreshing = false;
+          }
+        } catch (refreshErr) {
+          localStorage.removeItem('myticket_token');
+          localStorage.removeItem('myticket_refresh_token');
+          localStorage.removeItem('myticket_user');
+          processQueue(refreshErr);
+          isRefreshing = false;
+        }
+      } else {
+        // No refresh token available
         localStorage.removeItem('myticket_token');
+        localStorage.removeItem('myticket_refresh_token');
         localStorage.removeItem('myticket_user');
       }
     }

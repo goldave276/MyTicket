@@ -1,4 +1,4 @@
-name: Backend CI
+name: CI Pipeline
 
 on:
   push:
@@ -7,6 +7,35 @@ on:
     branches: [main]
 
 jobs:
+  frontend:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3000/api
+
   test:
     runs-on: ubuntu-latest
 
@@ -94,7 +123,7 @@ jobs:
           PGDATABASE: myticket_ci
         run: |
           test "$(psql -tAc "select count(*) from information_schema.tables where table_schema = 'public' and table_name in ('profiles', 'organizer_requests', 'events', 'reservations', 'tickets', 'payments')")" = "6"
-          test "$(psql -tAc "select count(*) from pg_proc where pronamespace = 'public'::regnamespace and proname in ('create_reservation', 'cancel_reservation', 'submit_event', 'approve_event', 'approve_organizer_request', 'get_organizer_event_reservations', 'cancel_event', 'update_my_profile', 'update_event', 'get_organizer_stats', 'get_admin_stats', 'admin_list_users', 'admin_update_user_role', 'admin_set_user_blocked', 'finish_expired_events', 'get_public_event_detail', 'enforce_event_invariants')")" = "17"
+          test "$(psql -tAc "select count(*) from pg_proc where pronamespace = 'public'::regnamespace and proname in ('create_reservation', 'cancel_reservation', 'submit_event', 'approve_event', 'approve_organizer_request', 'get_organizer_event_reservations', 'cancel_event', 'update_my_profile', 'update_event', 'get_organizer_stats', 'get_admin_stats', 'admin_list_users', 'admin_update_user_role', 'admin_set_user_blocked', 'finish_expired_events', 'get_public_event_detail', 'enforce_event_invariants', 'confirm_online_payment', 'scan_and_checkin_ticket')")" = "19"
           test "$(psql -tAc "select count(*) from pg_class where relnamespace = 'public'::regnamespace and relname in ('profiles', 'organizer_requests', 'events', 'reservations', 'tickets', 'payments') and relrowsecurity")" = "6"
           test "$(psql -tAc "select column_default from information_schema.columns where table_schema = 'public' and table_name = 'reservations' and column_name = 'status'")" = "'PENDING'::text"
           test "$(psql -tAc "select position('insert into public.tickets' in pg_get_functiondef('public.create_reservation(bigint,integer)'::regprocedure))")" = "0"

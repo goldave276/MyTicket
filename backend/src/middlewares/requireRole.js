@@ -1,4 +1,6 @@
 function requireRole(requiredRole) {
+    const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+
     return async (req, res, next) => {
         const { data: profile, error } = await req.supabase
             .from("profiles")
@@ -12,7 +14,7 @@ function requireRole(requiredRole) {
             });
         }
 
-        if (profile.role !== requiredRole) {
+        if (!roles.includes(profile.role)) {
             return res.status(403).json({
                 message: "Permission insuffisante"
             });

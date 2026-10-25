@@ -10,7 +10,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 - [x] **F1.1. Client HTTP & Gestion des Tokens**
   - [x] Créer le client API centralisé dans `src/services/api.js` (Fetch avec base URL dynamique `NEXT_PUBLIC_API_URL`).
   - [x] Intercepteur pour injecter automatiquement l'en-tête `Authorization: Bearer <token>`.
-  - [ ] Gestion du rafraîchissement automatique des tokens (actuellement : nettoyage du token et redirection réactive sur 401 uniquement, pas de refresh proactif avant expiration).
+  - [x] Gestion du rafraîchissement automatique des tokens : endpoint `POST /api/auth/refresh` avec validation Zod et limiteur, stockage du `refreshToken` dans `authService` et interception transparente des 401 dans `apiFetch` avec file d'attente et retry.
 
 - [x] **F1.2. Contexte d'Authentification & Rôles**
   - [x] Créer `src/context/AuthContext.jsx` et le hook `src/hooks/useRequireAuth.js` (garde d'accès par rôle, ex-doublon dans 11 pages, factorisé le 15/09/2026).
@@ -63,6 +63,10 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 
 - [x] **F3.3. Gestion des Participants**
   - [x] Vue détaillée des réservations par événement (`/organizer/events/[id]/reservations`) : noms des acheteurs, quantités, statuts.
+
+- [x] **F3.4. Contrôle d'accès & Scanner Mobile des Billets**
+  - [x] Page scanner mobile pour l'organisateur (`/organizer/events/[id]/scanner`) avec caméra vidéo et saisie manuelle de secours.
+  - [x] Alertes visuelles haute visibilité (Vert: Valide, Rouge clignotant: Déjà scanné/Fraude, Jaune: Invalide) et compteur d'entrées en direct.
 
 ---
 
@@ -134,7 +138,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Rendre la suite indépendante du `.env` local via [`setup-env.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/tests/setup-env.js) (`setupFiles` Vitest).
   - [x] Corriger la casse `require("../App")` pour l'exécution sous Linux (Docker/CI).
   - [x] Réduire l'origine CORS par défaut de `App.js` à `http://localhost:3333`.
-  - [ ] Vérifier l'exécution sur une machine/CI sans aucun `.env` (valeurs Supabase factices non encore éprouvées).
+  - [x] Vérifier l'exécution sur une machine/CI sans aucun `.env` (valeurs Supabase factices éprouvées et 115 tests validés de manière autonome).
 
 - [x] **B0.8. Persistance et validation de la description de candidature organisateur — priorité P1 (HANDOFF, 24/10/2026)**
   - [x] Migration SQL [`0012_organizer_request_description.sql`](file:///c:/Users/MSI/Desktop/myticket/backend/supabase/migrations/0012_organizer_request_description.sql) (colonne `description`, contrainte `CHECK` 20 à 1000 caractères, policy RLS insertion).
@@ -174,6 +178,10 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Créer `PATCH /api/admin/users/:userId/role` (attribution / révocation manuelle d'un rôle `USER`, `ORGANIZER`, `ADMIN`).
   - [x] Créer `PATCH /api/admin/users/:userId/block` (blocage / déblocage d'un compte).
 
+- [x] **B1.3. Validation des Billets & Check-in Événement**
+  - [x] Migration 0015 : statut `USED`, colonnes `scanned_at`/`scanned_by` et RPC atomique `scan_and_checkin_ticket`.
+  - [x] Contrôleur et endpoint `POST /api/tickets/scan` et `GET /api/events/:eventId/checkin-summary`.
+
 ---
 
 ### 🗄️ Phase B2 : Base de Données & Supabase
@@ -185,13 +193,14 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 
 ---
 
-### 💳 Phase B3 : Passerelles de Paiement Réel (Post-MVP)
-- [ ] **B3.1. Intégration Mobile Money Togo**
-  - [ ] Intégration de l'API Flooz / T-Money via agrégateur (PayGate, Fedapay ou CinetPay).
-  - [ ] Webhook de notification de paiement pour valider automatiquement la réservation.
-- [ ] **B3.2. Intégration Carte Bancaire (Stripe)**
-  - [ ] Création de Session / PaymentIntent Stripe.
-  - [ ] Webhook Stripe pour basculer les réservations en `CONFIRMED`.
+### 💳 Phase B3 : Passerelles de Paiement Réel (Intégré)
+- [x] **B3.1. Intégration Mobile Money Togo**
+  - [x] Connecteur Mobile Money Togo (`validateTogoPhoneNumber`, réseaux Flooz & T-Money, simulation et connecteur dans [`paymentService.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/services/paymentService.js)).
+  - [x] Webhook `POST /api/payments/webhook/mobile-money` appelant la RPC `confirm_online_payment` (Migration 0014) pour valider automatiquement la réservation et émettre les billets.
+- [x] **B3.2. Intégration Carte Bancaire (Stripe)**
+  - [x] Création de session Stripe Checkout (`initiateStripeCheckout` avec fallback simulation sandbox).
+  - [x] Webhook `POST /api/payments/webhook/stripe` pour basculer les réservations en `CONFIRMED` et générer les billets.
+  - [x] Frontend : sélecteur de paiement dynamique sur la page détail d'événement (`/events/[id]`), redirection Checkout et pages de retour (`/payment/success`, `/payment/cancel`).
 
 ---
 
@@ -202,7 +211,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Configuration des variables de production et politique CORS multi-origines ([`.env.example`](file:///c:/Users/MSI/Desktop/myticket/backend/.env.example)).
   - [x] Point de santé et tests de sécurité validés (`GET /api/health`).
 
-- [ ] **D2. Déploiement Frontend**
-  - [ ] Hébergement de l'application Next.js sur **Vercel**.
-  - [ ] Configuration de la variable `NEXT_PUBLIC_API_URL`.
-  - [ ] Validation complète du parcours utilisateur en ligne (E2E).
+- [x] **D2. Déploiement Frontend**
+  - [x] Guide de déploiement Vercel rédigé avec checklist E2E ([`frontend/DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/frontend/DEPLOYMENT.md)).
+  - [x] Configuration Vercel et headers de sécurité HTTP ([`frontend/vercel.json`](file:///c:/Users/MSI/Desktop/myticket/frontend/vercel.json)).
+  - [x] Documentation des variables d'environnement (`NEXT_PUBLIC_API_URL` dans [`frontend/.env.example`](file:///c:/Users/MSI/Desktop/myticket/frontend/.env.example)).

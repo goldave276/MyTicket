@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import eventService from '@/services/eventService';
 import reservationService from '@/services/reservationService';
+import paymentService from '@/services/paymentService';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import Badge from '@/components/common/Badge';
@@ -22,6 +23,8 @@ export default function EventDetailsPage() {
   const [error, setError] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [booking, setBooking] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('CARD');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   const loadEvent = useCallback(async () => {
     if (!id) return;
@@ -50,14 +53,56 @@ export default function EventDetailsPage() {
       return;
     }
 
+    const price = event.price ?? event.ticket_price ?? 0;
+    const isPaid = price > 0;
+
+    if (isPaid && paymentMethod === 'MOBILE_MONEY' && !phoneNumber.trim()) {
+      showToast('Veuillez renseigner votre numéro Flooz ou T-Money', 'error');
+      return;
+    }
+
     setBooking(true);
     try {
-      await reservationService.createReservation({
+      const res = await reservationService.createReservation({
         eventId: id,
         quantity: Number(quantity),
       });
-      showToast(`Réservation de ${quantity} place(s) confirmée avec succès !`, 'success');
-      router.push('/dashboard/tickets');
+
+      const reservationId = res.reservation?.id || res.id;
+
+      if (!isPaid || paymentMethod === 'ON_SITE') {
+        if (isPaid) {
+          await paymentService.initiateCheckout({
+            reservationId,
+            paymentMethod: 'ON_SITE',
+          });
+        }
+        showToast(`Réservation de ${quantity} place(s) enregistrée avec succès !`, 'success');
+        router.push(isPaid ? '/dashboard' : '/dashboard/tickets');
+        return;
+      }
+
+      if (paymentMethod === 'CARD') {
+        const checkoutRes = await paymentService.initiateCheckout({
+          reservationId,
+          paymentMethod: 'CARD',
+        });
+        if (checkoutRes.checkoutUrl) {
+          window.location.href = checkoutRes.checkoutUrl;
+          return;
+        }
+      }
+
+      if (paymentMethod === 'MOBILE_MONEY') {
+        const mmRes = await paymentService.initiateCheckout({
+          reservationId,
+          paymentMethod: 'MOBILE_MONEY',
+          phoneNumber: phoneNumber.trim(),
+        });
+        showToast(mmRes.instructions || 'Demande de débit Mobile Money initiée avec succès.', 'success');
+        router.push('/dashboard');
+        return;
+      }
     } catch (err) {
       showToast(err.message || 'Erreur lors de la réservation', 'error');
     } finally {
@@ -245,6 +290,60 @@ export default function EventDetailsPage() {
                   {totalPrice === 0 ? 'GRATUIT' : `${totalPrice} FCFA`}
                 </span>
               </div>
+
+              {!isSoldOut && totalPrice > 0 && (
+                <div className="space-y-3 pt-2 border-t border-zinc-800">
+                  <label className="spec-label block">Mode de paiement</label>
+                  <div className="grid grid-cols-3 gap-2 text-xs font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('CARD')}
+                      className={`p-2.5 rounded-md border text-center transition-colors ${
+                        paymentMethod === 'CARD'
+                          ? 'border-indigo-500 bg-indigo-500/10 text-white'
+                          : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700'
+                      }`}
+                    >
+                      💳 Carte
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('MOBILE_MONEY')}
+                      className={`p-2.5 rounded-md border text-center transition-colors ${
+                        paymentMethod === 'MOBILE_MONEY'
+                          ? 'border-indigo-500 bg-indigo-500/10 text-white'
+                          : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700'
+                      }`}
+                    >
+                      📱 MoMo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('ON_SITE')}
+                      className={`p-2.5 rounded-md border text-center transition-colors ${
+                        paymentMethod === 'ON_SITE'
+                          ? 'border-indigo-500 bg-indigo-500/10 text-white'
+                          : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700'
+                      }`}
+                    >
+                      💵 Sur place
+                    </button>
+                  </div>
+
+                  {paymentMethod === 'MOBILE_MONEY' && (
+                    <div className="space-y-1.5 pt-1">
+                      <span className="spec-label text-zinc-400">Numéro Flooz / T-Money (Togo)</span>
+                      <input
+                        type="tel"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        placeholder="Ex: 90 12 34 56"
+                        className="w-full px-3 py-2 text-sm bg-zinc-900 border border-zinc-800 rounded-md text-white placeholder-zinc-600 focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Submit Button */}
               <button

@@ -3,7 +3,10 @@ const requireAuth = require("../middlewares/authMiddleware");
 
 const {
     createPayment,
-    getMyPayments
+    getMyPayments,
+    initiateCheckout,
+    handleStripeWebhook,
+    handleMobileMoneyWebhook
 } = require("../controllers/paymentController");
 
 const router = express.Router();
@@ -18,6 +21,22 @@ router.post(
     "/",
     requireAuth,
     createPayment
+);
+
+router.post(
+    "/checkout",
+    requireAuth,
+    initiateCheckout
+);
+
+router.post(
+    "/webhook/stripe",
+    handleStripeWebhook
+);
+
+router.post(
+    "/webhook/mobile-money",
+    handleMobileMoneyWebhook
 );
 
 module.exports = router;

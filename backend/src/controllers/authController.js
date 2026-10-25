@@ -4,6 +4,7 @@ const {
     signupSchema,
     passwordResetSchema,
     updateProfileSchema,
+    refreshTokenSchema,
     formatZodErrors
 } = require("../validators/authValidator");
 
@@ -145,11 +146,40 @@ async function getMe(req, res) {
     });
 }
 
+async function refreshSession(req, res) {
+    const parseResult = refreshTokenSchema.safeParse(req.body);
+
+    if (!parseResult.success) {
+        return res.status(400).json({
+            message: "Donnees de rafraichissement invalides",
+            errors: formatZodErrors(parseResult.error)
+        });
+    }
+
+    const { refreshToken } = parseResult.data;
+
+    const { data, error } = await supabase.auth.refreshSession({
+        refresh_token: refreshToken
+    });
+
+    if (error || !data?.session) {
+        return res.status(401).json({ message: "Session invalide ou expiree" });
+    }
+
+    return res.status(200).json({
+        user: data.user,
+        accessToken: data.session.access_token,
+        refreshToken: data.session.refresh_token
+    });
+}
+
 module.exports = {
     login,
     signup,
     requestPasswordReset,
     logout,
     updateProfile,
-    getMe
+    getMe,
+    refreshSession
 };
+
