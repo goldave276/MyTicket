@@ -14,19 +14,38 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-function clearAuthStorageAndNotify() {
+export const clearAuthStorageAndNotify = () => {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('myticket_token');
-    localStorage.removeItem('myticket_refresh_token');
-    localStorage.removeItem('myticket_user');
-    window.dispatchEvent(new CustomEvent('myticket_auth_expired'));
+    try {
+      localStorage.removeItem('myticket_token');
+      localStorage.removeItem('myticket_refresh_token');
+      localStorage.removeItem('myticket_user');
+      window.dispatchEvent(new CustomEvent('myticket_auth_expired'));
+    } catch {
+      // Storage unavailable or disabled
+    }
   }
-}
+};
 
 /**
  * Universal fetch wrapper with authorization header injection, transparent token refresh and error handling.
  */
 export async function apiFetch(endpoint, options = {}, isRetry = false) {
+  const purgeAuth = () => {
+    try {
+      if (typeof clearAuthStorageAndNotify === 'function') {
+        clearAuthStorageAndNotify();
+      } else if (typeof window !== 'undefined') {
+        localStorage.removeItem('myticket_token');
+        localStorage.removeItem('myticket_refresh_token');
+        localStorage.removeItem('myticket_user');
+        window.dispatchEvent(new CustomEvent('myticket_auth_expired'));
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  };
+
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
 
   const headers = {
@@ -107,18 +126,20 @@ export async function apiFetch(endpoint, options = {}, isRetry = false) {
             return apiFetch(endpoint, { ...options, headers: retryHeaders }, true);
           } else {
             // Refresh failed (invalid/expired refresh token)
-            clearAuthStorageAndNotify();
-            processQueue(new Error('Session expirée'));
+            purgeAuth();
+            const sessionErr = new Error('Session expirée');
+            sessionErr.status = 401;
+            processQueue(sessionErr);
             isRefreshing = false;
           }
         } catch (refreshErr) {
-          clearAuthStorageAndNotify();
+          purgeAuth();
           processQueue(refreshErr);
           isRefreshing = false;
         }
       } else {
         // No refresh token available
-        clearAuthStorageAndNotify();
+        purgeAuth();
       }
     }
 

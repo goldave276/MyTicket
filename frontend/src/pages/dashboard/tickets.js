@@ -25,7 +25,12 @@ export default function UserTicketsPage() {
       const data = await ticketService.getMyTickets();
       setTickets(Array.isArray(data) ? data : data.tickets || []);
     } catch (err) {
-      if (err.status === 401 || err.message?.includes('Authentification')) {
+      if (
+        err.status === 401 ||
+        err.message?.includes('Authentification') ||
+        err.message?.includes('Session expirée') ||
+        (typeof window !== 'undefined' && !localStorage.getItem('myticket_token'))
+      ) {
         return;
       }
       setError(true);

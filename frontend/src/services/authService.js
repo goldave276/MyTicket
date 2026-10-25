@@ -1,4 +1,4 @@
-import apiFetch from './api';
+import apiFetch, { clearAuthStorageAndNotify } from './api';
 
 export const authService = {
   async login(credentials) {
@@ -55,9 +55,13 @@ export const authService = {
     });
 
     if (!response.ok) {
-      localStorage.removeItem('myticket_token');
-      localStorage.removeItem('myticket_refresh_token');
-      localStorage.removeItem('myticket_user');
+      if (typeof clearAuthStorageAndNotify === 'function') {
+        clearAuthStorageAndNotify();
+      } else {
+        localStorage.removeItem('myticket_token');
+        localStorage.removeItem('myticket_refresh_token');
+        localStorage.removeItem('myticket_user');
+      }
       throw new Error('Session expirée');
     }
 
@@ -106,9 +110,13 @@ export const authService = {
     } catch {
       // Ignore logout errors if session already expired
     } finally {
-      localStorage.removeItem('myticket_token');
-      localStorage.removeItem('myticket_refresh_token');
-      localStorage.removeItem('myticket_user');
+      if (typeof clearAuthStorageAndNotify === 'function') {
+        clearAuthStorageAndNotify();
+      } else {
+        localStorage.removeItem('myticket_token');
+        localStorage.removeItem('myticket_refresh_token');
+        localStorage.removeItem('myticket_user');
+      }
     }
   },
 
@@ -117,8 +125,12 @@ export const authService = {
     try {
       const token = localStorage.getItem('myticket_token');
       if (!token) {
-        localStorage.removeItem('myticket_user');
-        localStorage.removeItem('myticket_refresh_token');
+        if (typeof clearAuthStorageAndNotify === 'function') {
+          clearAuthStorageAndNotify();
+        } else {
+          localStorage.removeItem('myticket_user');
+          localStorage.removeItem('myticket_refresh_token');
+        }
         return null;
       }
       const stored = localStorage.getItem('myticket_user');

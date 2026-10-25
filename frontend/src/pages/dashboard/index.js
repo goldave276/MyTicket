@@ -25,7 +25,12 @@ export default function UserReservationsPage() {
       const data = await reservationService.getMyReservations();
       setReservations(Array.isArray(data) ? data : data.reservations || []);
     } catch (err) {
-      if (err.status === 401 || err.message?.includes('Authentification')) {
+      if (
+        err.status === 401 ||
+        err.message?.includes('Authentification') ||
+        err.message?.includes('Session expirée') ||
+        (typeof window !== 'undefined' && !localStorage.getItem('myticket_token'))
+      ) {
         return;
       }
       setError(true);
