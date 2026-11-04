@@ -120,7 +120,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 - [x] Tests unitaires & intégration avec Vitest (`npm test`)
 - [x] CI GitHub Actions (`.github/workflows/backend-ci.yml` réintroduite : exécution automatique des 112 tests, construction Docker et validation PostgreSQL 16 des migrations 0001 à 0013)
 - [x] Déploiement Cloud du Backend (Guide [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md) & [`.env.example`](file:///c:/Users/MSI/Desktop/myticket/backend/.env.example))
-- [ ] Déploiement Vercel du Frontend
+- [x] Déploiement Vercel du Frontend (en ligne sur `https://my-ticket-virid.vercel.app`)
 
 ---
 
@@ -172,7 +172,8 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **25/10/2026** | Frontend/Auth | Étape 8 (Durcissement et synchronisation expiration session) : Vérification de la présence de `myticket_token` dans `authService.getStoredUser()`, émission de l'événement `myticket_auth_expired` sur échec de refresh 401, purge instantanée du contexte React et suppression des toasts parasites sur écrans dashboard protégés. Compilation Turbopack validée (27/27 pages). Pushé sur `origin/main` (commit `37457b3`). | ✅ Validé & Poussé |
 | **25/10/2026** | Frontend/Auth | Étape 9 (Correction portée Turbopack `clearAuthStorageAndNotify`) : Export explicite de `clearAuthStorageAndNotify`, encapsulation locale sécurisée dans `apiFetch`, centralisation du nettoyage dans `authService.js` et neutralisation des erreurs 401 pendant la redirection fluide vers `/auth/login`. Pushé sur `origin/main` (commit `06db840`). | ✅ Validé & Poussé |
 | **25/10/2026** | DevOps/Prod | Étape 10 (Spécification Déploiement Haute Disponibilité, Sécurité, Sauvegardes & Surveillance) : Audit d'architecture 3-tiers (Cloudflare Pages pour le Frontend SPA Next.js, Render Docker pour le Backend Express 5, Supabase Cloud pour la DB/Auth/Storage). Clarification du formulaire d'inscription (exigences mot de passe 8 car. min, 1 lettre, 1 chiffre). Formalisation des stratégies HTTPS, CORS, sauvegardes PostgreSQL (quotidiennes + dump de secours), monitoring de disponibilité externe (`/api/health`) et checklist E2E de recette en production dans `TASKS.md` et `CLOUDFLARE_PAGES.md`. | ✅ Validé & Poussé |
-| **04/11/2026** | DevOps/Deploy | Étape 11 (Déploiement Backend Render & Préparation Vercel) : Déploiement du Web Service Docker Backend sur Render (`https://myticket-llwf.onrender.com` avec `GET /api/health` validé), autorisation de la caméra `camera=(self)` dans `frontend/vercel.json` pour le scanner mobile, retrait de la route résiduelle `frontend/src/pages/api/hello.js`. | ✅ Validé |
+| **04/11/2026** | DevOps/Deploy | Étape 11 (Déploiement Backend Render & Préparation Vercel) : Déploiement du Web Service Docker Backend sur Render (`https://myticket-llwf.onrender.com` avec `GET /api/health` validé), autorisation de la caméra `camera=(self)` dans `frontend/vercel.json` pour le scanner mobile, retrait de la route résiduelle `frontend/src/pages/api/hello.js`. | ✅ Validé & Poussé |
+| **04/11/2026** | DevOps/Deploy | Étape 12 (Déploiement Frontend Vercel & Liaison Fullstack) : Déploiement du Frontend Next.js sur Vercel (`https://my-ticket-virid.vercel.app`), injection de `NEXT_PUBLIC_API_URL` pointant vers Render et configuration de la politique CORS de production sur Render (`FRONTEND_URL`). | ✅ Validé |
 
 
 

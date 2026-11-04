@@ -221,10 +221,10 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Frontend SPA Next.js 16 (Pages router, Client-Side Rendering pur, zéro `getServerSideProps`) hébergé sur le CDN Edge mondial **Cloudflare Pages**.
   - [x] Backend API REST Express 5 conteneurisé sous Alpine Linux (`backend/Dockerfile`) déployé sur PaaS managé (**Render** ou **Railway**).
   - [x] Base de données, Auth et Storage hébergés sur **Supabase Cloud** (PostgreSQL 16 managé avec RLS et 19 RPCs).
-- [ ] **D1.2. Déploiement Frontend sur Vercel**
+- [x] **D1.2. Déploiement Frontend sur Vercel**
   - [x] En-têtes de sécurité HTTP déclarés dans `frontend/vercel.json` (anti-clickjacking, nosniff, permissions caméra `camera=(self)` pour le scanner mobile).
   - [x] Guide pas-à-pas de configuration documenté dans [`frontend/DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/frontend/DEPLOYMENT.md).
-  - [ ] Connexion du dépôt GitHub `goldave276/MyTicket` sur Vercel avec `Root Directory: frontend` et `NEXT_PUBLIC_API_URL=https://myticket-llwf.onrender.com/api`.
+  - [x] Application déployée en production sur Vercel : `https://my-ticket-virid.vercel.app` (connectée au backend Render `https://myticket-llwf.onrender.com/api`).
 
 - [x] **D1.3. Déploiement Backend Docker sur Render**
   - [x] Image Docker Alpine multi-stage sécurisée avec utilisateur non-root `nodeapp` et healthcheck natif (`backend/Dockerfile`).
