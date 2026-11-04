@@ -221,15 +221,16 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Frontend SPA Next.js 16 (Pages router, Client-Side Rendering pur, zéro `getServerSideProps`) hébergé sur le CDN Edge mondial **Cloudflare Pages**.
   - [x] Backend API REST Express 5 conteneurisé sous Alpine Linux (`backend/Dockerfile`) déployé sur PaaS managé (**Render** ou **Railway**).
   - [x] Base de données, Auth et Storage hébergés sur **Supabase Cloud** (PostgreSQL 16 managé avec RLS et 19 RPCs).
-- [ ] **D1.2. Déploiement Frontend sur Cloudflare Pages**
-  - [x] Configuration des scripts de build Cloudflare (`pages:build` via `@cloudflare/next-on-pages`) dans `frontend/package.json`.
-  - [x] En-têtes de sécurité HTTP déclarés dans `frontend/public/_headers` (anti-clickjacking, nosniff, permissions caméra pour le scanner mobile).
-  - [x] Guide pas-à-pas de configuration Cloudflare Pages documenté dans [`CLOUDFLARE_PAGES.md`](file:///c:/Users/MSI/Desktop/myticket/CLOUDFLARE_PAGES.md).
-  - [ ] Connexion du dépôt GitHub `goldave276/MyTicket` sur le dashboard Cloudflare Pages et configuration des variables (`NODE_VERSION=20`, `NEXT_PUBLIC_API_URL`).
-- [ ] **D1.3. Déploiement Backend Docker sur Render**
+- [ ] **D1.2. Déploiement Frontend sur Vercel**
+  - [x] En-têtes de sécurité HTTP déclarés dans `frontend/vercel.json` (anti-clickjacking, nosniff, permissions caméra `camera=(self)` pour le scanner mobile).
+  - [x] Guide pas-à-pas de configuration documenté dans [`frontend/DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/frontend/DEPLOYMENT.md).
+  - [ ] Connexion du dépôt GitHub `goldave276/MyTicket` sur Vercel avec `Root Directory: frontend` et `NEXT_PUBLIC_API_URL=https://myticket-llwf.onrender.com/api`.
+
+- [x] **D1.3. Déploiement Backend Docker sur Render**
   - [x] Image Docker Alpine multi-stage sécurisée avec utilisateur non-root `nodeapp` et healthcheck natif (`backend/Dockerfile`).
   - [x] Guide de déploiement Web Service Render rédigé dans [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md).
-  - [ ] Création du Web Service sur Render lié au sous-dossier `backend/` avec injection des variables d'environnement (`NODE_ENV=production`, `PORT=3000`, `TRUST_PROXY=1`, etc.).
+  - [x] Web Service Render déployé en production avec variables d'environnement (`NODE_ENV=production`, `PORT=3000`, `TRUST_PROXY=1`, etc.) sur `https://myticket-llwf.onrender.com`.
+  - [x] Point de contrôle opérationnel : `GET /api/health` actif et validé.
 
 ---
 
