@@ -133,9 +133,11 @@ export async function apiFetch(endpoint, options = {}, isRetry = false) {
             isRefreshing = false;
           }
         } catch (refreshErr) {
-          purgeAuth();
           processQueue(refreshErr);
           isRefreshing = false;
+          // Do not erase a persisted session on a transient network/API error.
+          // The caller receives the original failure and can retry later.
+          throw refreshErr;
         }
       } else {
         // No refresh token available

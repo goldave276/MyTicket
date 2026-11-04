@@ -11,11 +11,11 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Créer le client API centralisé dans `src/services/api.js` (Fetch avec base URL dynamique `NEXT_PUBLIC_API_URL`).
   - [x] Intercepteur pour injecter automatiquement l'en-tête `Authorization: Bearer <token>`.
   - [x] Gestion du rafraîchissement automatique des tokens : endpoint `POST /api/auth/refresh` avec validation Zod et limiteur, stockage du `refreshToken` dans `authService` et interception transparente des 401 dans `apiFetch` avec file d'attente et retry.
-  - [x] Synchronisation stricte de l'état local : validation de `myticket_token` au démarrage, nettoyage atomique du stockage sur session expirée et redirection fluide sans flash d'erreurs 401 sur le dashboard.
+  - [x] Synchronisation stricte de l'état local : validation de `myticket_token` au démarrage, nettoyage atomique seulement après une session invalidée confirmée, conservation de la session lors d'une panne temporaire et redirection fluide sans flash d'erreurs 401 sur le dashboard.
 
 - [x] **F1.2. Contexte d'Authentification & Rôles**
   - [x] Créer `src/context/AuthContext.jsx` et le hook `src/hooks/useRequireAuth.js` (garde d'accès par rôle, ex-doublon dans 11 pages, factorisé le 15/09/2026).
-  - [x] Stockage de la session (`localStorage`, token + profil).
+  - [x] Stockage de la session (`localStorage`, token + profil fusionné incluant le rôle).
   - [x] Garde de page par rôle (`USER`, `ORGANIZER`, `ADMIN`) via `useRequireAuth({ role })` — la permission réelle reste toujours vérifiée côté backend.
 
 - [x] **F1.3. Système de Design & Composants Communs**

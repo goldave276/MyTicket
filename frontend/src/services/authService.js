@@ -80,10 +80,15 @@ export const authService = {
 
   async getProfile() {
     const response = await apiFetch('/auth/me');
-    if (response.user) {
-      localStorage.setItem('myticket_user', JSON.stringify(response.user));
+    // `/auth/me` separates Supabase auth data (email, id) from the app profile
+    // (role, full_name). Persist one complete object for UI restoration.
+    const user = response.user
+      ? { ...response.user, ...(response.profile || {}) }
+      : response;
+    if (user) {
+      localStorage.setItem('myticket_user', JSON.stringify(user));
     }
-    return response.user || response;
+    return user;
   },
 
   async updateProfile(profileData) {

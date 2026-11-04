@@ -19,12 +19,15 @@ export function AuthProvider({ children }) {
       }
       const userData = await authService.getProfile();
       setUser(userData);
-    } catch {
-      // Token invalid or session expired
-      setUser(null);
-      localStorage.removeItem('myticket_token');
-      localStorage.removeItem('myticket_refresh_token');
-      localStorage.removeItem('myticket_user');
+    } catch (err) {
+      // The API client clears storage only after a confirmed expired/invalid
+      // session. A network or temporary API outage must not sign the user out.
+      if (err?.status === 401) {
+        setUser(null);
+        localStorage.removeItem('myticket_token');
+        localStorage.removeItem('myticket_refresh_token');
+        localStorage.removeItem('myticket_user');
+      }
     } finally {
       setLoading(false);
     }
