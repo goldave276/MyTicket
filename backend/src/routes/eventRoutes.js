@@ -20,49 +20,49 @@ const router = express.Router();
 router.post(
     "/",
     requireAuth,
-    requireRole("ORGANIZER"),
+    requireRole(["ORGANIZER", "ADMIN"]),
     createEvent
 );
 
 router.get(
     "/me",
     requireAuth,
-    requireRole("ORGANIZER"),
+    requireRole(["ORGANIZER", "ADMIN"]),
     getMyEvents
 );
 
 router.patch(
     "/:eventId/submit",
     requireAuth,
-    requireRole("ORGANIZER"),
+    requireRole(["ORGANIZER", "ADMIN"]),
     submitEvent
 );
 
 router.get(
     "/stats",
     requireAuth,
-    requireRole("ORGANIZER"),
+    requireRole(["ORGANIZER", "ADMIN"]),
     getOrganizerStats
 );
 
 router.patch(
     "/:eventId",
     requireAuth,
-    requireRole("ORGANIZER"),
+    requireRole(["ORGANIZER", "ADMIN"]),
     updateEvent
 );
 
 router.patch(
     "/:eventId/cancel",
     requireAuth,
-    requireRole("ORGANIZER"),
+    requireRole(["ORGANIZER", "ADMIN"]),
     cancelEvent
 );
 
 router.get(
     "/:eventId/reservations",
     requireAuth,
-    requireRole("ORGANIZER"),
+    requireRole(["ORGANIZER", "ADMIN"]),
     getEventReservations
 );
 

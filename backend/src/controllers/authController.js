@@ -31,8 +31,21 @@ async function login(req, res) {
         });
     }
 
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, full_name")
+        .eq("id", data.user.id)
+        .single();
+
+    const userWithProfile = {
+        ...data.user,
+        role: profile?.role || "USER",
+        full_name: profile?.full_name || data.user.user_metadata?.full_name || null
+    };
+
     return res.status(200).json({
-        user: data.user,
+        user: userWithProfile,
+        profile: profile || null,
         accessToken: data.session.access_token,
         refreshToken: data.session.refresh_token
     });
