@@ -1,5 +1,24 @@
 # HANDOFF — MyTicket
 
+> **📌 MISE À JOUR DU 07/11/2026 (Branche `fix/audit`)**
+>
+> - **État des tests Backend** : **134 / 134 tests passés** sur 19 fichiers (`npm --prefix backend test`, dont `test:unit` : 80 tests sur 12 fichiers, et `test:http` : 54 tests sur 7 fichiers).
+> - **État du Linter Frontend** : **0 erreur, 0 warning** (`npm --prefix frontend run lint`).
+> - **Migrations PostgreSQL / Supabase** : **0001 à 0018** dans `backend/supabase/migrations/` (incluant `0014` paiements en ligne, `0015` scanner/check-in, `0016` création DRAFT admin, `0017` permissions hiérarchiques RBAC admin, et `0018` verrouillage `service_role` + auto-confirmation des événements gratuits `price = 0`).
+> - **Corrections de l'audit Sécurité & QA appliquées sur `fix/audit`** :
+>   1. Révocation des droits publics/`authenticated` sur `promote_user_to_admin` et `confirm_online_payment` (exécutables uniquement par `service_role`).
+>   2. Sécurisation des webhooks Stripe et Mobile Money (`req.supabase || supabaseService`, validation `validateReservationId(paymentId)`, vérification des secrets d'en-tête `stripe-signature` / `x-webhook-secret`, masquage des `TypeError`).
+>   3. Désactivation de la persistance de session sur le singleton Supabase (`persistSession: false`) et lecture des profils via client isolé par JWT (`createAuthenticatedClient`).
+>   4. Affichage fidèle des places restantes (`remainingCapacity`) et de la date (`eventDate`) sur le catalogue public et la page détail, et auto-confirmation immédiate avec génération des billets pour les événements gratuits (`price = 0`).
+>   5. Encodage de `ticket.ticket_code` (UUID) dans le QR Pass, détection caméra temps réel via `BarcodeDetector` dans `/organizer/events/[id]/scanner`, et jointure `event:events(...)` sur `/api/tickets/me` et `/api/reservations/me`.
+>   6. Échappement HTML (`escapeHtml`) dans `emailService.js`, prévention d'Open Redirect sur `/auth/login`, vérification réelle du statut sur `/payment/success`, alignement des statistiques Admin/Organisateur et du bouton Bloquer/Débloquer, et interception propre des erreurs Express `400` (JSON malformé) et `413` (> 10 Mo).
+> - **Prochaines étapes pour la reprise** :
+>   1. Appliquer la migration `0018_audit_security_and_free_events.sql` sur l'instance Supabase Cloud et vérifier que `SUPABASE_SERVICE_ROLE_KEY` est configurée sur Render.
+>   2. Fusionner la branche `fix/audit` dans `main` et pousser sur `origin/main`.
+>   3. Exécuter la checklist E2E de recette en production (`TASKS.md` Phase D5).
+
+---
+
 Document de reprise destiné à une IA ou à un développeur qui ne dispose pas de l’historique des échanges. Il décrit l’état observé dans le dépôt local `main` au commit `dc8cbce` (dépôt propre, aligné sur `origin/main` au moment de l’audit). Les constats portent sur le code et les fichiers suivis ; ils ne prouvent pas l’état d’un projet Supabase distant ni d’un déploiement en ligne.
 
 ## 1. Objectif et public de l’application

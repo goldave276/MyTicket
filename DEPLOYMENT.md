@@ -33,6 +33,9 @@ Assurez-vous que toutes les migrations du dossier `backend/supabase/migrations/`
 13. `0013_schedule_finish_expired_events.sql` (Planification automatique horaire du passage à l'état FINISHED via pg_cron)
 14. `0014_confirm_online_payment.sql` (Fonction RPC confirm_online_payment pour validation et émission automatique de billets via webhooks Stripe et Mobile Money)
 15. `0015_ticket_checkin_and_scanner.sql` (Statut 'USED', colonnes de scan et fonction RPC scan_and_checkin_ticket pour le contrôle d'accès organisateur)
+16. `0016_allow_admin_event_creation.sql` (Politique RLS autorisant les administrateurs à créer des événements en statut DRAFT)
+17. `0017_admin_hierarchical_permissions.sql` (Permissions hiérarchiques ADMIN et fonction RPC `promote_user_to_admin` restreinte à `service_role`)
+18. `0018_audit_security_and_free_events.sql` (Verrouillage `service_role` sur `confirm_online_payment`/`promote_user_to_admin`, nettoyage doublon RLS et confirmation immédiate des événements gratuits `price = 0`)
 
 ---
 
@@ -47,9 +50,11 @@ Configurez les variables suivantes dans le tableau de bord de votre hébergeur (
 | `FRONTEND_URL` | Origine(s) autorisée(s) par CORS (séparées par virgule) | `https://myticket.pages.dev` *(interdiction du wildcard `*` en production)* |
 | `SUPABASE_URL` | URL de votre instance Supabase | `https://xyzproject.supabase.co` |
 | `SUPABASE_PUBLISHABLE_KEY` | Clé Anon / Publishable Supabase | `eyJhbGciOi...` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clé Service Role Supabase (webhooks paiement & script promotion admin) | `eyJhbGciOi...` *(strictement côté serveur)* |
 | `PASSWORD_RESET_REDIRECT_URL`| Redirection mot de passe | `https://myticket.pages.dev/auth/reset-password` |
 | `STRIPE_SECRET_KEY` | Clé secrète Stripe pour paiements CB | `sk_live_...` (optionnelle en dev/simulation) |
 | `STRIPE_WEBHOOK_SECRET` | Clé secrète de vérification du webhook Stripe | `whsec_...` (optionnelle en dev) |
+| `MOBILE_MONEY_WEBHOOK_SECRET` | Clé secrète de vérification du webhook Mobile Money | `momo_whsec_...` (optionnelle en dev) |
 | `SMTP_HOST` | Serveur SMTP (Brevo, Resend, SendGrid) | `smtp-relay.brevo.com` (optionnelle, simulation auto) |
 | `SMTP_PORT` | Port SMTP | `587` ou `465` |
 | `SMTP_USER` | Identifiant de connexion SMTP | `votre-compte-smtp` |
