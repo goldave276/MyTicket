@@ -1,16 +1,18 @@
 const { validateReservationId } = require("../validators/reservationValidator");
+const { supabaseService } = require("../config/supabase");
 
 async function createPayment(req, res) {
-    const reservationId = Number(req.body.reservationId);
+    const idValidation = validateReservationId(req.body?.reservationId);
     const paymentMethod = String(
-        req.body.paymentMethod || ""
+        req.body?.paymentMethod || ""
     ).toUpperCase();
 
-    if (!Number.isInteger(reservationId) || reservationId <= 0) {
+    if (!idValidation.isValid) {
         return res.status(400).json({
             message: "Identifiant de reservation invalide"
         });
     }
+    const reservationId = idValidation.value;
 
     if (
         ![
@@ -161,17 +163,17 @@ async function triggerTicketEmailAsync(supabase, { paymentId, recipientEmail, re
     }
 }
 
-
 async function initiateCheckout(req, res) {
-    const reservationId = Number(req.body.reservationId);
-    const paymentMethod = String(req.body.paymentMethod || "").toUpperCase();
-    const phoneNumber = req.body.phoneNumber;
+    const idValidation = validateReservationId(req.body?.reservationId);
+    const paymentMethod = String(req.body?.paymentMethod || "").toUpperCase();
+    const phoneNumber = req.body?.phoneNumber;
 
-    if (!Number.isInteger(reservationId) || reservationId <= 0) {
+    if (!idValidation.isValid) {
         return res.status(400).json({
             message: "Identifiant de reservation invalide"
         });
     }
+    const reservationId = idValidation.value;
 
     if (!["CARD", "MOBILE_MONEY", "ON_SITE"].includes(paymentMethod)) {
         return res.status(400).json({
@@ -260,22 +262,36 @@ async function initiateCheckout(req, res) {
 async function handleStripeWebhook(req, res) {
     const { paymentId, providerPaymentId, status } = req.body || {};
 
-    if (!paymentId) {
+    if (paymentId === undefined || paymentId === null || paymentId === "") {
         return res.status(400).json({ message: "paymentId requis" });
     }
 
+    const idValidation = validateReservationId(paymentId);
+    if (!idValidation.isValid) {
+        return res.status(400).json({ message: "Identifiant de paiement invalide" });
+    }
+
+    if (process.env.STRIPE_WEBHOOK_SECRET) {
+        const sig = req.headers?.["stripe-signature"];
+        if (!sig || typeof sig !== "string") {
+            return res.status(401).json({ message: "Signature webhook Stripe manquante" });
+        }
+    }
+
+    const dbClient = req.supabase || supabaseService;
+
     try {
         if (status === "SUCCEEDED" || !status) {
-            const updatedPayment = await confirmOnlinePayment(req.supabase, {
-                paymentId: Number(paymentId),
+            const updatedPayment = await confirmOnlinePayment(dbClient, {
+                paymentId: idValidation.value,
                 providerPaymentId: providerPaymentId || `stripe_evt_${Date.now()}`,
                 provider: "STRIPE",
                 metadata: req.body
             });
 
             // Envoi d'email de confirmation asynchrone non-bloquant
-            triggerTicketEmailAsync(req.supabase, {
-                paymentId: Number(paymentId),
+            triggerTicketEmailAsync(dbClient, {
+                paymentId: idValidation.value,
                 recipientEmail: req.body?.customerEmail || req.body?.email,
                 recipientName: req.body?.customerName
             });
@@ -288,29 +304,47 @@ async function handleStripeWebhook(req, res) {
 
         return res.status(200).json({ received: true });
     } catch (err) {
-        return res.status(400).json({ message: err.message });
+        return res.status(400).json({
+            message: err instanceof TypeError
+                ? "Erreur lors du traitement du webhook Stripe"
+                : (err.message || "Erreur lors du traitement du webhook Stripe")
+        });
     }
 }
 
 async function handleMobileMoneyWebhook(req, res) {
     const { paymentId, transactionRef, status } = req.body || {};
 
-    if (!paymentId) {
+    if (paymentId === undefined || paymentId === null || paymentId === "") {
         return res.status(400).json({ message: "paymentId requis" });
     }
 
+    const idValidation = validateReservationId(paymentId);
+    if (!idValidation.isValid) {
+        return res.status(400).json({ message: "Identifiant de paiement invalide" });
+    }
+
+    if (process.env.MOBILE_MONEY_WEBHOOK_SECRET) {
+        const secretHeader = req.headers?.["x-webhook-secret"];
+        if (secretHeader !== process.env.MOBILE_MONEY_WEBHOOK_SECRET) {
+            return res.status(401).json({ message: "Signature webhook Mobile Money invalide" });
+        }
+    }
+
+    const dbClient = req.supabase || supabaseService;
+
     try {
         if (status === "SUCCESS" || status === "SUCCEEDED" || !status) {
-            const updatedPayment = await confirmOnlinePayment(req.supabase, {
-                paymentId: Number(paymentId),
+            const updatedPayment = await confirmOnlinePayment(dbClient, {
+                paymentId: idValidation.value,
                 providerPaymentId: transactionRef || `mm_evt_${Date.now()}`,
                 provider: "MOBILE_MONEY",
                 metadata: req.body
             });
 
             // Envoi d'email de confirmation asynchrone non-bloquant
-            triggerTicketEmailAsync(req.supabase, {
-                paymentId: Number(paymentId),
+            triggerTicketEmailAsync(dbClient, {
+                paymentId: idValidation.value,
                 recipientEmail: req.body?.customerEmail || req.body?.email,
                 recipientName: req.body?.customerName
             });
@@ -323,7 +357,11 @@ async function handleMobileMoneyWebhook(req, res) {
 
         return res.status(200).json({ received: true });
     } catch (err) {
-        return res.status(400).json({ message: err.message });
+        return res.status(400).json({
+            message: err instanceof TypeError
+                ? "Erreur lors du traitement du webhook Mobile Money"
+                : (err.message || "Erreur lors du traitement du webhook Mobile Money")
+        });
     }
 }
 
@@ -335,4 +373,4 @@ module.exports = {
     initiateCheckout,
     handleStripeWebhook,
     handleMobileMoneyWebhook
-};
+};

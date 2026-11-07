@@ -243,6 +243,35 @@ describe("Contrat du flux de paiement", () => {
             expect(response.statusCode).toBe(200);
             expect(response.body.payment.status).toBe("SUCCEEDED");
         });
+
+        it("rejette un webhook avec paymentId non entier ou hors safe integer sans lever TypeError", async () => {
+            const res1 = createResponse();
+            await handleStripeWebhook({ body: { paymentId: "abc", status: "SUCCEEDED" } }, res1);
+            expect(res1.statusCode).toBe(400);
+            expect(res1.body.message).toBe("Identifiant de paiement invalide");
+
+            const res2 = createResponse();
+            await handleMobileMoneyWebhook({ body: { paymentId: -5, status: "SUCCESS" } }, res2);
+            expect(res2.statusCode).toBe(400);
+            expect(res2.body.message).toBe("Identifiant de paiement invalide");
+        });
+
+        it("exige l'en-tete stripe-signature lorsque STRIPE_WEBHOOK_SECRET est configure", async () => {
+            const prevSecret = process.env.STRIPE_WEBHOOK_SECRET;
+            process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_secret";
+            try {
+                const response = createResponse();
+                await handleStripeWebhook({ body: { paymentId: 42, status: "SUCCEEDED" }, headers: {} }, response);
+                expect(response.statusCode).toBe(401);
+                expect(response.body.message).toBe("Signature webhook Stripe manquante");
+            } finally {
+                if (prevSecret === undefined) {
+                    delete process.env.STRIPE_WEBHOOK_SECRET;
+                } else {
+                    process.env.STRIPE_WEBHOOK_SECRET = prevSecret;
+                }
+            }
+        });
     });
 });
 
