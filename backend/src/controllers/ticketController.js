@@ -1,9 +1,26 @@
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+function extractTicketUuid(rawCode) {
+    if (!rawCode || typeof rawCode !== "string") return "";
+    const trimmed = rawCode.trim();
+    if (trimmed.startsWith("{")) {
+        try {
+            const parsed = JSON.parse(trimmed);
+            const candidate = parsed?.ticketCode || parsed?.ticket_code;
+            if (typeof candidate === "string") {
+                return candidate.trim();
+            }
+        } catch {
+            // Fall through to raw UUID validation
+        }
+    }
+    return trimmed;
+}
+
 async function getMyTickets(req, res) {
     const { data, error } = await req.supabase
         .from("tickets")
-        .select("*")
+        .select("*, event:events(id, title, event_date, location, event_type, price)")
         .eq("user_id", req.user.id)
         .order("created_at", { ascending: false });
 
@@ -21,21 +38,22 @@ async function getMyTickets(req, res) {
 async function scanTicket(req, res) {
     const { ticketCode, eventId } = req.body || {};
     const parsedEventId = Number(eventId);
+    const normalizedCode = extractTicketUuid(ticketCode);
 
-    if (!ticketCode || typeof ticketCode !== "string" || !UUID_REGEX.test(ticketCode.trim())) {
+    if (!normalizedCode || !UUID_REGEX.test(normalizedCode)) {
         return res.status(400).json({
             message: "Format du code de billet invalide (UUID attendu)"
         });
     }
 
-    if (!Number.isInteger(parsedEventId) || parsedEventId <= 0) {
+    if (!Number.isSafeInteger(parsedEventId) || parsedEventId <= 0) {
         return res.status(400).json({
             message: "Identifiant d'evenement invalide"
         });
     }
 
     const { data, error } = await req.supabase.rpc("scan_and_checkin_ticket", {
-        p_ticket_code: ticketCode.trim(),
+        p_ticket_code: normalizedCode,
         p_event_id: parsedEventId
     });
 
@@ -82,7 +100,7 @@ async function scanTicket(req, res) {
 async function getEventCheckinSummary(req, res) {
     const eventId = Number(req.params.eventId);
 
-    if (!Number.isInteger(eventId) || eventId <= 0) {
+    if (!Number.isSafeInteger(eventId) || eventId <= 0) {
         return res.status(400).json({
             message: "Identifiant d'evenement invalide"
         });

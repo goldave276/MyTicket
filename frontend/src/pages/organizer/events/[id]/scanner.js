@@ -6,7 +6,21 @@ import eventService from '@/services/eventService';
 import ticketService from '@/services/ticketService';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useToast } from '@/context/ToastContext';
-import { TicketIcon, ArrowRightIcon } from '@/components/common/Icons';
+
+function normalizeScannedPayload(rawValue) {
+  if (!rawValue || typeof rawValue !== 'string') return '';
+  const trimmed = rawValue.trim();
+  if (trimmed.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      const code = parsed?.ticketCode || parsed?.ticket_code;
+      if (typeof code === 'string') return code.trim();
+    } catch {
+      // Return raw trimmed value
+    }
+  }
+  return trimmed;
+}
 
 export default function TicketScannerPage() {
   const router = useRouter();
@@ -22,8 +36,11 @@ export default function TicketScannerPage() {
   const [lastScanResult, setLastScanResult] = useState(null);
   const [scanHistory, setScanHistory] = useState([]);
   const [cameraActive, setCameraActive] = useState(false);
+  const [barcodeSupported, setBarcodeSupported] = useState(true);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const scanIntervalRef = useRef(null);
+  const lastDetectedCodeRef = useRef('');
 
   const loadData = useCallback(async () => {
     if (!id) return;
@@ -52,14 +69,129 @@ export default function TicketScannerPage() {
     }
   }, [authLoading, loadData]);
 
+  const stopCamera = useCallback(() => {
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current);
+      scanIntervalRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setCameraActive(false);
+  }, []);
+
   // Clean up camera on unmount
   useEffect(() => {
     return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
+      stopCamera();
+    };
+  }, [stopCamera]);
+
+  const handleValidateTicket = useCallback(
+    async (codeToScan) => {
+      const code = normalizeScannedPayload(codeToScan || manualCode);
+      if (!code) {
+        showToast('Veuillez renseigner un code de billet', 'error');
+        return;
+      }
+
+      setScanning(true);
+      try {
+        const res = await ticketService.scanTicket({
+          ticketCode: code,
+          eventId: Number(id),
+        });
+
+        const result = {
+          success: true,
+          type: 'VALID',
+          message: 'ENTRÉE VALIDÉE',
+          participant: res.checkin?.participant_name || 'Participant',
+          email: res.checkin?.participant_email || '',
+          ticketCode: code,
+          time: new Date().toLocaleTimeString(),
+        };
+
+        setLastScanResult(result);
+        setScanHistory((prev) => [result, ...prev.slice(0, 9)]);
+        setManualCode('');
+        showToast(`Billet validé : ${result.participant}`, 'success');
+
+        // Refresh checkin count
+        const updatedSummary = await ticketService.getCheckinSummary(id).catch(() => null);
+        if (updatedSummary) setSummary(updatedSummary);
+      } catch (err) {
+        const isAlreadyUsed = err.status === 409 || err.message?.includes('deja utilise');
+        const isCancelled = err.status === 410 || err.message?.includes('annule');
+
+        const result = {
+          success: false,
+          type: isAlreadyUsed ? 'ALREADY_USED' : isCancelled ? 'CANCELLED' : 'INVALID',
+          message: isAlreadyUsed
+            ? 'BILLET DÉJÀ UTILISÉ'
+            : isCancelled
+              ? 'BILLET ANNULÉ'
+              : 'BILLET INVALIDE',
+          detail: err.message || 'Code introuvable pour cet événement',
+          ticketCode: code,
+          time: new Date().toLocaleTimeString(),
+        };
+
+        setLastScanResult(result);
+        setScanHistory((prev) => [result, ...prev.slice(0, 9)]);
+        showToast(result.message + ' : ' + (result.detail || ''), 'error');
+      } finally {
+        setScanning(false);
+      }
+    },
+    [id, manualCode, showToast]
+  );
+
+  // Automatic QR detection loop when camera is active
+  useEffect(() => {
+    if (!cameraActive) return undefined;
+
+    if (typeof window === 'undefined' || !('BarcodeDetector' in window)) {
+      setBarcodeSupported(false);
+      return undefined;
+    }
+
+    setBarcodeSupported(true);
+    let detector;
+    try {
+      detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+    } catch {
+      setBarcodeSupported(false);
+      return undefined;
+    }
+
+    scanIntervalRef.current = setInterval(async () => {
+      if (!videoRef.current || videoRef.current.readyState < 2 || scanning) return;
+      try {
+        const barcodes = await detector.detect(videoRef.current);
+        if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+          const extracted = normalizeScannedPayload(barcodes[0].rawValue);
+          if (extracted && extracted !== lastDetectedCodeRef.current) {
+            lastDetectedCodeRef.current = extracted;
+            await handleValidateTicket(extracted);
+            setTimeout(() => {
+              lastDetectedCodeRef.current = '';
+            }, 3500);
+          }
+        }
+      } catch {
+        // Ignore transient frame detection errors
+      }
+    }, 600);
+
+    return () => {
+      if (scanIntervalRef.current) {
+        clearInterval(scanIntervalRef.current);
+        scanIntervalRef.current = null;
       }
     };
-  }, []);
+  }, [cameraActive, scanning, handleValidateTicket]);
 
   const startCamera = async () => {
     try {
@@ -73,72 +205,11 @@ export default function TicketScannerPage() {
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        await videoRef.current.play();
       }
       setCameraActive(true);
     } catch (err) {
       showToast('Impossible d’accéder à la caméra : ' + err.message, 'error');
-    }
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-    setCameraActive(false);
-  };
-
-  const handleValidateTicket = async (codeToScan) => {
-    const code = (codeToScan || manualCode).trim();
-    if (!code) {
-      showToast('Veuillez renseigner un code de billet', 'error');
-      return;
-    }
-
-    setScanning(true);
-    try {
-      const res = await ticketService.scanTicket({
-        ticketCode: code,
-        eventId: Number(id),
-      });
-
-      const result = {
-        success: true,
-        type: 'VALID',
-        message: 'ENTRÉE VALIDÉE',
-        participant: res.checkin?.participant_name || 'Participant',
-        email: res.checkin?.participant_email || '',
-        ticketCode: code,
-        time: new Date().toLocaleTimeString(),
-      };
-
-      setLastScanResult(result);
-      setScanHistory((prev) => [result, ...prev.slice(0, 9)]);
-      setManualCode('');
-      showToast(`Billet validé : ${result.participant}`, 'success');
-
-      // Refresh checkin count
-      const updatedSummary = await ticketService.getCheckinSummary(id).catch(() => null);
-      if (updatedSummary) setSummary(updatedSummary);
-    } catch (err) {
-      const isAlreadyUsed = err.status === 409 || err.message?.includes('deja utilise');
-      const isCancelled = err.status === 410 || err.message?.includes('annule');
-
-      const result = {
-        success: false,
-        type: isAlreadyUsed ? 'ALREADY_USED' : isCancelled ? 'CANCELLED' : 'INVALID',
-        message: isAlreadyUsed ? 'BILLET DÉJÀ UTILISÉ' : isCancelled ? 'BILLET ANNULÉ' : 'BILLET INVALIDE',
-        detail: err.message || 'Code introuvable pour cet événement',
-        ticketCode: code,
-        time: new Date().toLocaleTimeString(),
-      };
-
-      setLastScanResult(result);
-      setScanHistory((prev) => [result, ...prev.slice(0, 9)]);
-      showToast(result.message + ' : ' + (result.detail || ''), 'error');
-    } finally {
-      setScanning(false);
     }
   };
 
@@ -179,14 +250,15 @@ export default function TicketScannerPage() {
         <div className="bg-zinc-900 border border-zinc-800 rounded-md p-6">
           <h1 className="text-2xl font-bold text-white tracking-tight">{event?.title || 'Événement'}</h1>
           <p className="text-sm text-zinc-400 mt-1">
-            {event?.venue && `📍 ${event.venue} — `}
-            {event?.event_date && new Date(event.event_date).toLocaleDateString('fr-FR', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            {(event?.venue || event?.location) && `📍 ${event.venue || event.location} — `}
+            {(event?.event_date || event?.eventDate) &&
+              new Date(event.event_date || event.eventDate).toLocaleDateString('fr-FR', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
           </p>
 
           {/* Stats Bar */}
@@ -286,6 +358,12 @@ export default function TicketScannerPage() {
               </div>
             )}
           </div>
+
+          {cameraActive && !barcodeSupported && (
+            <div className="p-3 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
+              Votre navigateur ne supporte pas la détection automatique de QR Code (`BarcodeDetector`). Utilisez Chrome/Edge sur mobile ou saisissez le code UUID affiché sur le billet ci-dessous.
+            </div>
+          )}
 
           {/* Manual Input Form */}
           <div className="space-y-3 pt-2 border-t border-zinc-800">

@@ -95,7 +95,9 @@ export default function UserTicketsPage() {
                       <span className="text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
                         PASS VERIFIÉ
                       </span>
-                      <span className="font-mono text-xs font-bold text-zinc-400">#{String(ticket.id).slice(-8)}</span>
+                      <span className="font-mono text-xs font-bold text-zinc-400">
+                        #{String(ticket.ticket_code || ticket.id).slice(0, 8)}
+                      </span>
                     </div>
 
                     <h3 className="text-lg font-bold text-zinc-900 dark:text-white line-clamp-1">
@@ -106,8 +108,8 @@ export default function UserTicketsPage() {
                       <div className="flex items-center gap-2">
                         <CalendarIcon className="w-4 h-4 text-indigo-500 shrink-0" />
                         <span>
-                          {ticket.eventDate || ticket.event?.date
-                            ? new Date(ticket.eventDate || ticket.event?.date).toLocaleDateString('fr-FR', {
+                          {ticket.eventDate || ticket.event?.event_date || ticket.event?.date
+                            ? new Date(ticket.eventDate || ticket.event?.event_date || ticket.event?.date).toLocaleDateString('fr-FR', {
                                 weekday: 'short',
                                 day: 'numeric',
                                 month: 'short',
