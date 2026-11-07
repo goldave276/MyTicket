@@ -14,7 +14,7 @@ export const adminService = {
   async rejectOrganizerRequest(requestId, reason) {
     return apiFetch(`/admin/organizer-requests/${requestId}/reject`, {
       method: 'PATCH',
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify({ reason, adminComment: reason }),
     });
   },
 
@@ -31,7 +31,7 @@ export const adminService = {
   async rejectEvent(eventId, reason) {
     return apiFetch(`/admin/events/${eventId}/reject`, {
       method: 'PATCH',
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify({ reason, adminComment: reason }),
     });
   },
 

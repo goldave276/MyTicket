@@ -122,37 +122,41 @@ export default function AdminUsersPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredUsers.map((u) => (
-                      <tr key={u.id}>
-                        <td className="font-bold text-white flex items-center gap-2">
-                          <UserIcon className="w-4 h-4 text-indigo-400 shrink-0" />
-                          {u.fullName || u.full_name || 'Utilisateur'}
-                        </td>
-                        <td className="text-xs font-mono text-zinc-500">{u.email}</td>
-                        <td>
-                          <Badge status={u.role || 'USER'} />
-                        </td>
-                        <td>
-                          <select
-                            value={u.role || 'USER'}
-                            onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                            className="px-3 py-1.5 rounded-md bg-zinc-800 border border-zinc-700 text-xs font-bold text-white focus:outline-none"
-                          >
-                            <option value="USER">Membre (USER)</option>
-                            <option value="ORGANIZER">Organisateur (ORGANIZER)</option>
-                            <option value="ADMIN">Administrateur (ADMIN)</option>
-                          </select>
-                        </td>
-                        <td className="text-right">
-                          <button
-                            onClick={() => handleToggleBlock(u.id, u.isBlocked)}
-                            className={u.isBlocked ? 'pill pill-emerald' : 'pill pill-rose'}
-                          >
-                            {u.isBlocked ? 'Débloquer' : 'Bloquer'}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {filteredUsers.map((u) => {
+                      const isBlocked = Boolean(u.is_blocked ?? u.isBlocked);
+                      return (
+                        <tr key={u.id}>
+                          <td className="font-bold text-white flex items-center gap-2">
+                            <UserIcon className="w-4 h-4 text-indigo-400 shrink-0" />
+                            {u.fullName || u.full_name || 'Utilisateur'}
+                          </td>
+                          <td className="text-xs font-mono text-zinc-500">{u.email}</td>
+                          <td>
+                            <Badge status={u.role || 'USER'} />
+                          </td>
+                          <td>
+                            <select
+                              value={u.role || 'USER'}
+                              onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                              className="px-3 py-1.5 rounded-md bg-zinc-800 border border-zinc-700 text-xs font-bold text-white focus:outline-none"
+                            >
+                              <option value="USER">Membre (USER)</option>
+                              <option value="ORGANIZER">Organisateur (ORGANIZER)</option>
+                              <option value="ADMIN">Administrateur (ADMIN)</option>
+                            </select>
+                          </td>
+                          <td className="text-right">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleBlock(u.id, isBlocked)}
+                              className={isBlocked ? 'pill pill-emerald' : 'pill pill-rose'}
+                            >
+                              {isBlocked ? 'Débloquer' : 'Bloquer'}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

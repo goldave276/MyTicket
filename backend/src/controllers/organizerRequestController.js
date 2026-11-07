@@ -224,7 +224,7 @@ async function approveOrganizerRequest(req, res) {
 
 async function rejectOrganizerRequest(req, res) {
     const requestId = Number(req.params.requestId);
-    const adminComment = req.body?.adminComment;
+    const adminComment = req.body?.adminComment ?? req.body?.reason;
 
     if (!Number.isInteger(requestId) || requestId <= 0) {
         return res.status(400).json({

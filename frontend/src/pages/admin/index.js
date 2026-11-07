@@ -27,11 +27,12 @@ export default function AdminDashboardPage() {
     setError(false);
     try {
       const data = await adminService.getGlobalStats();
+      const s = data?.stats || data || {};
       setStats({
-        totalUsers: data.totalUsers ?? 0,
-        totalOrganizers: data.totalOrganizers ?? 0,
-        pendingRequests: data.pendingRequests ?? 0,
-        pendingEvents: data.pendingEvents ?? 0,
+        totalUsers: s.users_total ?? s.totalUsers ?? 0,
+        totalOrganizers: s.organizers_total ?? s.totalOrganizers ?? 0,
+        pendingRequests: s.requests_pending ?? s.pendingRequests ?? 0,
+        pendingEvents: s.events_pending ?? s.pendingEvents ?? 0,
       });
     } catch (err) {
       setError(true);
