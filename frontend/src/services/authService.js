@@ -15,10 +15,13 @@ export const authService = {
     if (refreshToken) {
       localStorage.setItem('myticket_refresh_token', refreshToken);
     }
-    if (response.user) {
-      localStorage.setItem('myticket_user', JSON.stringify(response.user));
+    const userToStore = response.profile
+      ? { ...response.user, ...response.profile, role: response.profile.role || response.user?.role || 'USER' }
+      : response.user;
+    if (userToStore) {
+      localStorage.setItem('myticket_user', JSON.stringify(userToStore));
     }
-    return response;
+    return { ...response, user: userToStore };
   },
 
   async signup(data) {
@@ -34,10 +37,13 @@ export const authService = {
     if (refreshToken) {
       localStorage.setItem('myticket_refresh_token', refreshToken);
     }
-    if (response.user) {
-      localStorage.setItem('myticket_user', JSON.stringify(response.user));
+    const userToStore = response.profile
+      ? { ...response.user, ...response.profile, role: response.profile.role || response.user?.role || 'USER' }
+      : response.user;
+    if (userToStore) {
+      localStorage.setItem('myticket_user', JSON.stringify(userToStore));
     }
-    return response;
+    return { ...response, user: userToStore };
   },
 
   async refreshSession() {
@@ -72,10 +78,13 @@ export const authService = {
     if (data.refreshToken) {
       localStorage.setItem('myticket_refresh_token', data.refreshToken);
     }
-    if (data.user) {
-      localStorage.setItem('myticket_user', JSON.stringify(data.user));
+    const userToStore = data.profile
+      ? { ...data.user, ...data.profile, role: data.profile.role || data.user?.role || 'USER' }
+      : data.user;
+    if (userToStore) {
+      localStorage.setItem('myticket_user', JSON.stringify(userToStore));
     }
-    return data;
+    return { ...data, user: userToStore };
   },
 
   async getProfile() {

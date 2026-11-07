@@ -31,20 +31,28 @@ async function login(req, res) {
         });
     }
 
+    // Récupération du profil applicatif pour hydrater le vrai rôle (USER, ORGANIZER, ADMIN)
     const { data: profile } = await supabase
         .from("profiles")
-        .select("role, full_name")
+        .select("id, full_name, role, is_blocked, created_at")
         .eq("id", data.user.id)
-        .single();
+        .maybeSingle();
 
-    const userWithProfile = {
+    if (profile?.is_blocked) {
+        return res.status(403).json({
+            message: "Compte bloque"
+        });
+    }
+
+    const appUser = {
         ...data.user,
         role: profile?.role || "USER",
-        full_name: profile?.full_name || data.user.user_metadata?.full_name || null
+        full_name: profile?.full_name || data.user.user_metadata?.full_name || null,
+        is_blocked: profile?.is_blocked || false
     };
 
     return res.status(200).json({
-        user: userWithProfile,
+        user: appUser,
         profile: profile || null,
         accessToken: data.session.access_token,
         refreshToken: data.session.refresh_token
@@ -73,8 +81,21 @@ async function signup(req, res) {
         return res.status(400).json({ message: error.message });
     }
 
+    const appUser = {
+        ...data.user,
+        role: "USER",
+        full_name: fullName || null,
+        is_blocked: false
+    };
+
     return res.status(201).json({
-        user: data.user,
+        user: appUser,
+        profile: {
+            id: data.user.id,
+            full_name: fullName || null,
+            role: "USER",
+            is_blocked: false
+        },
         accessToken: data.session?.access_token || null,
         refreshToken: data.session?.refresh_token || null,
         confirmationRequired: !data.session
@@ -143,7 +164,7 @@ async function updateProfile(req, res) {
 async function getMe(req, res) {
     const { data: profile, error } = await req.supabase
         .from("profiles")
-        .select("id, full_name, role, created_at")
+        .select("id, full_name, role, is_blocked, created_at")
         .eq("id", req.user.id)
         .single();
 
@@ -153,8 +174,15 @@ async function getMe(req, res) {
         });
     }
 
+    const appUser = {
+        ...req.user,
+        role: profile.role,
+        full_name: profile.full_name,
+        is_blocked: profile.is_blocked || false
+    };
+
     return res.status(200).json({
-        user: req.user,
+        user: appUser,
         profile
     });
 }
@@ -179,8 +207,22 @@ async function refreshSession(req, res) {
         return res.status(401).json({ message: "Session invalide ou expiree" });
     }
 
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("id, full_name, role, is_blocked, created_at")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+    const appUser = {
+        ...data.user,
+        role: profile?.role || "USER",
+        full_name: profile?.full_name || data.user.user_metadata?.full_name || null,
+        is_blocked: profile?.is_blocked || false
+    };
+
     return res.status(200).json({
-        user: data.user,
+        user: appUser,
+        profile: profile || null,
         accessToken: data.session.access_token,
         refreshToken: data.session.refresh_token
     });
@@ -195,4 +237,3 @@ module.exports = {
     getMe,
     refreshSession
 };
-

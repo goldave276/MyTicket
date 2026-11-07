@@ -66,7 +66,6 @@ router.get(
     getEventReservations
 );
 
-
 router.get(
     "/approved",
     getApprovedEvents

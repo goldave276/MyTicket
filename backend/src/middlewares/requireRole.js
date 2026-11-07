@@ -14,7 +14,9 @@ function requireRole(requiredRole) {
             });
         }
 
-        if (!roles.includes(profile.role)) {
+        // Hiérarchie RBAC : un administrateur (ADMIN) dispose de tous les droits et privilèges
+        // sur les rôles subordonnés (ORGANIZER, USER).
+        if (profile.role !== "ADMIN" && !roles.includes(profile.role)) {
             return res.status(403).json({
                 message: "Permission insuffisante"
             });
