@@ -153,16 +153,13 @@ export default function TicketScannerPage() {
     if (!cameraActive) return undefined;
 
     if (typeof window === 'undefined' || !('BarcodeDetector' in window)) {
-      setBarcodeSupported(false);
       return undefined;
     }
 
-    setBarcodeSupported(true);
     let detector;
     try {
       detector = new window.BarcodeDetector({ formats: ['qr_code'] });
     } catch {
-      setBarcodeSupported(false);
       return undefined;
     }
 
@@ -207,6 +204,7 @@ export default function TicketScannerPage() {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
+      setBarcodeSupported(typeof window !== 'undefined' && 'BarcodeDetector' in window);
       setCameraActive(true);
     } catch (err) {
       showToast('Impossible d’accéder à la caméra : ' + err.message, 'error');

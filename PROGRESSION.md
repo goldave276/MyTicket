@@ -11,8 +11,8 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | Module | Statut | Progression | Description |
 | :--- | :---: | :---: | :--- |
 | **Backend (API Express)** | 🟢 Validé & Durci | 100% (Paiements & Scanner) | Auth, rôles, catalogue, cycle de vie, détail public, RLS durcis, passerelles de paiement (Stripe/MoMo) et API check-in/scanner |
-| **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0016 | RLS `DRAFT`, trigger invariants, description (0012), pg_cron (0013), RPC `confirm_online_payment` (0014), RPC `scan_and_checkin_ticket` (0015), RLS création Admin (0016) |
-| **DevOps & Tests** | 🟢 Validé | 128/128 tests validés | Dockerfile, Vitest (128 tests déterministes sans `.env`), CI Pipeline GitHub Actions fullstack (backend, docker, pg16, frontend), guides de déploiement |
+| **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0018 | RLS `DRAFT`, trigger invariants, description (0012), pg_cron (0013), RPC `confirm_online_payment` (0014), RPC `scan_and_checkin_ticket` (0015), RLS création Admin (0016), RBAC hiérarchique (0017), Audit Sécurité & Événements gratuits (0018) |
+| **DevOps & Tests** | 🟢 Validé | 133/133 tests validés | Dockerfile, Vitest (133 tests déterministes sur 19 fichiers sans `.env`), CI Pipeline GitHub Actions fullstack (backend, docker, pg16, frontend), guides de déploiement |
 | **Frontend (Next.js / React)** | 🟢 Fonctionnel & Complet | 100% (Paiements & Scanner mobile) | Interface Utilisateur, Espace Organisateur avec Scanner Caméra (`/organizer/events/[id]/scanner`), Dashboard Admin, Paiements en ligne ; `npm run lint` et `npm run build` (27/27 pages) |
 
 ---
@@ -83,6 +83,8 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - `0014_confirm_online_payment.sql` (fonction RPC confirm_online_payment pour validation idempotente et émission de billets)
   - `0015_ticket_checkin_and_scanner.sql` (statut tickets `USED`, colonnes de traçabilité `scanned_at`/`scanned_by` et RPC sécurisée `scan_and_checkin_ticket`)
   - `0016_allow_admin_event_creation.sql` (politique RLS autorisant les profils `ADMIN` à créer des événements en statut `DRAFT`)
+  - `0017_admin_hierarchical_permissions.sql` (permissions hiérarchiques admin et `promote_user_to_admin` restreinte à `service_role`)
+  - `0018_audit_security_and_free_events.sql` (durcissement RPC `confirm_online_payment`/`promote_user_to_admin`, nettoyage doublon RLS 0016, auto-confirmation et émission immédiate des billets pour les événements gratuits `price = 0`)
 
 ---
 
@@ -179,6 +181,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **05/11/2026** | Backend/Security | Étape 14 (Rôles Fullstack Admin/Organisateur) : Autorisation du rôle `ADMIN` sur l'ensemble des routes événements (`POST /`, `GET /me`, `GET /stats`, `PATCH /:eventId`) pour éliminer les erreurs 403 "Permission insuffisante" ; enrichissement de la réponse `POST /api/auth/login` avec le rôle et le nom complet issus de la table `profiles` pour une activation immédiate des permissions frontend. 128/128 tests validés. | ✅ Validé & Poussé |
 | **07/11/2026** | Database/Security | Étape 15 (Migration 0016 - Création d'événements par les Admins) : Nouvelle politique RLS `Organizers and admins can create own events in DRAFT only` autorisant les administrateurs à créer des événements directement en statut `DRAFT`. | ✅ Validé & Poussé |
 | **07/11/2026** | Fullstack/Permissions | Étape 16 (Hiérarchie RBAC Complète & Tâches Supérieures Admin) : Déverrouillage universel du rôle `ADMIN` dans le middleware `requireRole` (héritage automatique de tous les privilèges sur les rôles subordonnés), synchronisation complète du profil applicatif sur `login`, `signup`, `getMe` et `refreshSession` (frontend + backend), migration SQL `0017_admin_hierarchical_permissions.sql` (modération globale `cancel_event`, supervision des réservations `get_organizer_event_reservations`, politiques RLS `reservations`/`tickets`, et emails dans `admin_list_users`), script de promotion `promote-admin.js`. | ✅ Validé & Prêt |
+| **07/11/2026** | Fullstack/Audit | Étape 17 (Corrections Audit Sécurité & QA sur branche `fix/audit`) : Verrouillage `service_role` sur `promote_user_to_admin` et `confirm_online_payment` (migrations 0014, 0017, 0018), sécurisation des webhooks de paiement (`supabaseService` sans fuite de session, validation `paymentId`, vérification de secrets), auto-confirmation et génération de billets pour événements gratuits (`price = 0`), lecture de `remainingCapacity`/`eventDate` sur catalogue et détail événement, encodage `ticket_code` UUID dans le QR Pass et scan caméra `BarcodeDetector`, échappement HTML dans `emailService.js`, protection Open Redirect sur `/auth/login`, vérification réelle du statut sur `/payment/success`, alignement des contrats API/UI (stats Admin/Organisateur, blocage utilisateur, motif de refus, jointures `event` sur réservations/tickets), gestion propre des erreurs Express `400`/`413`. **133/133 tests backend passés, 0 erreur / 0 warning ESLint frontend**. | ✅ Validé |
 
 
 

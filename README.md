@@ -348,5 +348,5 @@ confirmee genere ses tickets via la fonction PostgreSQL transactionnelle.
 | PATCH | `/api/admin/events/:eventId/approve` | Oui | ADMIN | Approuver un evenement |
 | PATCH | `/api/admin/events/:eventId/reject` | Oui | ADMIN | Refuser un evenement |
 | GET | `/api/admin/payments/pending` | Oui | ADMIN | Lister les paiements sur place en attente |
-| PATCH | `/api/admin/payments/:paymentId/confirm-on-site` | Oui | ADMIN | Confirmer le paiement sur place et emettre les billets |
+| PATCH | `/api/admin/payments/:paymentId/confirm-onsite` | Oui | ADMIN | Confirmer le paiement sur place et emettre les billets |
 
