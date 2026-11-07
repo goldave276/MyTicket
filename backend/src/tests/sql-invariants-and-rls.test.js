@@ -225,6 +225,34 @@ describe("Invariants SQL, RLS et Validations Safe BigInt (Phase B0.5)", () => {
             expect(migration0013).toContain("'0 * * * *'");
             expect(migration0013).toContain("public.finish_expired_events()");
         });
+
+        it("verrouille l'execution de confirm_online_payment et promote_user_to_admin au seul service_role", () => {
+            const migration0014 = fs.readFileSync(
+                path.join(__dirname, "../../supabase/migrations/0014_confirm_online_payment.sql"),
+                "utf8"
+            );
+            const migration0017 = fs.readFileSync(
+                path.join(__dirname, "../../supabase/migrations/0017_admin_hierarchical_permissions.sql"),
+                "utf8"
+            );
+
+            expect(migration0014).toContain(
+                "revoke all on function public.confirm_online_payment(bigint, text, text, jsonb) from public, anon, authenticated;"
+            );
+            expect(migration0014).toContain(
+                "grant execute on function public.confirm_online_payment(bigint, text, text, jsonb) to service_role;"
+            );
+
+            expect(migration0017).toContain(
+                'drop policy if exists "Organizers and admins can create own events in DRAFT only" on public.events;'
+            );
+            expect(migration0017).toContain(
+                "revoke all on function public.promote_user_to_admin(text) from public, anon, authenticated;"
+            );
+            expect(migration0017).toContain(
+                "grant execute on function public.promote_user_to_admin(text) to service_role;"
+            );
+        });
     });
 });
 

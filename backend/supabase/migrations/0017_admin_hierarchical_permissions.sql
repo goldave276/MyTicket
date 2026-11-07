@@ -9,6 +9,7 @@
 
 -- 1. Création d'événements au statut DRAFT autorisée pour ORGANIZER et ADMIN
 drop policy if exists "Organizers can create own events in DRAFT only" on public.events;
+drop policy if exists "Organizers and admins can create own events in DRAFT only" on public.events;
 drop policy if exists "Organizers and Admins can create own events in DRAFT only" on public.events;
 
 create policy "Organizers and Admins can create own events in DRAFT only"
@@ -161,6 +162,13 @@ declare
     target_uid uuid;
     profile_row public.profiles;
 begin
+    if not (
+        current_user in ('postgres', 'service_role', 'supabase_admin')
+        or exists (select 1 from public.profiles where id = auth.uid() and role = 'ADMIN')
+    ) then
+        raise exception 'Permission insuffisante';
+    end if;
+
     select id into target_uid from auth.users where email = p_email;
     if target_uid is null then
         raise exception 'Utilisateur avec cet email introuvable';
@@ -171,3 +179,7 @@ begin
     return profile_row;
 end;
 $$;
+
+
+revoke all on function public.promote_user_to_admin(text) from public, anon, authenticated;
+grant execute on function public.promote_user_to_admin(text) to service_role;
