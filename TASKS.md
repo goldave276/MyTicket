@@ -194,6 +194,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 - [x] **B2.2. Consolidation & Optimisations**
   - [x] Créer les index sur `events(event_date, status)`, `reservations(user_id, event_id)`, `tickets(user_id, ticket_code)`, `payments` et `organizer_requests` (Migration 0009).
   - [x] Exploiter les fonctions RPC sécurisées dans les contrôleurs (`get_admin_stats`, `get_organizer_stats`, `admin_list_users`, `admin_update_user_role`, `admin_set_user_blocked`).
+  - [x] Migration 0016 : Autorisation RLS d'insertion d'événements en statut DRAFT pour les administrateurs.
 
 ---
 

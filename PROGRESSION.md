@@ -11,7 +11,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | Module | Statut | Progression | Description |
 | :--- | :---: | :---: | :--- |
 | **Backend (API Express)** | 🟢 Validé & Durci | 100% (Paiements & Scanner) | Auth, rôles, catalogue, cycle de vie, détail public, RLS durcis, passerelles de paiement (Stripe/MoMo) et API check-in/scanner |
-| **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0015 | RLS `DRAFT`, trigger invariants, description (0012), pg_cron (0013), RPC `confirm_online_payment` (0014), RPC `scan_and_checkin_ticket` (0015) |
+| **Base de Données (Supabase)** | 🟢 Validé | Migrations 0001 à 0016 | RLS `DRAFT`, trigger invariants, description (0012), pg_cron (0013), RPC `confirm_online_payment` (0014), RPC `scan_and_checkin_ticket` (0015), RLS création Admin (0016) |
 | **DevOps & Tests** | 🟢 Validé | 128/128 tests validés | Dockerfile, Vitest (128 tests déterministes sans `.env`), CI Pipeline GitHub Actions fullstack (backend, docker, pg16, frontend), guides de déploiement |
 | **Frontend (Next.js / React)** | 🟢 Fonctionnel & Complet | 100% (Paiements & Scanner mobile) | Interface Utilisateur, Espace Organisateur avec Scanner Caméra (`/organizer/events/[id]/scanner`), Dashboard Admin, Paiements en ligne ; `npm run lint` et `npm run build` (27/27 pages) |
 
@@ -82,6 +82,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
   - `0013_schedule_finish_expired_events.sql` (activation de pg_cron et planification horaire de finish_expired_events)
   - `0014_confirm_online_payment.sql` (fonction RPC confirm_online_payment pour validation idempotente et émission de billets)
   - `0015_ticket_checkin_and_scanner.sql` (statut tickets `USED`, colonnes de traçabilité `scanned_at`/`scanned_by` et RPC sécurisée `scan_and_checkin_ticket`)
+  - `0016_allow_admin_event_creation.sql` (politique RLS autorisant les profils `ADMIN` à créer des événements en statut `DRAFT`)
 
 ---
 
@@ -176,6 +177,7 @@ Ce document sert de journal de bord pour suivre l'avancement global du projet My
 | **04/11/2026** | DevOps/Deploy | Étape 12 (Déploiement Frontend Vercel & Liaison Fullstack) : Déploiement du Frontend Next.js sur Vercel (`https://my-ticket-virid.vercel.app`), injection de `NEXT_PUBLIC_API_URL` pointant vers Render et configuration de la politique CORS de production sur Render (`FRONTEND_URL`). | ✅ Validé |
 | **04/11/2026** | Frontend/Auth | Étape 13 : conservation de la session lors d'une erreur réseau/API temporaire et fusion des données Supabase `user` avec le profil applicatif au rechargement, afin de restaurer correctement les rôles `ORGANIZER` et `ADMIN`. Lint validé ; recette navigateur à effectuer, la compilation Turbopack locale étant bloquée par la création d'une jonction Windows. | ⚠️ À recetter |
 | **05/11/2026** | Backend/Security | Étape 14 (Rôles Fullstack Admin/Organisateur) : Autorisation du rôle `ADMIN` sur l'ensemble des routes événements (`POST /`, `GET /me`, `GET /stats`, `PATCH /:eventId`) pour éliminer les erreurs 403 "Permission insuffisante" ; enrichissement de la réponse `POST /api/auth/login` avec le rôle et le nom complet issus de la table `profiles` pour une activation immédiate des permissions frontend. 128/128 tests validés. | ✅ Validé & Poussé |
+| **07/11/2026** | Database/Security | Étape 15 (Migration 0016 - Création d'événements par les Admins) : Nouvelle politique RLS `Organizers and admins can create own events in DRAFT only` autorisant les administrateurs à créer des événements directement en statut `DRAFT`. | ✅ Validé & Poussé |
 
 
 
