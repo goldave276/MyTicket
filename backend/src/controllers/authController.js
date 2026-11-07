@@ -1,4 +1,4 @@
-const { supabase } = require("../config/supabase");
+const { supabase, createAuthenticatedClient } = require("../config/supabase");
 const {
     loginSchema,
     signupSchema,
@@ -26,13 +26,22 @@ async function login(req, res) {
     });
 
     if (error) {
+        if (error.status === 0 || error.name === "AuthRetryableFetchError") {
+            return res.status(503).json({
+                message: "Service d'authentification temporairement indisponible"
+            });
+        }
         return res.status(401).json({
             message: "Email ou mot de passe incorrect"
         });
     }
 
+    const userClient = data.session?.access_token && typeof createAuthenticatedClient === "function"
+        ? createAuthenticatedClient(data.session.access_token)
+        : supabase;
+
     // Récupération du profil applicatif pour hydrater le vrai rôle (USER, ORGANIZER, ADMIN)
-    const { data: profile } = await supabase
+    const { data: profile } = await userClient
         .from("profiles")
         .select("id, full_name, role, is_blocked, created_at")
         .eq("id", data.user.id)
@@ -207,11 +216,21 @@ async function refreshSession(req, res) {
         return res.status(401).json({ message: "Session invalide ou expiree" });
     }
 
-    const { data: profile } = await supabase
+    const userClient = data.session?.access_token && typeof createAuthenticatedClient === "function"
+        ? createAuthenticatedClient(data.session.access_token)
+        : supabase;
+
+    const { data: profile } = await userClient
         .from("profiles")
         .select("id, full_name, role, is_blocked, created_at")
         .eq("id", data.user.id)
         .maybeSingle();
+
+    if (profile?.is_blocked) {
+        return res.status(403).json({
+            message: "Compte bloque"
+        });
+    }
 
     const appUser = {
         ...data.user,

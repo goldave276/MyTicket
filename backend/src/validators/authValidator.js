@@ -12,6 +12,7 @@ const loginSchema = z.object({
     password: z
         .string({ required_error: "Mot de passe obligatoire" })
         .min(1, { message: "Mot de passe obligatoire" })
+        .max(128, { message: "Le mot de passe ne peut pas depasser 128 caracteres" })
 });
 
 const signupSchema = z.object({

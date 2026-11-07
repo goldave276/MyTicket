@@ -24,7 +24,8 @@ export default function LoginPage() {
     try {
       await login({ email, password });
       showToast('Connexion réussie ! Bienvenue sur MyTicket.', 'success');
-      const redirectUrl = router.query.redirect || '/dashboard';
+      const rawRedirect = typeof router.query.redirect === 'string' ? router.query.redirect : '';
+      const redirectUrl = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : '/dashboard';
       router.push(redirectUrl);
     } catch (err) {
       setError(err.message || 'Identifiants incorrects. Veuillez réessayer.');
