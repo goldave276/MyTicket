@@ -28,10 +28,11 @@ export default function EventCard({ event, showStatus = false, onAction }) {
   } = event;
 
   const category = event_type || eventType || 'Événement';
-  const eventDateStr = date || event_date;
+  const eventDateStr = date || event_date || event.eventDate;
   const eventPrice = price ?? ticket_price ?? 0;
-  const remaining = available_tickets ?? availableTickets ?? 0;
-  const total = total_tickets ?? totalTickets ?? 100;
+  const total = event.capacity ?? total_tickets ?? totalTickets ?? 100;
+  const remaining = event.remainingCapacity ?? event.remaining_capacity ?? available_tickets ?? availableTickets ?? total;
+
   const image = image_url || imageUrl || getEventImage(category);
 
   const percentLeft = Math.max(0, Math.min(100, Math.round((remaining / total) * 100)));
@@ -40,6 +41,7 @@ export default function EventCard({ event, showStatus = false, onAction }) {
     <div className="group relative rounded-md border border-zinc-800 bg-zinc-900/60 overflow-hidden hover:border-indigo-500/40 transition-all duration-300 flex flex-col justify-between">
       {/* Event Cover Image & Badge */}
       <div className="frame-corners relative h-48 w-full overflow-hidden bg-zinc-800">
+        {/* eslint-disable-next-line @next/next/no-img-element -- remote event cover URL */}
         <img
           src={image}
           alt={title}

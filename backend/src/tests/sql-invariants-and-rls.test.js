@@ -252,6 +252,14 @@ describe("Invariants SQL, RLS et Validations Safe BigInt (Phase B0.5)", () => {
             expect(migration0017).toContain(
                 "grant execute on function public.promote_user_to_admin(text) to service_role;"
             );
+            const migration0018 = fs.readFileSync(
+                path.join(__dirname, "../../supabase/migrations/0018_audit_security_and_free_events.sql"),
+                "utf8"
+            );
+            expect(migration0018).toContain("when coalesce(event_row.price, 0) = 0 then 'CONFIRMED'");
+            expect(migration0018).toContain(
+                "insert into public.tickets (reservation_id, event_id, user_id)"
+            );
         });
     });
 });

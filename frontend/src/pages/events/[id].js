@@ -165,7 +165,9 @@ export default function EventDetailsPage() {
   }
 
   const eventPrice = event.price ?? event.ticket_price ?? 0;
-  const available = event.available_tickets ?? event.availableTickets ?? 0;
+  const totalCapacity = event.capacity ?? event.total_tickets ?? event.totalTickets ?? 100;
+  const available = event.remainingCapacity ?? event.remaining_capacity ?? event.available_tickets ?? event.availableTickets ?? totalCapacity;
+  const eventDateVal = event.date || event.event_date || event.eventDate;
   const totalPrice = eventPrice * quantity;
   const isSoldOut = available <= 0;
   const eventImage =
@@ -257,8 +259,8 @@ export default function EventDetailsPage() {
               <div className="spec-item">
                 <span className="spec-label">Date</span>
                 <span className="spec-value">
-                  {event.date || event.event_date
-                    ? new Date(event.date || event.event_date).toLocaleDateString('fr-FR', {
+                  {eventDateVal
+                    ? new Date(eventDateVal).toLocaleDateString('fr-FR', {
                         day: 'numeric',
                         month: 'short',
                         year: 'numeric',
@@ -270,8 +272,8 @@ export default function EventDetailsPage() {
               <div className="spec-item">
                 <span className="spec-label">Heure</span>
                 <span className="spec-value">
-                  {event.date || event.event_date
-                    ? new Date(event.date || event.event_date).toLocaleTimeString('fr-FR', {
+                  {eventDateVal
+                    ? new Date(eventDateVal).toLocaleTimeString('fr-FR', {
                         hour: '2-digit',
                         minute: '2-digit',
                       })
