@@ -138,16 +138,23 @@ export default function EventCard({ event, showStatus = false, onAction }) {
             >
               Gérer l’événement
             </button>
+          ) : remaining === 0 ? (
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="w-full inline-flex items-center justify-center gap-2 font-mono uppercase tracking-wider text-xs font-semibold rounded-md py-3 px-4 bg-zinc-800 text-zinc-500 cursor-not-allowed"
+            >
+              <TicketIcon className="w-4 h-4" />
+              Complet
+            </button>
           ) : (
             <Link
               href={`/events/${id}`}
-              className={remaining === 0
-                ? 'w-full inline-flex items-center justify-center gap-2 font-mono uppercase tracking-wider text-xs font-semibold rounded-md py-3 px-4 bg-zinc-800 text-zinc-500 cursor-not-allowed'
-                : 'btn-primary w-full'
-              }
+              className="btn-primary w-full"
             >
               <TicketIcon className="w-4 h-4" />
-              {remaining === 0 ? 'Complet' : 'Réserver une place'}
+              Réserver une place
               <ArrowRightIcon className="w-4 h-4" />
             </Link>
           )}

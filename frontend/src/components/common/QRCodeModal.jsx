@@ -27,6 +27,8 @@ export default function QRCodeModal({ isOpen, onClose, ticket }) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
+    const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
     img.onload = () => {
       canvas.width = img.width + 40;
       canvas.height = img.height + 40;
@@ -40,8 +42,9 @@ export default function QRCodeModal({ isOpen, onClose, ticket }) {
         downloadLink.href = pngFile;
         downloadLink.click();
       }
+      URL.revokeObjectURL(url);
     };
-    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+    img.src = url;
   };
 
   return (

@@ -25,7 +25,7 @@ function normalizeScannedPayload(rawValue) {
 export default function TicketScannerPage() {
   const router = useRouter();
   const { id } = router.query;
-  const { loading: authLoading } = useRequireAuth({ role: 'ORGANIZER' });
+  const { ready, loading: authLoading } = useRequireAuth({ role: 'ORGANIZER' });
   const { showToast } = useToast();
 
   const [event, setEvent] = useState(null);
@@ -64,10 +64,10 @@ export default function TicketScannerPage() {
   }, [id, showToast]);
 
   useEffect(() => {
-    if (!authLoading) {
+    if (ready && !authLoading) {
       queueMicrotask(() => loadData());
     }
-  }, [authLoading, loadData]);
+  }, [ready, authLoading, loadData]);
 
   const stopCamera = useCallback(() => {
     if (scanIntervalRef.current) {
@@ -211,7 +211,7 @@ export default function TicketScannerPage() {
     }
   };
 
-  if (authLoading || loading) {
+  if (!ready || authLoading || loading) {
     return (
       <div className="max-w-2xl mx-auto py-12 space-y-6 animate-pulse">
         <div className="h-8 bg-zinc-800 rounded w-1/3" />
@@ -286,11 +286,10 @@ export default function TicketScannerPage() {
         {/* Big Alert Banner on Scan */}
         {lastScanResult && (
           <div
-            className={`p-6 rounded-md border text-center transition-all ${
-              lastScanResult.success
-                ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
-                : 'bg-rose-500/20 border-rose-500/50 text-rose-300 animate-pulse'
-            }`}
+            className={`p-6 rounded-md border text-center transition-all ${lastScanResult.success
+              ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+              : 'bg-rose-500/20 border-rose-500/50 text-rose-300 animate-pulse'
+              }`}
           >
             <div className="text-4xl mb-2">{lastScanResult.success ? '✅' : '🚫'}</div>
             <h2 className="text-2xl font-bold uppercase tracking-wider">{lastScanResult.message}</h2>

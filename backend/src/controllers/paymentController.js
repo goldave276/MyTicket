@@ -205,10 +205,10 @@ async function initiateCheckout(req, res) {
 
     const { data: event } = reservation
         ? await req.supabase
-              .from("events")
-              .select("id, title, price, currency")
-              .eq("id", reservation.event_id)
-              .single()
+            .from("events")
+            .select("id, title, price, currency")
+            .eq("id", reservation.event_id)
+            .single()
         : { data: {} };
 
     const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:3333").split(",")[0].trim();
@@ -260,6 +260,10 @@ async function initiateCheckout(req, res) {
 }
 
 async function handleStripeWebhook(req, res) {
+    if (process.env.NODE_ENV === "production" && !process.env.STRIPE_WEBHOOK_SECRET) {
+        return res.status(500).json({ message: "Configuration webhook Stripe manquante sur le serveur" });
+    }
+
     const { paymentId, providerPaymentId, status } = req.body || {};
 
     if (paymentId === undefined || paymentId === null || paymentId === "") {
@@ -279,6 +283,10 @@ async function handleStripeWebhook(req, res) {
     }
 
     const dbClient = req.supabase || supabaseService;
+    if (!req.supabase && !process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NODE_ENV === "production") {
+        console.error("[handleStripeWebhook] SUPABASE_SERVICE_ROLE_KEY manquante pour exécuter confirm_online_payment");
+        return res.status(500).json({ message: "Configuration service role Supabase manquante sur le serveur" });
+    }
 
     try {
         if (status === "SUCCEEDED" || !status) {
@@ -313,6 +321,10 @@ async function handleStripeWebhook(req, res) {
 }
 
 async function handleMobileMoneyWebhook(req, res) {
+    if (process.env.NODE_ENV === "production" && !process.env.MOBILE_MONEY_WEBHOOK_SECRET) {
+        return res.status(500).json({ message: "Configuration webhook Mobile Money manquante sur le serveur" });
+    }
+
     const { paymentId, transactionRef, status } = req.body || {};
 
     if (paymentId === undefined || paymentId === null || paymentId === "") {
@@ -332,6 +344,10 @@ async function handleMobileMoneyWebhook(req, res) {
     }
 
     const dbClient = req.supabase || supabaseService;
+    if (!req.supabase && !process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NODE_ENV === "production") {
+        console.error("[handleMobileMoneyWebhook] SUPABASE_SERVICE_ROLE_KEY manquante pour exécuter confirm_online_payment");
+        return res.status(500).json({ message: "Configuration service role Supabase manquante sur le serveur" });
+    }
 
     try {
         if (status === "SUCCESS" || status === "SUCCEEDED" || !status) {

@@ -1,15 +1,12 @@
-import { Inter, JetBrains_Mono } from "next/font/google";
+// Définition autonome des polices sans dépendance réseau externe bloquante au build
+// Optimisé pour chargement instantané (zéro FOUT/FOIT), frugalité réseau et résilience offline.
+export const sans = {
+  variable: "font-sans",
+  className: "font-sans",
+};
 
-// Display / body copy — bold, clean grotesk.
-export const sans = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
+export const mono = {
+  variable: "font-mono",
+  className: "font-mono",
+};
 
-// Technical labels, nav, specs, badges — uppercase + tracked wherever used.
-export const mono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  display: "swap",
-});

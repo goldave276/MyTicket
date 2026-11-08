@@ -279,3 +279,23 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [ ] **Emails Transactionnels** : Réception de l'email de confirmation stylisé avec récapitulatif des billets et QR codes.
   - [ ] **Accès Billets & Export** : Visualisation sur `/dashboard/tickets`, téléchargement PNG du QR code, test d'impression pass A4 (`@media print`).
   - [ ] **Contrôle d'Accès Scanner** : Test du scanner caméra mobile (`/organizer/events/[id]/scanner`) pour valider l'accès caméra et le check-in en direct (statut `USED`).
+
+---
+
+## 🔍 PARTIE 4 : ASSAINISSEMENT POST-AUDIT (08/11/2026)
+- [x] **A1. Déblocage du build frontend Next.js**
+  - [x] Remplacement du chargement distant `next/font/google` par des polices système natives dans `frontend/src/lib/fonts.js` et `globals.css`.
+  - [x] Configuration du script de build avec Webpack (`next build --webpack`) pour garantir une compilation hors-ligne déterministe (27/27 pages générées en ~4s).
+- [x] **A2. Sécurité des webhooks de paiement**
+  - [x] Garde-fous stricts sur `handleStripeWebhook` et `handleMobileMoneyWebhook` dans `backend/src/controllers/paymentController.js` (rejet 500 immédiat en production si `SUPABASE_SERVICE_ROLE_KEY` est absente).
+- [x] **A3. Performance requêtes SQL profil**
+  - [x] Mutualisation de la récupération du profil utilisateur dans `backend/src/middlewares/authMiddleware.js` (`req.profile`) pour éliminer la seconde requête séquentielle dans `requireRole.js`.
+- [x] **A4. Cohérence mise à jour rôles & blocage Admin**
+  - [x] Traitement conjoint et sans retour hâtif des mutations `role` et `isBlocked` dans `backend/src/controllers/adminController.js`.
+- [x] **A5. Fiabilisation UI, Accessibilité & Standards**
+  - [x] Gestion d'erreur explicite avec composant `ErrorState` dans `frontend/src/pages/dashboard/become-organizer.js`.
+  - [x] Garde de synchronisation `ready` dans `frontend/src/pages/organizer/events/[id]/scanner.js`.
+  - [x] Bouton désactivé sémantique pour les événements complets dans `frontend/src/components/events/EventCard.jsx`.
+  - [x] Élimination de `unescape()` déprécié au profit d'un SVG Blob URL dans `frontend/src/components/common/QRCodeModal.jsx`.
+  - [x] Hydratation correcte du profil utilisateur sur mise à jour dans `frontend/src/services/authService.js`.
+  - [x] Attributs `aria-label` ajoutés sur les filtres et champs de recherche (`EventFilters.jsx`, `admin/users.js`).

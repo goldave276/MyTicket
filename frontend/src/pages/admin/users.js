@@ -94,6 +94,7 @@ export default function AdminUsersPage() {
             <input
               type="text"
               placeholder="Rechercher par nom ou par email..."
+              aria-label="Rechercher par nom ou par email"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="field-input pl-11"
