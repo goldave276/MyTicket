@@ -11,7 +11,7 @@ export default function Sidebar({ mode = 'user' }) {
   const userLinks = [
     { href: '/dashboard', label: 'Mes Réservations', icon: TicketIcon },
     { href: '/dashboard/tickets', label: 'Mes Pass & QR Codes', icon: QrCodeIcon },
-    { href: '/dashboard/become-organizer', label: 'Devenir Organisateur', icon: BuildingIcon },
+    ...(!isOrganizer ? [{ href: '/dashboard/become-organizer', label: 'Devenir Organisateur', icon: BuildingIcon }] : []),
     { href: '/dashboard/profile', label: 'Mon Profil', icon: UserIcon },
   ];
 
@@ -60,6 +60,41 @@ export default function Sidebar({ mode = 'user' }) {
           );
         })}
       </nav>
+
+      {(isAdmin || isOrganizer) && (
+        <div className="pt-4 mt-4 border-t border-zinc-800 space-y-1">
+          <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+            Accès Rapides
+          </span>
+          {isAdmin && mode !== 'admin' && (
+            <Link
+              href="/admin"
+              className="eyebrow flex items-center gap-3 px-4 py-2.5 rounded-md text-amber-400 hover:bg-zinc-800 transition-colors"
+            >
+              <ShieldIcon className="w-4 h-4 text-amber-400" />
+              Administration
+            </Link>
+          )}
+          {isOrganizer && mode !== 'organizer' && (
+            <Link
+              href="/organizer"
+              className="eyebrow flex items-center gap-3 px-4 py-2.5 rounded-md text-purple-400 hover:bg-zinc-800 transition-colors"
+            >
+              <BuildingIcon className="w-4 h-4 text-purple-400" />
+              Espace Organisateur
+            </Link>
+          )}
+          {mode !== 'user' && (
+            <Link
+              href="/dashboard"
+              className="eyebrow flex items-center gap-3 px-4 py-2.5 rounded-md text-zinc-400 hover:bg-zinc-800 transition-colors"
+            >
+              <TicketIcon className="w-4 h-4 text-zinc-400" />
+              Espace Client
+            </Link>
+          )}
+        </div>
+      )}
     </aside>
   );
 }

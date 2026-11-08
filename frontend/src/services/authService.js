@@ -15,9 +15,11 @@ export const authService = {
     if (refreshToken) {
       localStorage.setItem('myticket_refresh_token', refreshToken);
     }
+    const rawRole = response.profile?.role || response.user?.role || 'USER';
+    const role = String(rawRole).trim().toUpperCase();
     const userToStore = response.profile
-      ? { ...response.user, ...response.profile, role: response.profile.role || response.user?.role || 'USER' }
-      : response.user;
+      ? { ...response.user, ...response.profile, role }
+      : (response.user ? { ...response.user, role } : null);
     if (userToStore) {
       localStorage.setItem('myticket_user', JSON.stringify(userToStore));
     }
@@ -37,9 +39,11 @@ export const authService = {
     if (refreshToken) {
       localStorage.setItem('myticket_refresh_token', refreshToken);
     }
+    const rawRole = response.profile?.role || response.user?.role || 'USER';
+    const role = String(rawRole).trim().toUpperCase();
     const userToStore = response.profile
-      ? { ...response.user, ...response.profile, role: response.profile.role || response.user?.role || 'USER' }
-      : response.user;
+      ? { ...response.user, ...response.profile, role }
+      : (response.user ? { ...response.user, role } : null);
     if (userToStore) {
       localStorage.setItem('myticket_user', JSON.stringify(userToStore));
     }
@@ -78,9 +82,11 @@ export const authService = {
     if (data.refreshToken) {
       localStorage.setItem('myticket_refresh_token', data.refreshToken);
     }
+    const rawRole = data.profile?.role || data.user?.role || 'USER';
+    const role = String(rawRole).trim().toUpperCase();
     const userToStore = data.profile
-      ? { ...data.user, ...data.profile, role: data.profile.role || data.user?.role || 'USER' }
-      : data.user;
+      ? { ...data.user, ...data.profile, role }
+      : (data.user ? { ...data.user, role } : null);
     if (userToStore) {
       localStorage.setItem('myticket_user', JSON.stringify(userToStore));
     }
@@ -91,9 +97,11 @@ export const authService = {
     const response = await apiFetch('/auth/me');
     // `/auth/me` separates Supabase auth data (email, id) from the app profile
     // (role, full_name). Persist one complete object for UI restoration.
+    const rawRole = response.profile?.role || response.user?.role || response.role || 'USER';
+    const role = String(rawRole).trim().toUpperCase();
     const user = response.user
-      ? { ...response.user, ...(response.profile || {}) }
-      : response;
+      ? { ...response.user, ...(response.profile || {}), role }
+      : { ...response, role };
     if (user) {
       localStorage.setItem('myticket_user', JSON.stringify(user));
     }

@@ -1,4 +1,4 @@
-const { supabase } = require("../config/supabase");
+const { supabase, createAuthenticatedClient } = require("../config/supabase");
 const {
     loginSchema,
     signupSchema,
@@ -31,8 +31,9 @@ async function login(req, res) {
         });
     }
 
-    // Récupération du profil applicatif pour hydrater le vrai rôle (USER, ORGANIZER, ADMIN)
-    const { data: profile } = await supabase
+    // Récupération du profil applicatif via le token de session pour satisfaire les RLS (auth.uid() = id)
+    const userClient = createAuthenticatedClient(data.session.access_token);
+    const { data: profile } = await userClient
         .from("profiles")
         .select("id, full_name, role, is_blocked, created_at")
         .eq("id", data.user.id)
@@ -44,16 +45,17 @@ async function login(req, res) {
         });
     }
 
+    const normalizedRole = (profile?.role || "USER").trim().toUpperCase();
     const appUser = {
         ...data.user,
-        role: profile?.role || "USER",
+        role: normalizedRole,
         full_name: profile?.full_name || data.user.user_metadata?.full_name || null,
         is_blocked: profile?.is_blocked || false
     };
 
     return res.status(200).json({
         user: appUser,
-        profile: profile || null,
+        profile: profile ? { ...profile, role: normalizedRole } : null,
         accessToken: data.session.access_token,
         refreshToken: data.session.refresh_token
     });
@@ -174,16 +176,17 @@ async function getMe(req, res) {
         });
     }
 
+    const normalizedRole = (profile.role || "USER").trim().toUpperCase();
     const appUser = {
         ...req.user,
-        role: profile.role,
+        role: normalizedRole,
         full_name: profile.full_name,
         is_blocked: profile.is_blocked || false
     };
 
     return res.status(200).json({
         user: appUser,
-        profile
+        profile: { ...profile, role: normalizedRole }
     });
 }
 
@@ -207,22 +210,24 @@ async function refreshSession(req, res) {
         return res.status(401).json({ message: "Session invalide ou expiree" });
     }
 
-    const { data: profile } = await supabase
+    const userClient = createAuthenticatedClient(data.session.access_token);
+    const { data: profile } = await userClient
         .from("profiles")
         .select("id, full_name, role, is_blocked, created_at")
         .eq("id", data.user.id)
         .maybeSingle();
 
+    const normalizedRole = (profile?.role || "USER").trim().toUpperCase();
     const appUser = {
         ...data.user,
-        role: profile?.role || "USER",
+        role: normalizedRole,
         full_name: profile?.full_name || data.user.user_metadata?.full_name || null,
         is_blocked: profile?.is_blocked || false
     };
 
     return res.status(200).json({
         user: appUser,
-        profile: profile || null,
+        profile: profile ? { ...profile, role: normalizedRole } : null,
         accessToken: data.session.access_token,
         refreshToken: data.session.refresh_token
     });

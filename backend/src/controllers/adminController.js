@@ -7,8 +7,27 @@ async function getAdminStats(req, res) {
         });
     }
 
+    let pendingRequests = 0;
+    let pendingEvents = 0;
+    try {
+        const [reqRes, eventRes] = await Promise.all([
+            req.supabase.from("organizer_requests").select("*", { count: "exact", head: true }).eq("status", "PENDING"),
+            req.supabase.from("events").select("*", { count: "exact", head: true }).eq("status", "PENDING")
+        ]);
+        if (typeof reqRes.count === "number") pendingRequests = reqRes.count;
+        if (typeof eventRes.count === "number") pendingEvents = eventRes.count;
+    } catch {
+        // Fail-safe non-bloquant
+    }
+
     return res.status(200).json({
-        stats: data
+        stats: data,
+        totalUsers: data?.users_total ?? 0,
+        totalOrganizers: data?.organizers_total ?? 0,
+        pendingRequests,
+        pendingEvents,
+        eventsTotal: data?.events_total ?? 0,
+        revenueConfirmed: data?.revenue_confirmed ?? 0
     });
 }
 

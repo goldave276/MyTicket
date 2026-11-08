@@ -144,12 +144,17 @@ export default function AdminUsersPage() {
                           </select>
                         </td>
                         <td className="text-right">
-                          <button
-                            onClick={() => handleToggleBlock(u.id, u.isBlocked)}
-                            className={u.isBlocked ? 'pill pill-emerald' : 'pill pill-rose'}
-                          >
-                            {u.isBlocked ? 'Débloquer' : 'Bloquer'}
-                          </button>
+                          {(() => {
+                            const isBlocked = Boolean(u.is_blocked ?? u.isBlocked);
+                            return (
+                              <button
+                                onClick={() => handleToggleBlock(u.id, isBlocked)}
+                                className={isBlocked ? 'pill pill-emerald' : 'pill pill-rose'}
+                              >
+                                {isBlocked ? 'Débloquer' : 'Bloquer'}
+                              </button>
+                            );
+                          })()}
                         </td>
                       </tr>
                     ))}
