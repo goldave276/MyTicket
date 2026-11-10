@@ -18,6 +18,19 @@ export const adminService = {
     });
   },
 
+  async getAllEvents(params = {}) {
+    const searchParams = new URLSearchParams();
+    if (params.status) searchParams.append('status', params.status);
+    const queryString = searchParams.toString();
+    return apiFetch(`/admin/events${queryString ? `?${queryString}` : ''}`);
+  },
+
+  async deleteOrCancelEvent(eventId, force = false) {
+    return apiFetch(`/admin/events/${eventId}${force ? '?force=true' : ''}`, {
+      method: 'DELETE',
+    });
+  },
+
   async getPendingEvents() {
     return apiFetch('/admin/events/pending');
   },

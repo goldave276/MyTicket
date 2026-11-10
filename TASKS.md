@@ -47,7 +47,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 - [x] **F2.4. Profil & Demande Organisateur**
   - [x] Page "Mon Profil" (`/dashboard/profile`) : modification du nom complet et consultation de son rôle.
   - [x] Formulaire "Devenir Organisateur" (`/dashboard/become-organizer`) : type d'événement ciblé, justificatif et description de l'activité (persistée et contrainte à 20-1000 caractères).
-  - [x] Téléversement réel du justificatif vers Supabase Storage (PDF, JPG, PNG, max 5 Mo) avec préfixe utilisateur sécurisé, vérification de type/taille et stockage dans `organizer-documents`.
+  - [x] Téléversement réel du justificatif vers Supabase Storage (PDF, JPG, PNG, max 5 Mo) avec préfixe utilisateur sécurisé, vérification de type/taille et stockage dans `organizer-documents` (durci avec `supabaseService.storage` pour contourner les échecs RLS de stockage).
   - [x] Suivi en direct du statut de la demande (`PENDING`, `APPROVED`, `REJECTED`).
 
 ---
@@ -91,6 +91,11 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 
 - [x] **F4.4. Tableau de Bord Global Admin**
   - [x] Vue synthétique (`/admin`) : nombre d'utilisateurs inscrits, événements actifs, demandes/événements en attente.
+
+- [x] **F4.5. Gestion Globale & Modération / Suppression d'Événements**
+  - [x] Page d'administration complète (`/admin/events`) avec filtrage par statut (`APPROVED`, `PENDING`, `DRAFT`, `CANCELLED`, `FINISHED`) et recherche.
+  - [x] Suppression physique si 0 réservation ou annulation d'urgence (`CANCELLED`) avec invalidation des billets et des réservations associées.
+  - [x] Action rapide de modération/suppression directement sur la page publique d'un événement (`/events/[id]`) pour les administrateurs.
 
 ---
 
@@ -233,6 +238,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Guide de déploiement Web Service Render rédigé dans [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md).
   - [x] Web Service Render déployé en production avec variables d'environnement (`NODE_ENV=production`, `PORT=3000`, `TRUST_PROXY=1`, etc.) sur `https://myticket-llwf.onrender.com`.
   - [x] Point de contrôle opérationnel : `GET /api/health` actif et validé.
+  - [x] **Pipeline CI/CD Automatisé** : Automatisation du déploiement Render conditionné au succès des 4 jobs CI (Next.js build, tests unitaires, build Docker et migrations PostgreSQL) via Deploy Hook Render (`RENDER_DEPLOY_HOOK`) dans `.github/workflows/backend-ci.yml`.
 
 ---
 

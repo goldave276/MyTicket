@@ -36,6 +36,8 @@ Assurez-vous que toutes les migrations du dossier `backend/supabase/migrations/`
 16. `0016_allow_admin_event_creation.sql` (Politique RLS autorisant les administrateurs à créer des événements en statut DRAFT)
 17. `0017_admin_hierarchical_permissions.sql` (Permissions hiérarchiques ADMIN et fonction RPC `promote_user_to_admin` restreinte à `service_role`)
 18. `0018_audit_security_and_free_events.sql` (Verrouillage `service_role` sur `confirm_online_payment`/`promote_user_to_admin`, nettoyage doublon RLS et confirmation immédiate des événements gratuits `price = 0`)
+19. `0019_fix_rls_infinite_recursion.sql` (Résolution de la récursion infinie RLS sur `profiles` via `auth.jwt()` et fonction helper `public.is_admin()`)
+20. `0020_admin_delete_or_cancel_event.sql` (Suppression physique pure si 0 réservation ou annulation d'urgence atomique de l'événement et de ses réservations/billets par l'administrateur)
 
 ---
 
@@ -75,7 +77,11 @@ Configurez les variables suivantes dans le tableau de bord de votre hébergeur (
 2. Choisissez le répertoire racine : `backend`.
 3. Environnement : **Docker** (Render détectera automatiquement `backend/Dockerfile`).
 4. Ajoutez les variables d'environnement listées à l'étape 2.
-5. Déployez le service.
+5. **Déploiement Automatisé via GitHub Actions (Recommandé) :**
+   * Dans Render > Service Backend > **Settings** > **Deploy Hook** : générez ou copiez l'URL de votre Deploy Hook.
+   * Désactivez l'option **Auto-Deploy** sur Render pour que seuls les commits ayant réussi tous les tests CI soient déployés.
+   * Dans GitHub > Répertoire > **Settings** > **Secrets and variables** > **Actions** : ajoutez le secret `RENDER_DEPLOY_HOOK` avec cette URL.
+   * Le job `deploy-render` de `.github/workflows/backend-ci.yml` déclenchera automatiquement Render à chaque push validé sur `main`.
 
 ### Option B : Déploiement sur Railway
 1. Créez un nouveau projet et liez le dépôt GitHub.

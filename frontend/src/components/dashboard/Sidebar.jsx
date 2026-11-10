@@ -23,6 +23,7 @@ export default function Sidebar({ mode = 'user' }) {
 
   const adminLinks = [
     { href: '/admin', label: 'Statistiques Globales', icon: BarChartIcon },
+    { href: '/admin/events', label: 'Tous les Événements', icon: TicketIcon },
     { href: '/admin/organizer-requests', label: 'Demandes Organisateur', icon: BuildingIcon },
     { href: '/admin/events-pending', label: 'Événements à approuver', icon: TicketIcon },
     { href: '/admin/payments', label: 'Paiements sur Place', icon: CurrencyIcon },
