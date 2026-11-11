@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import reservationService from '@/services/reservationService';
@@ -11,11 +12,18 @@ import { BuildingIcon, ClockIcon, CheckCircleIcon, ArrowRightIcon } from '@/comp
 
 function formatRequestDate(request) {
   const raw = request.createdAt || request.created_at;
-  return raw ? new Date(raw).toLocaleDateString('fr-FR') : 'Date inconnue';
+  return raw ? new Date(raw).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }) : 'Date inconnue';
 }
 
 export default function BecomeOrganizerPage() {
   const { ready, isOrganizer } = useRequireAuth();
+  const { refreshUser } = useAuth();
   const { showToast } = useToast();
 
   const [requests, setRequests] = useState([]);
@@ -26,25 +34,70 @@ export default function BecomeOrganizerPage() {
   const [eventType, setEventType] = useState('CONCERT');
   const [selectedFile, setSelectedFile] = useState(null);
   const [description, setDescription] = useState('');
+  const prevPendingRef = useRef(false);
 
-  const fetchRequests = useCallback(async () => {
-    setLoading(true);
+  const fetchRequests = useCallback(async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     setError(false);
     try {
       const data = await reservationService.getMyOrganizerRequests();
-      setRequests(Array.isArray(data) ? data : data.requests || []);
+      const list = Array.isArray(data) ? data : data.requests || [];
+      setRequests(list);
+
+      // Si une demande a été approuvée, synchroniser le statut utilisateur
+      const hasApproved = list.some((r) => r.status === 'APPROVED');
+      if (hasApproved && !isOrganizer) {
+        await refreshUser();
+        showToast('Félicitations ! Votre demande d’organisateur a été validée.', 'success');
+      }
     } catch (err) {
-      setError(true);
-      showToast(err.message || 'Impossible de charger vos demandes', 'error');
-      setRequests([]);
+      if (!isBackground) {
+        setError(true);
+        showToast(err.message || 'Impossible de charger vos demandes', 'error');
+        setRequests([]);
+      }
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
-  }, [showToast]);
+  }, [isOrganizer, refreshUser, showToast]);
 
   useEffect(() => {
-    // Deferred to a microtask so this effect doesn't call setState synchronously.
+    // Premier chargement
     if (ready) queueMicrotask(() => fetchRequests());
+  }, [ready, fetchRequests]);
+
+  const hasPending = requests.some((r) => r.status === 'PENDING');
+
+  // Auto-rafraîchissement intelligent : polling doux tant qu'une demande est en attente
+  useEffect(() => {
+    if (!ready || !hasPending) return;
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchRequests(true);
+      }
+    }, 12000); // 12 secondes
+
+    return () => clearInterval(interval);
+  }, [ready, hasPending, fetchRequests]);
+
+  // Auto-rafraîchissement au focus et au changement de visibilité d'onglet
+  useEffect(() => {
+    if (!ready) return;
+
+    const handleFocus = () => {
+      if (document.visibilityState === 'visible') {
+        fetchRequests(true);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+    };
   }, [ready, fetchRequests]);
 
   const handleFileChange = (e) => {
@@ -264,21 +317,29 @@ export default function BecomeOrganizerPage() {
 
           {/* History of Requests */}
           {!loading && requests.length > 0 && (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6 shadow-sm space-y-4">
               <h4 className="text-base font-bold text-zinc-900 dark:text-white">Historique de vos demandes</h4>
               <div className="space-y-3">
                 {requests.map((req) => (
                   <div
                     key={req.id}
-                    className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 flex justify-between items-center"
+                    className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 space-y-2"
                   >
-                    <div>
-                      <span className="text-sm font-bold text-zinc-900 dark:text-white">
-                        {req.eventType || req.event_type}
-                      </span>
-                      <p className="text-xs text-zinc-400">{formatRequestDate(req)}</p>
+                    <div className="flex justify-between items-start gap-2">
+                      <div>
+                        <span className="text-sm font-bold text-zinc-900 dark:text-white block">
+                          {req.eventType || req.event_type}
+                        </span>
+                        <p className="text-xs text-zinc-400 mt-0.5">{formatRequestDate(req)}</p>
+                      </div>
+                      <Badge status={req.status} />
                     </div>
-                    <Badge status={req.status} />
+                    {(req.adminComment || req.admin_comment) && (
+                      <div className="text-xs p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300">
+                        <span className="font-bold">Motif du refus : </span>
+                        <span>{req.adminComment || req.admin_comment}</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

@@ -216,9 +216,130 @@ async function sendTicketConfirmationEmail({
   }
 }
 
+function buildOrganizerRequestNotificationHtml({
+  applicantName,
+  applicantEmail,
+  eventType,
+  description,
+}) {
+  const safeName = escapeHtml(applicantName || "Membre MyTicket");
+  const safeEmail = escapeHtml(applicantEmail || "Non communiqué");
+  const safeEventType = escapeHtml(eventType || "Non précisé");
+  const safeDesc = escapeHtml(description || "Aucune description fournie");
+  const adminUrl = `${(process.env.FRONTEND_URL || "http://localhost:3333").split(",")[0].trim()}/admin/organizer-requests`;
+
+  return `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nouvelle demande d'accréditation Organisateur</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0b0d0c; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f2f4f2;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0b0d0c; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #111312; border: 1px solid #1f2421; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+          <tr>
+            <td style="padding: 24px 32px; background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);">
+              <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #c7d2fe; font-weight: 700;">Administration MyTicket</span>
+              <h1 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 6px 0 0 0;">Nouvelle demande Organisateur</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 32px;">
+              <p style="font-size: 15px; line-height: 1.5; color: #d4d4d8; margin: 0 0 20px 0;">
+                Un utilisateur vient de soumettre un dossier pour obtenir le statut d’<strong>Organisateur officiel</strong> sur MyTicket.
+              </p>
+              <div style="background-color: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+                <div style="margin-bottom: 10px;">
+                  <span style="font-size: 12px; color: #a1a1aa; text-transform: uppercase;">Demandeur :</span>
+                  <div style="color: #ffffff; font-weight: 600; font-size: 15px;">${safeName} (<a href="mailto:${safeEmail}" style="color: #818cf8; text-decoration: none;">${safeEmail}</a>)</div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                  <span style="font-size: 12px; color: #a1a1aa; text-transform: uppercase;">Type d'événements envisagés :</span>
+                  <div style="color: #ffffff; font-weight: 500; font-size: 14px;">${safeEventType}</div>
+                </div>
+                <div>
+                  <span style="font-size: 12px; color: #a1a1aa; text-transform: uppercase;">Description / Note :</span>
+                  <div style="color: #e4e4e7; font-size: 13px; line-height: 1.4; white-space: pre-wrap; margin-top: 4px;">${safeDesc}</div>
+                </div>
+              </div>
+              <div style="text-align: center; margin: 32px 0 16px 0;">
+                <a href="${adminUrl}" style="display: inline-block; background-color: #4f46e5; color: #ffffff; font-weight: 700; font-size: 14px; padding: 14px 28px; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);">
+                  Examiner la demande dans l'Admin
+                </a>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 16px 32px; background-color: #0d0f0e; border-top: 1px solid #1f2421; text-align: center; font-size: 12px; color: #71717a;">
+              Notification administrative automatique générée par MyTicket.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}
+
+/**
+ * Envoie une notification à l'administrateur lorsqu'un utilisateur soumet une demande organisateur.
+ */
+async function sendOrganizerRequestNotificationEmail({
+  adminEmail,
+  applicantName,
+  applicantEmail,
+  eventType,
+  description,
+}) {
+  const recipient = adminEmail || process.env.ADMIN_EMAIL || process.env.SMTP_USER;
+  if (!recipient) {
+    console.warn("[emailService] Aucun email administrateur configuré pour la notification.");
+    return { success: false, reason: "MISSING_ADMIN_EMAIL" };
+  }
+
+  const transporter = getTransporter();
+  const html = buildOrganizerRequestNotificationHtml({
+    applicantName,
+    applicantEmail,
+    eventType,
+    description,
+  });
+
+  const mailOptions = {
+    from: process.env.SMTP_FROM || '"MyTicket Billetterie" <no-reply@myticket.tg>',
+    to: recipient,
+    subject: `🔔 Nouvelle demande Organisateur : ${applicantName || applicantEmail || "Un membre"} - MyTicket`,
+    html,
+  };
+
+  if (!transporter) {
+    console.info(
+      `[emailService:SIMULATION] Alerte demande organisateur simulée envoyée à l'admin ${recipient} pour ${applicantEmail}.`
+    );
+    return { success: true, simulated: true, messageId: `simulated-${Date.now()}` };
+  }
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.info(`[emailService] Alerte demande organisateur envoyée à l'admin ${recipient} (MessageId: ${info.messageId})`);
+    return { success: true, simulated: false, messageId: info.messageId };
+  } catch (err) {
+    console.error(`[emailService] Erreur envoi email admin:`, err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 module.exports = {
   sendTicketConfirmationEmail,
   buildTicketEmailHtml,
+  sendOrganizerRequestNotificationEmail,
+  buildOrganizerRequestNotificationHtml,
   escapeHtml,
   getTransporter,
 };

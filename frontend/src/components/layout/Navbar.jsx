@@ -6,7 +6,7 @@ import UserDropdown from './UserDropdown';
 import { TicketIcon, SearchIcon, PlusIcon, ShieldIcon, BuildingIcon } from '../common/Icons';
 
 export default function Navbar() {
-  const { user, isOrganizer, isAdmin, loading } = useAuth();
+  const { user, isOrganizer, isAdmin, loading, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
 
@@ -86,50 +86,86 @@ export default function Navbar() {
           {/* Mobile Menu Trigger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-md text-zinc-300 hover:bg-zinc-800"
+            className="md:hidden p-2.5 rounded-lg text-zinc-300 hover:bg-zinc-800 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center border border-zinc-800 focus:outline-none"
+            aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-expanded={mobileMenuOpen}
           >
-            <span className="sr-only">Open Menu</span>
-            {mobileMenuOpen ? '✕' : '☰'}
+            <span className="text-xl leading-none">{mobileMenuOpen ? '✕' : '☰'}</span>
           </button>
         </div>
       </div>
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-zinc-800 bg-zinc-950/95 backdrop-blur-xl px-4 py-4 space-y-3">
+        <div className="md:hidden border-t border-zinc-800 bg-zinc-950/98 backdrop-blur-2xl px-5 py-5 space-y-3 safe-pb animate-in fade-in duration-150">
           <Link
             href="/"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-base font-semibold text-zinc-200"
+            className="flex items-center gap-3 py-3 px-3 rounded-lg text-base font-semibold text-zinc-200 hover:bg-zinc-900 min-h-[44px]"
           >
+            <TicketIcon className="w-5 h-5 text-indigo-400" />
             Découvrir les Événements
           </Link>
+
           {user && (
-            <Link
-              href="/dashboard"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-base font-semibold text-zinc-200"
-            >
-              Mes Réservations & Tickets
-            </Link>
+            <>
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 py-3 px-3 rounded-lg text-base font-semibold text-zinc-200 hover:bg-zinc-900 min-h-[44px]"
+              >
+                <TicketIcon className="w-5 h-5 text-indigo-400" />
+                Mes Réservations & Tickets
+              </Link>
+
+              {!isOrganizer && (
+                <Link
+                  href="/dashboard/become-organizer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 py-3 px-3 rounded-lg text-base font-semibold text-indigo-400 hover:bg-zinc-900 min-h-[44px]"
+                >
+                  <BuildingIcon className="w-5 h-5 text-indigo-400" />
+                  Devenir Organisateur
+                </Link>
+              )}
+            </>
           )}
+
           {isOrganizer && (
             <Link
               href="/organizer"
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-base font-semibold text-indigo-400"
+              className="flex items-center gap-3 py-3 px-3 rounded-lg text-base font-semibold text-purple-400 hover:bg-zinc-900 min-h-[44px]"
             >
+              <BuildingIcon className="w-5 h-5 text-purple-400" />
               Espace Organisateur
             </Link>
           )}
+
           {isAdmin && (
             <Link
               href="/admin"
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-base font-semibold text-purple-400"
+              className="flex items-center gap-3 py-3 px-3 rounded-lg text-base font-semibold text-amber-400 hover:bg-zinc-900 min-h-[44px]"
             >
+              <ShieldIcon className="w-5 h-5 text-amber-400" />
               Espace Administration
             </Link>
+          )}
+
+          {user && (
+            <div className="pt-3 border-t border-zinc-800/80">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logout();
+                }}
+                className="w-full flex items-center gap-3 py-3 px-3 rounded-lg text-base font-semibold text-rose-400 hover:bg-rose-500/10 min-h-[44px]"
+              >
+                <span>Déconnexion</span>
+              </button>
+            </div>
           )}
         </div>
       )}

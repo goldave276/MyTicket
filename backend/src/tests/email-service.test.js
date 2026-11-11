@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   sendTicketConfirmationEmail,
   buildTicketEmailHtml,
+  sendOrganizerRequestNotificationEmail,
+  buildOrganizerRequestNotificationHtml,
 } from "../services/emailService.js";
 
 describe("Email Service - Transactional Emails", () => {
@@ -81,5 +83,33 @@ describe("Email Service - Transactional Emails", () => {
     if (originalHost) {
       process.env.SMTP_HOST = originalHost;
     }
+  });
+
+  it("genere un gabarit HTML d'alerte admin avec demandeur et lien admin", () => {
+    const html = buildOrganizerRequestNotificationHtml({
+      applicantName: "Edoh Kodjo",
+      applicantEmail: "edoh@example.com",
+      eventType: "FESTIVAL",
+      description: "Organisation du festival annuel de musique afro.",
+    });
+
+    expect(html).toContain("Edoh Kodjo");
+    expect(html).toContain("edoh@example.com");
+    expect(html).toContain("FESTIVAL");
+    expect(html).toContain("Organisation du festival annuel de musique afro.");
+    expect(html).toContain("/admin/organizer-requests");
+  });
+
+  it("envoie ou simule l'email d'alerte pour l'administrateur sans lever d'erreur", async () => {
+    const result = await sendOrganizerRequestNotificationEmail({
+      adminEmail: "admin@myticket.tg",
+      applicantName: "Edoh Kodjo",
+      applicantEmail: "edoh@example.com",
+      eventType: "CONCERT",
+      description: "Production de concerts live à Lomé",
+    });
+
+    expect(result.success).toBe(true);
+    expect(typeof result.messageId).toBe("string");
   });
 });

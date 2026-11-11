@@ -3,6 +3,7 @@ const {
     validateOrganizerUploadedFile
 } = require("../validators/organizerDocumentValidator");
 const { supabaseService } = require("../config/supabase");
+const { sendOrganizerRequestNotificationEmail } = require("../services/emailService");
 
 /**
  * Enrichit une liste de demandes avec une URL signée temporaire pour chaque justificatif
@@ -182,6 +183,16 @@ async function createOrganizerRequest(req, res) {
             message: "Impossible de creer la demande"
         });
     }
+
+    // Notification administrative par email asynchrone (non bloquante pour le client)
+    sendOrganizerRequestNotificationEmail({
+        applicantName: req.profile?.full_name || req.user?.user_metadata?.full_name || req.user?.email,
+        applicantEmail: req.user?.email,
+        eventType,
+        description
+    }).catch((notifErr) => {
+        console.error("[organizerRequestController] Erreur envoi alerte admin:", notifErr);
+    });
 
     return res.status(201).json({
         request: data

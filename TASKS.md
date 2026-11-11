@@ -22,6 +22,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Layout global (Navbar dynamique selon le rôle connecté, Footer).
   - [x] Composants UI atomiques : Modal, Skeleton, Toasts (`ToastContext`), `ErrorState` (état d'erreur réel avec relance, ajouté le 15/09/2026).
   - [x] Composants métiers : Badge de statut (`DRAFT`, `PENDING`, `APPROVED`, `REJECTED`, `CANCELLED`), Carte événement, Carte ticket.
+  - [x] **Ergonomie Mobile Android & iPhone (11/11/2026)** : Barre d'onglets de navigation secondaire horizontale à défilement tactile fluide sur mobile (`Sidebar.jsx`), drawer tactile étendu dans `Navbar.jsx`, support des safe-areas iOS (`env(safe-area-inset-bottom)`), élimination du délai de tap de 300ms via `touch-action: manipulation`, cibles tactiles >= 44px.
 
 ---
 
@@ -48,7 +49,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Page "Mon Profil" (`/dashboard/profile`) : modification du nom complet et consultation de son rôle.
   - [x] Formulaire "Devenir Organisateur" (`/dashboard/become-organizer`) : type d'événement ciblé, justificatif et description de l'activité (persistée et contrainte à 20-1000 caractères).
   - [x] Téléversement réel du justificatif vers Supabase Storage (PDF, JPG, PNG, max 5 Mo) avec préfixe utilisateur sécurisé, vérification de type/taille et stockage dans `organizer-documents` (durci avec `supabaseService.storage` pour contourner les échecs RLS de stockage).
-  - [x] Suivi en direct du statut de la demande (`PENDING`, `APPROVED`, `REJECTED`).
+  - [x] Suivi en direct du statut de la demande (`PENDING`, `APPROVED`, `REJECTED`) avec **auto-rafraîchissement d'état intelligent** (polling doux et focus window), synchronisation automatique de session (`refreshUser`), et affichage du motif de refus le cas échéant.
 
 ---
 
@@ -80,6 +81,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Visualisation et lecture de la description détaillée de l'activité du demandeur dans la liste admin.
   - [x] Visualisation et ouverture du justificatif officiel fourni par le demandeur grâce au lien signé temporaire (1 heure).
   - [x] Actions "Approuver" (passage du rôle en `ORGANIZER`) et "Refuser" avec motif.
+  - [x] **Alerte & Auto-rafraîchissement (11/11/2026)** : Envoi d'email automatique à l'administrateur dès qu'un utilisateur soumet une demande, pastille numérique d'alerte dans la Sidebar, auto-rafraîchissement en tâche de fond et affichage sous forme de fiches tactiles complètes sur mobile.
 
 - [x] **F4.2. Validation des Événements**
   - [x] Page de modération (`/admin/events-pending`) : liste des événements soumis en attente de validation.
