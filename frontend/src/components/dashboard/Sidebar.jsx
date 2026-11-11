@@ -82,50 +82,12 @@ export default function Sidebar({ mode = 'user' }) {
 
   return (
     <>
-      {/* Version Mobile (iPhone / Android) : Barre de navigation horizontale fluide et compacte */}
-      <nav
-        aria-label="Navigation secondaire mobile"
-        className="md:hidden w-full overflow-x-auto no-scrollbar flex items-center gap-2 p-1.5 bg-zinc-900/90 backdrop-blur-md rounded-xl border border-zinc-800 shrink-0 sticky top-20 z-30 shadow-md"
-      >
-        {links.map((link) => {
-          const Icon = link.icon;
-          const isActive = router.pathname === link.href;
-
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`eyebrow flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-xs whitespace-nowrap transition-all touch-manipulation min-h-[40px] shrink-0 ${
-                isActive
-                  ? 'bg-indigo-400 text-zinc-950 font-bold shadow'
-                  : 'text-zinc-300 hover:bg-zinc-800/80 bg-zinc-950/40'
-              }`}
-            >
-              <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-zinc-950' : 'text-zinc-400'}`} />
-              <span>{link.label}</span>
-              {typeof link.badge === 'number' && link.badge > 0 && (
-                <span
-                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold leading-none ${
-                    isActive ? 'bg-zinc-950 text-indigo-300' : link.badgeColor || 'bg-indigo-500 text-white'
-                  }`}
-                >
-                  {link.badge}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Version Desktop (Tablette & Ordinateur) : Sidebar latérale persistante */}
-      <aside className="hidden md:block w-64 shrink-0 panel p-4 h-fit sticky top-24">
-        <div className="px-3 py-2 border-b border-zinc-800 mb-3">
-          <span className="eyebrow text-zinc-500">
-            {mode === 'organizer' ? 'Espace Organisateur' : mode === 'admin' ? 'Administration' : 'Mon Compte'}
-          </span>
-        </div>
-
-        <nav className="space-y-1">
+      {/* Version Mobile (iPhone / Android) : Segmented Pills fluides avec masque de défilement */}
+      <div className="md:hidden w-full sticky top-16 z-30 bg-[#08090e]/95 backdrop-blur-md pt-2 pb-3 border-b border-white/5 -mx-4 px-4 sm:-mx-6 sm:px-6">
+        <nav
+          aria-label="Navigation secondaire mobile"
+          className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-mask-x py-1"
+        >
           {links.map((link) => {
             const Icon = link.icon;
             const isActive = router.pathname === link.href;
@@ -134,20 +96,18 @@ export default function Sidebar({ mode = 'user' }) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`eyebrow flex items-center justify-between gap-3 px-4 py-3 rounded-md transition-all ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all touch-manipulation min-h-[44px] shrink-0 ${
                   isActive
-                    ? 'bg-indigo-400 text-zinc-950'
-                    : 'text-zinc-300 hover:bg-zinc-800'
+                    ? 'bg-gradient-to-r from-cyan-500 to-sky-400 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
+                    : 'bg-white/5 text-slate-300 hover:bg-white/10 active:scale-95'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-zinc-950' : 'text-zinc-500'}`} />
-                  <span>{link.label}</span>
-                </div>
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-slate-950' : 'text-slate-400'}`} />
+                <span>{link.label}</span>
                 {typeof link.badge === 'number' && link.badge > 0 && (
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold leading-none ${
-                      isActive ? 'bg-zinc-950 text-indigo-300' : link.badgeColor || 'bg-indigo-500 text-white'
+                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold leading-none ${
+                      isActive ? 'bg-slate-950 text-cyan-300' : link.badgeColor || 'bg-cyan-500 text-slate-950'
                     }`}
                   >
                     {link.badge}
@@ -157,48 +117,92 @@ export default function Sidebar({ mode = 'user' }) {
             );
           })}
         </nav>
+      </div>
 
-        {(isAdmin || isOrganizer) && (
-          <div className="pt-4 mt-4 border-t border-zinc-800 space-y-1">
-            <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-              Accès Rapides
+      {/* Version Desktop (Tablette & Ordinateur) : Sidebar latérale persistante */}
+      <aside className="hidden md:block w-64 shrink-0 h-fit sticky top-24">
+        <div className="bg-[#11141e] border border-white/10 rounded-2xl p-3 space-y-1 shadow-lg">
+          <div className="px-3 py-2 border-b border-white/10 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              {mode === 'organizer' ? 'Espace Organisateur' : mode === 'admin' ? 'Administration' : 'Mon Compte'}
             </span>
-            {isAdmin && mode !== 'admin' && (
-              <Link
-                href="/admin"
-                className="eyebrow flex items-center justify-between px-4 py-2.5 rounded-md text-amber-400 hover:bg-zinc-800 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <ShieldIcon className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Administration</span>
-                </div>
-                {adminBadgeCounts.pendingRequests > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-400 text-zinc-950">
-                    {adminBadgeCounts.pendingRequests}
-                  </span>
-                )}
-              </Link>
-            )}
-            {isOrganizer && mode !== 'organizer' && (
-              <Link
-                href="/organizer"
-                className="eyebrow flex items-center gap-3 px-4 py-2.5 rounded-md text-purple-400 hover:bg-zinc-800 transition-colors"
-              >
-                <BuildingIcon className="w-4 h-4 text-purple-400 shrink-0" />
-                <span>Espace Organisateur</span>
-              </Link>
-            )}
-            {mode !== 'user' && (
-              <Link
-                href="/dashboard"
-                className="eyebrow flex items-center gap-3 px-4 py-2.5 rounded-md text-zinc-400 hover:bg-zinc-800 transition-colors"
-              >
-                <TicketIcon className="w-4 h-4 text-zinc-400 shrink-0" />
-                <span>Espace Client</span>
-              </Link>
-            )}
           </div>
-        )}
+
+          <nav className="space-y-1">
+            {links.map((link) => {
+              const Icon = link.icon;
+              const isActive = router.pathname === link.href;
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                    isActive
+                      ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 font-bold'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`} />
+                    <span>{link.label}</span>
+                  </div>
+                  {typeof link.badge === 'number' && link.badge > 0 && (
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold leading-none ${
+                        isActive ? 'bg-slate-950 text-cyan-300' : link.badgeColor || 'bg-cyan-500 text-slate-950'
+                      }`}
+                    >
+                      {link.badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {(isAdmin || isOrganizer) && (
+            <div className="pt-4 mt-4 border-t border-white/10 space-y-1">
+              <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Accès Rapides
+              </span>
+              {isAdmin && mode !== 'admin' && (
+                <Link
+                  href="/admin"
+                  className="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold text-amber-400 hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <ShieldIcon className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>Administration</span>
+                  </div>
+                  {adminBadgeCounts.pendingRequests > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-slate-950">
+                      {adminBadgeCounts.pendingRequests}
+                    </span>
+                  )}
+                </Link>
+              )}
+              {isOrganizer && mode !== 'organizer' && (
+                <Link
+                  href="/organizer"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-purple-400 hover:bg-white/5 transition-colors"
+                >
+                  <BuildingIcon className="w-4 h-4 text-purple-400 shrink-0" />
+                  <span>Espace Organisateur</span>
+                </Link>
+              )}
+              {mode !== 'user' && (
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/5 transition-colors"
+                >
+                  <TicketIcon className="w-4 h-4 text-slate-400 shrink-0" />
+                  <span>Espace Client</span>
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
       </aside>
     </>
   );

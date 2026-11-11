@@ -12,9 +12,7 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
-  /* Brand accent — reassigning the whole `indigo` color scale means every
-     existing indigo utility class (bg, text, border, ring) already used
-     across the app repaints to this cyan without touching each file. */
+  /* Palette Cyan & Indigo Modernisée */
   --color-indigo-50: #ecfeff;
   --color-indigo-100: #cffafe;
   --color-indigo-200: #a5f3fc;
@@ -26,18 +24,13 @@
   --color-indigo-800: #155e75;
   --color-indigo-900: #164e63;
   --color-indigo-950: #083344;
-
-  /* Sharper, "technical drawing" corners app-wide. */
-  --radius-lg: 0.25rem;
-  --radius-xl: 0.375rem;
-  --radius-2xl: 0.5rem;
 }
 
 :root {
-  --background: #0b0d0c;
-  --background-elevated: #121512;
-  --foreground: #f2f4f2;
-  --accent: #22d3ee;
+  --background: #08090e;
+  --background-elevated: #11141e;
+  --foreground: #f8fafc;
+  --accent: #06b6d4;
 }
 
 @theme inline {
@@ -55,9 +48,18 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Utilitaires mobiles & safe-areas iPhone */
+/* Utilitaires mobiles & safe-areas iPhone/Android */
+.safe-pt {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
 .safe-pb {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Masque de défilement horizontal fluide */
+.scroll-mask-x {
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -154,24 +156,29 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    font-family: var(--font-mono);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 600;
-    font-size: 0.8125rem;
-    background: var(--accent);
-    color: #06181b;
-    border: 1px solid var(--accent);
-    border-radius: var(--radius-md);
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 0.875rem;
+    background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+    color: #041318;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 9999px;
     padding: 0.75rem 1.25rem;
-    transition: filter 150ms ease, transform 150ms ease;
+    min-height: 44px;
+    box-shadow: 0 4px 14px 0 rgba(6, 182, 212, 0.25);
+    transition: filter 150ms ease, transform 150ms ease, box-shadow 150ms ease;
   }
   .btn-primary:hover {
     filter: brightness(1.08);
+    box-shadow: 0 6px 20px 0 rgba(6, 182, 212, 0.35);
+  }
+  .btn-primary:active {
+    transform: scale(0.98);
   }
   .btn-primary:disabled {
     filter: grayscale(0.6) brightness(0.7);
     cursor: not-allowed;
+    box-shadow: none;
   }
 
   .btn-outline {
@@ -179,21 +186,23 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    font-family: var(--font-mono);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-family: var(--font-sans);
     font-weight: 600;
-    font-size: 0.8125rem;
-    background: transparent;
+    font-size: 0.875rem;
+    background: rgba(255, 255, 255, 0.05);
     color: var(--foreground);
-    border: 1px solid color-mix(in oklab, var(--foreground) 25%, transparent);
-    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
     padding: 0.75rem 1.25rem;
-    transition: border-color 150ms ease, background 150ms ease;
+    min-height: 44px;
+    transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
   }
   .btn-outline:hover {
     border-color: var(--accent);
-    background: color-mix(in oklab, var(--accent) 8%, transparent);
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+  }
+  .btn-outline:active {
+    transform: scale(0.98);
   }
 
   /* Labelled spec value — the ACTIVE / PACK / CLASS / MAX-ORDER pattern. */

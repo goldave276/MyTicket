@@ -307,3 +307,4 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Élimination de `unescape()` déprécié au profit d'un SVG Blob URL dans `frontend/src/components/common/QRCodeModal.jsx`.
   - [x] Hydratation correcte du profil utilisateur sur mise à jour dans `frontend/src/services/authService.js`.
   - [x] Attributs `aria-label` ajoutés sur les filtres et champs de recherche (`EventFilters.jsx`, `admin/users.js`).
+  - [x] Refonte ergonomique mobile-first et design system moderne (Style Linear x Spotify) : viewport-fit=cover, safe-areas, suppression de l'écrasement de radius, header compact 64px, tiroir plein écran occultant, segmented pills tactiles avec scroll-mask, cartes de réservations mobiles et footer responsive épuré.
