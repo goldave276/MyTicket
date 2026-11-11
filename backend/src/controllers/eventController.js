@@ -300,8 +300,55 @@ async function getPublicEventDetail(req, res) {
     });
 
     if (error) {
-        return res.status(500).json({
-            message: "Impossible de recuperer le detail de l'evenement"
+        // Fallback resilient : interrogation directe de la table events si la RPC n'est pas installee ou echoue
+        const { data: fallbackEvent, error: fallbackError } = await supabase
+            .from("events")
+            .select("id, title, description, event_type, event_date, location, capacity, price, status, organizer_id")
+            .eq("id", idValidation.value)
+            .eq("status", "APPROVED")
+            .gt("event_date", new Date().toISOString())
+            .maybeSingle();
+
+        if (fallbackError) {
+            return res.status(500).json({
+                message: "Impossible de recuperer le detail de l'evenement"
+            });
+        }
+
+        if (!fallbackEvent) {
+            return res.status(404).json({ message: "Evenement introuvable" });
+        }
+
+        const { data: reservationsData } = await supabase
+            .from("reservations")
+            .select("quantity")
+            .eq("event_id", idValidation.value)
+            .in("status", ["PENDING", "CONFIRMED"]);
+
+        const bookedSeats = Array.isArray(reservationsData)
+            ? reservationsData.reduce((acc, r) => acc + (Number(r.quantity) || 0), 0)
+            : 0;
+
+        const remainingCapacity = Math.max(0, Number(fallbackEvent.capacity || 0) - bookedSeats);
+
+        return res.status(200).json({
+            event: {
+                id: fallbackEvent.id,
+                title: fallbackEvent.title,
+                description: fallbackEvent.description,
+                eventType: fallbackEvent.event_type,
+                event_type: fallbackEvent.event_type,
+                eventDate: fallbackEvent.event_date,
+                event_date: fallbackEvent.event_date,
+                location: fallbackEvent.location,
+                capacity: fallbackEvent.capacity,
+                price: fallbackEvent.price,
+                status: fallbackEvent.status,
+                organizerId: fallbackEvent.organizer_id,
+                organizer_id: fallbackEvent.organizer_id,
+                remainingCapacity,
+                remaining_capacity: remainingCapacity
+            }
         });
     }
 
