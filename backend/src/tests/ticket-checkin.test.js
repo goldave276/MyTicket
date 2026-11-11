@@ -77,6 +77,39 @@ describe("Contrôle d'accès & Scanner de billets (Phase B1.3)", () => {
         expect(response.body.checkin.participant_name).toBe("Koffi Mensah");
     });
 
+    it("extrait et valide le ticketCode depuis un payload JSON de QR Code", async () => {
+        const response = createResponse();
+        const calls = [];
+        const validCode = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
+        const qrJson = JSON.stringify({ ticketCode: validCode, ticketId: 15, eventId: 7 });
+
+        const supabase = {
+            rpc(name, payload) {
+                calls.push([name, payload]);
+                return Promise.resolve({
+                    data: {
+                        ticket_id: 15,
+                        ticket_code: validCode,
+                        status: "USED",
+                        participant_name: "Afiwa"
+                    },
+                    error: null
+                });
+            }
+        };
+
+        await scanTicket({
+            body: { ticketCode: qrJson, eventId: 7 },
+            supabase
+        }, response);
+
+        expect(response.statusCode).toBe(200);
+        expect(calls[0][1]).toEqual({
+            p_ticket_code: validCode,
+            p_event_id: 7
+        });
+    });
+
     it("détecte et bloque un billet déjà scanné (409 Conflict)", async () => {
         const response = createResponse();
         const validCode = "b1ffcd88-8b0a-4fe7-aa5c-5aa8ac270b22";

@@ -24,9 +24,11 @@ export default function LoginPage() {
     try {
       const res = await login({ email, password });
       showToast('Connexion réussie ! Bienvenue sur MyTicket.', 'success');
+      const rawRedirect = typeof router.query.redirect === 'string' ? router.query.redirect : '';
+      const safeRedirect = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : null;
       const userRole = res?.user?.role?.toUpperCase();
       const defaultRedirect = userRole === 'ADMIN' ? '/admin' : userRole === 'ORGANIZER' ? '/organizer' : '/dashboard';
-      const redirectUrl = router.query.redirect || defaultRedirect;
+      const redirectUrl = safeRedirect || defaultRedirect;
       router.push(redirectUrl);
     } catch (err) {
       setError(err.message || 'Identifiants incorrects. Veuillez réessayer.');

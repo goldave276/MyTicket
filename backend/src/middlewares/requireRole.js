@@ -2,16 +2,21 @@ function requireRole(requiredRole) {
     const roles = (Array.isArray(requiredRole) ? requiredRole : [requiredRole]).map(r => String(r).trim().toUpperCase());
 
     return async (req, res, next) => {
-        const { data: profile, error } = await req.supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", req.user.id)
-            .single();
+        let profile = req.profile;
+        if (!profile || !profile.role) {
+            const { data, error } = await req.supabase
+                .from("profiles")
+                .select("id, role")
+                .eq("id", req.user.id)
+                .single();
 
-        if (error || !profile) {
-            return res.status(500).json({
-                message: "Impossible de verifier le role"
-            });
+            if (error || !data) {
+                return res.status(500).json({
+                    message: "Impossible de verifier le role"
+                });
+            }
+            profile = data;
+            req.profile = profile;
         }
 
         const userRole = (profile.role || "").trim().toUpperCase();

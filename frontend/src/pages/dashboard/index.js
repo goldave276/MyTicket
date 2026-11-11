@@ -134,8 +134,8 @@ export default function UserReservationsPage() {
                         <td className="p-4 space-y-0.5 text-xs">
                           <div className="flex items-center gap-1.5 font-semibold text-zinc-700 dark:text-zinc-300">
                             <CalendarIcon className="w-3.5 h-3.5 text-indigo-500" />
-                            {res.event?.date || res.eventDate
-                              ? new Date(res.event?.date || res.eventDate).toLocaleDateString('fr-FR')
+                            {res.event?.event_date || res.event?.date || res.eventDate
+                              ? new Date(res.event?.event_date || res.event?.date || res.eventDate).toLocaleDateString('fr-FR')
                               : 'À venir'}
                           </div>
                           <div className="text-zinc-400 truncate max-w-[180px]">

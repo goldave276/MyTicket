@@ -116,7 +116,7 @@ Docker permettra d'executer l'application dans des environnements reproductibles
 Le MVP backend est valide. Il comprend l'authentification, les roles
 `USER`, `ORGANIZER` et `ADMIN`, les demandes d'organisateur, la gestion des
 evenements, les reservations, les annulations, les tickets, les politiques
-RLS Supabase et les migrations PostgreSQL (0001 à 0013).
+RLS Supabase et les migrations PostgreSQL (0001 à 0018).
 
 L'intégration continue GitHub Actions (`.github/workflows/backend-ci.yml`) valide
 automatiquement les tests, la construction Docker et l'application des migrations SQL
@@ -124,7 +124,7 @@ automatiquement les tests, la construction Docker et l'application des migration
 
 Le mode de paiement sur place (`ON_SITE`) est géré dans le MVP avec confirmation par
 l'administrateur (`/admin/payments`) qui déclenche l'émission atomique des billets.
-Les paiements en ligne Stripe et Mobile Money restent prévus post-MVP.
+Les paiements en ligne Stripe Checkout et Mobile Money Togo (Flooz / T-Money) sont intégrés avec webhooks sécurisés, et les événements gratuits (`price = 0`) sont confirmés immédiatement à la réservation.
 
 ## Demarrage du backend
 
@@ -143,7 +143,7 @@ Pour executer les tests :
 
 ```powershell
 cd backend
-npm test          # Suite complete de tests (112 tests)
+npm test          # Suite complete de tests (134 tests)
 npm run test:unit # Tests unitaires et validateurs de schemas Zod
 npm run test:http # Tests d'integration HTTP, securite CORS et guards
 ```
@@ -172,7 +172,7 @@ configurees dans le gestionnaire de secrets de la plateforme d'hebergement.
 - [ ] Les logs et alertes de la plateforme sont consultables.
 
 Les pushes et pull requests vers `main` déclenchent le workflow GitHub Actions
-`.github/workflows/backend-ci.yml`, qui exécute automatiquement les 112 tests du backend,
+`.github/workflows/backend-ci.yml`, qui exécute automatiquement les 134 tests du backend,
 la construction de l'image Docker et la validation de l'ensemble des migrations SQL sur PostgreSQL 16.
 
 ## Regles metier principales
@@ -289,6 +289,7 @@ Authorization: Bearer <access_token_supabase>
 | POST | `/api/auth/password-reset` | Non | Demander un lien de reinitialisation |
 | PATCH | `/api/auth/profile` | Oui | Modifier le nom du profil |
 | POST | `/api/auth/logout` | Oui | Fermer la session courante |
+| POST | `/api/auth/refresh` | Non | Rafraichir la session via `refreshToken` |
 
 ### Demandes organisateur
 
@@ -329,6 +330,13 @@ La validation admin se fait avec `GET /api/admin/events/pending`, puis
 | GET | `/api/reservations/me` | Oui | Voir ses reservations |
 | PATCH | `/api/reservations/:reservationId/cancel` | Oui | Annuler une reservation |
 | GET | `/api/tickets/me` | Oui | Voir ses tickets |
+| POST | `/api/tickets/scan` | Oui | Scanner et valider un billet (`ORGANIZER` / `ADMIN`) |
+| GET | `/api/tickets/events/:eventId/checkin-summary` | Oui | Consulter le resume de check-in d'un evenement (`ORGANIZER` / `ADMIN`) |
+| POST | `/api/payments` | Oui | Enregistrer un paiement pour une reservation |
+| POST | `/api/payments/checkout` | Oui | Initier un paiement Stripe Checkout, Mobile Money ou sur place |
+| GET | `/api/payments/me` | Oui | Consulter ses paiements |
+| POST | `/api/payments/webhook/stripe` | Non | Webhook de confirmation Stripe |
+| POST | `/api/payments/webhook/mobile-money` | Non | Webhook de confirmation Mobile Money |
 
 Le corps d'une reservation contient `eventId` et `quantity`. Une reservation
 confirmee genere ses tickets via la fonction PostgreSQL transactionnelle.
@@ -348,5 +356,5 @@ confirmee genere ses tickets via la fonction PostgreSQL transactionnelle.
 | PATCH | `/api/admin/events/:eventId/approve` | Oui | ADMIN | Approuver un evenement |
 | PATCH | `/api/admin/events/:eventId/reject` | Oui | ADMIN | Refuser un evenement |
 | GET | `/api/admin/payments/pending` | Oui | ADMIN | Lister les paiements sur place en attente |
-| PATCH | `/api/admin/payments/:paymentId/confirm-on-site` | Oui | ADMIN | Confirmer le paiement sur place et emettre les billets |
+| PATCH | `/api/admin/payments/:paymentId/confirm-onsite` | Oui | ADMIN | Confirmer le paiement sur place et emettre les billets |
 

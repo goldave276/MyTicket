@@ -31,6 +31,27 @@ describe("Email Service - Transactional Emails", () => {
     expect(html).toContain("Accéder à mes QR Codes d'accès");
   });
 
+  it("echappe les caracteres HTML dangereux et extrait la premiere URL de FRONTEND_URL", () => {
+    const prevFrontend = process.env.FRONTEND_URL;
+    process.env.FRONTEND_URL = "http://localhost:3333,https://my-ticket-virid.vercel.app";
+    try {
+      const html = buildTicketEmailHtml({
+        userName: '<script>alert("xss")</script>',
+        eventTitle: 'Festival <img src=x onerror=alert(1)>',
+        eventLocation: 'Lomé & "Plage"',
+        tickets: [{ id: 1, ticket_code: '<b>fake</b>' }],
+      });
+
+      expect(html).not.toContain("<script>");
+      expect(html).toContain("&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;");
+      expect(html).toContain("http://localhost:3333/dashboard/tickets");
+      expect(html).not.toContain("http://localhost:3333,https://");
+    } finally {
+      if (prevFrontend === undefined) delete process.env.FRONTEND_URL;
+      else process.env.FRONTEND_URL = prevFrontend;
+    }
+  });
+
   it("refuse d'envoyer si le destinataire est manquant", async () => {
     const result = await sendTicketConfirmationEmail({
       to: "",

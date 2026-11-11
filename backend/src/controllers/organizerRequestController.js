@@ -2,6 +2,7 @@ const {
     validateOrganizerRequestInput,
     validateOrganizerUploadedFile
 } = require("../validators/organizerDocumentValidator");
+const { supabaseService } = require("../config/supabase");
 
 /**
  * Enrichit une liste de demandes avec une URL signée temporaire pour chaque justificatif
@@ -12,7 +13,11 @@ async function enrichRequestsWithSignedUrls(supabase, requests) {
         return [];
     }
 
-    if (!supabase?.storage?.from) {
+    const storageClient = (process.env.SUPABASE_SERVICE_ROLE_KEY && supabaseService?.storage?.from)
+        ? supabaseService.storage
+        : supabase?.storage;
+
+    if (!storageClient?.from) {
         return requests;
     }
 
@@ -23,7 +28,7 @@ async function enrichRequestsWithSignedUrls(supabase, requests) {
             }
 
             try {
-                const { data, error } = await supabase.storage
+                const { data, error } = await storageClient
                     .from("organizer-documents")
                     .createSignedUrl(item.document_path, 3600);
 
@@ -64,23 +69,47 @@ async function createOrganizerRequest(req, res) {
         const safeFilename = `${timestamp}_${fileValidation.filename}`;
         const targetPath = `${userId}/${safeFilename}`;
 
-        if (req.supabase?.storage?.from) {
+        const storageClient = (process.env.SUPABASE_SERVICE_ROLE_KEY && supabaseService?.storage?.from)
+            ? supabaseService.storage
+            : req.supabase?.storage;
+
+        if (storageClient?.from) {
             try {
-                const { error: uploadError } = await req.supabase.storage
+                let { error: uploadError } = await storageClient
                     .from("organizer-documents")
                     .upload(targetPath, fileValidation.buffer, {
                         contentType: fileValidation.mimeType,
-                        upsert: false
+                        upsert: true
                     });
 
+                // Si le bucket n'existe pas, tentative d'auto-création avec supabaseService puis nouvel essai
+                if (uploadError && (uploadError.message?.toLowerCase().includes("not found") || uploadError.statusCode === "404" || uploadError.status === 404)) {
+                    if (supabaseService?.storage?.createBucket) {
+                        try {
+                            await supabaseService.storage.createBucket("organizer-documents", { public: false });
+                            const retry = await storageClient
+                                .from("organizer-documents")
+                                .upload(targetPath, fileValidation.buffer, {
+                                    contentType: fileValidation.mimeType,
+                                    upsert: true
+                                });
+                            uploadError = retry.error;
+                        } catch (bucketErr) {
+                            console.error("[organizerRequestController] Erreur creation bucket:", bucketErr);
+                        }
+                    }
+                }
+
                 if (uploadError) {
+                    console.error("[organizerRequestController] Erreur upload storage:", uploadError);
                     return res.status(500).json({
-                        message: "Echec du televersement du document dans le stockage"
+                        message: `Echec du televersement du document dans le stockage (${uploadError.message || "erreur inconnue"})`
                     });
                 }
 
                 finalDocumentPath = targetPath;
             } catch (err) {
+                console.error("[organizerRequestController] Exception upload storage:", err);
                 return res.status(500).json({
                     message: "Erreur service lors du televersement du document"
                 });
@@ -100,9 +129,13 @@ async function createOrganizerRequest(req, res) {
     const { eventType, description, documentPath, filename } = validation.value;
 
     // Si aucun nouveau fichier n'a été uploadé dans cette requête (chemin préexistant), vérifier sa présence
-    if (!req.body?.file && req.supabase?.storage?.from) {
+    const checkClient = (process.env.SUPABASE_SERVICE_ROLE_KEY && supabaseService?.storage?.from)
+        ? supabaseService.storage
+        : req.supabase?.storage;
+
+    if (!req.body?.file && checkClient?.from) {
         try {
-            const { data: fileList, error: storageError } = await req.supabase.storage
+            const { data: fileList, error: storageError } = await checkClient
                 .from("organizer-documents")
                 .list(userId, {
                     search: filename

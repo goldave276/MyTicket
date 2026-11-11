@@ -28,10 +28,11 @@ export default function EventCard({ event, showStatus = false, onAction }) {
   } = event;
 
   const category = event_type || eventType || 'Événement';
-  const eventDateStr = date || event_date;
+  const eventDateStr = date || event_date || event.eventDate;
   const eventPrice = price ?? ticket_price ?? 0;
-  const remaining = available_tickets ?? availableTickets ?? 0;
-  const total = total_tickets ?? totalTickets ?? 100;
+  const total = event.capacity ?? total_tickets ?? totalTickets ?? 100;
+  const remaining = event.remainingCapacity ?? event.remaining_capacity ?? available_tickets ?? availableTickets ?? total;
+
   const image = image_url || imageUrl || getEventImage(category);
 
   const percentLeft = Math.max(0, Math.min(100, Math.round((remaining / total) * 100)));
@@ -40,6 +41,7 @@ export default function EventCard({ event, showStatus = false, onAction }) {
     <div className="group relative rounded-md border border-zinc-800 bg-zinc-900/60 overflow-hidden hover:border-indigo-500/40 transition-all duration-300 flex flex-col justify-between">
       {/* Event Cover Image & Badge */}
       <div className="frame-corners relative h-48 w-full overflow-hidden bg-zinc-800">
+        {/* eslint-disable-next-line @next/next/no-img-element -- remote event cover URL */}
         <img
           src={image}
           alt={title}
@@ -136,16 +138,23 @@ export default function EventCard({ event, showStatus = false, onAction }) {
             >
               Gérer l’événement
             </button>
+          ) : remaining === 0 ? (
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="w-full inline-flex items-center justify-center gap-2 font-mono uppercase tracking-wider text-xs font-semibold rounded-md py-3 px-4 bg-zinc-800 text-zinc-500 cursor-not-allowed"
+            >
+              <TicketIcon className="w-4 h-4" />
+              Complet
+            </button>
           ) : (
             <Link
               href={`/events/${id}`}
-              className={remaining === 0
-                ? 'w-full inline-flex items-center justify-center gap-2 font-mono uppercase tracking-wider text-xs font-semibold rounded-md py-3 px-4 bg-zinc-800 text-zinc-500 cursor-not-allowed'
-                : 'btn-primary w-full'
-              }
+              className="btn-primary w-full"
             >
               <TicketIcon className="w-4 h-4" />
-              {remaining === 0 ? 'Complet' : 'Réserver une place'}
+              Réserver une place
               <ArrowRightIcon className="w-4 h-4" />
             </Link>
           )}

@@ -37,10 +37,10 @@ export default function OrganizerDashboardPage() {
       setEvents(myEventsList);
 
       setStats({
-        totalEvents: statsData.totalEvents ?? myEventsList.length,
-        activeEvents: statsData.activeEvents ?? myEventsList.filter((e) => e.status === 'APPROVED').length,
-        totalTicketsSold: statsData.totalTicketsSold ?? 0,
-        totalRevenue: statsData.totalRevenue ?? 0,
+        totalEvents: statsData?.stats?.events_total ?? statsData?.totalEvents ?? myEventsList.length,
+        activeEvents: statsData?.stats?.events_approved ?? statsData?.activeEvents ?? myEventsList.filter((e) => e.status === 'APPROVED').length,
+        totalTicketsSold: statsData?.stats?.places_reserved ?? statsData?.totalTicketsSold ?? 0,
+        totalRevenue: statsData?.stats?.revenue_confirmed ?? statsData?.totalRevenue ?? 0,
       });
     } catch (err) {
       setError(true);

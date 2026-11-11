@@ -104,6 +104,16 @@ app.use((req, res) => {
 
 // Gestion centralisée des erreurs inattendues.
 app.use((err, req, res, next) => {
+    if (err && err.type === "entity.parse.failed") {
+        return res.status(400).json({
+            message: "Corps JSON invalide"
+        });
+    }
+    if (err && err.type === "entity.too.large") {
+        return res.status(413).json({
+            message: "Charge utile trop volumineuse"
+        });
+    }
     if (err.code === "CORS_ORIGIN_DENIED" || err.status === 403) {
         return res.status(403).json({
             message: "Origine non autorisee"

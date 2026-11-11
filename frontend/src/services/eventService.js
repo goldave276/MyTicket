@@ -82,6 +82,12 @@ export const eventService = {
     });
   },
 
+  async deleteEvent(eventId, force = false) {
+    return apiFetch(`/events/${eventId}${force ? '?force=true' : ''}`, {
+      method: 'DELETE',
+    });
+  },
+
   async getEventReservations(eventId) {
     return apiFetch(`/events/${eventId}/reservations`);
   },

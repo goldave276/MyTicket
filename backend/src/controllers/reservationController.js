@@ -38,7 +38,7 @@ async function createReservation(req, res) {
 async function getMyReservations(req, res) {
     const { data, error } = await req.supabase
         .from("reservations")
-        .select("*")
+        .select("*, event:events(id, title, event_date, location, price, event_type)")
         .eq("user_id", req.user.id)
         .order("created_at", { ascending: false });
 

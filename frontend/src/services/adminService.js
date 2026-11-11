@@ -14,7 +14,20 @@ export const adminService = {
   async rejectOrganizerRequest(requestId, reason) {
     return apiFetch(`/admin/organizer-requests/${requestId}/reject`, {
       method: 'PATCH',
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify({ reason, adminComment: reason }),
+    });
+  },
+
+  async getAllEvents(params = {}) {
+    const searchParams = new URLSearchParams();
+    if (params.status) searchParams.append('status', params.status);
+    const queryString = searchParams.toString();
+    return apiFetch(`/admin/events${queryString ? `?${queryString}` : ''}`);
+  },
+
+  async deleteOrCancelEvent(eventId, force = false) {
+    return apiFetch(`/admin/events/${eventId}${force ? '?force=true' : ''}`, {
+      method: 'DELETE',
     });
   },
 
@@ -31,7 +44,7 @@ export const adminService = {
   async rejectEvent(eventId, reason) {
     return apiFetch(`/admin/events/${eventId}/reject`, {
       method: 'PATCH',
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify({ reason, adminComment: reason }),
     });
   },
 

@@ -148,7 +148,11 @@ export async function apiFetch(endpoint, options = {}, isRetry = false) {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      const error = new Error(data.message || data.error || `Erreur ${response.status}`);
+      const firstFieldError =
+        data.errors && typeof data.errors === 'object'
+          ? Object.values(data.errors).find((v) => typeof v === 'string' && v.trim() !== '')
+          : null;
+      const error = new Error(firstFieldError || data.message || data.error || `Erreur ${response.status}`);
       error.status = response.status;
       error.data = data;
       throw error;

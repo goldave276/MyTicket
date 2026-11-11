@@ -8,6 +8,7 @@ const {
     updateEvent,
     submitEvent,
     cancelEvent,
+    deleteEvent,
     getApprovedEvents,
     getPublicEventDetail,
     getOrganizerStats
@@ -57,6 +58,13 @@ router.patch(
     requireAuth,
     requireRole(["ORGANIZER", "ADMIN"]),
     cancelEvent
+);
+
+router.delete(
+    "/:eventId",
+    requireAuth,
+    requireRole("ADMIN"),
+    deleteEvent
 );
 
 router.get(

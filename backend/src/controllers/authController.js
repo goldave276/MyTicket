@@ -26,13 +26,21 @@ async function login(req, res) {
     });
 
     if (error) {
+        if (error.status === 0 || error.name === "AuthRetryableFetchError") {
+            return res.status(503).json({
+                message: "Service d'authentification temporairement indisponible"
+            });
+        }
         return res.status(401).json({
             message: "Email ou mot de passe incorrect"
         });
     }
 
-    // Récupération du profil applicatif via le token de session pour satisfaire les RLS (auth.uid() = id)
-    const userClient = createAuthenticatedClient(data.session.access_token);
+    const userClient = data.session?.access_token && typeof createAuthenticatedClient === "function"
+        ? createAuthenticatedClient(data.session.access_token)
+        : supabase;
+
+    // Récupération du profil applicatif pour hydrater le vrai rôle (USER, ORGANIZER, ADMIN)
     const { data: profile } = await userClient
         .from("profiles")
         .select("id, full_name, role, is_blocked, created_at")
@@ -210,7 +218,10 @@ async function refreshSession(req, res) {
         return res.status(401).json({ message: "Session invalide ou expiree" });
     }
 
-    const userClient = createAuthenticatedClient(data.session.access_token);
+    const userClient = data.session?.access_token && typeof createAuthenticatedClient === "function"
+        ? createAuthenticatedClient(data.session.access_token)
+        : supabase;
+
     const { data: profile } = await userClient
         .from("profiles")
         .select("id, full_name, role, is_blocked, created_at")
@@ -218,6 +229,12 @@ async function refreshSession(req, res) {
         .maybeSingle();
 
     const normalizedRole = (profile?.role || "USER").trim().toUpperCase();
+
+    if (profile?.is_blocked) {
+        return res.status(403).json({
+            message: "Compte bloque"
+        });
+    }
     const appUser = {
         ...data.user,
         role: normalizedRole,

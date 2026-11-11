@@ -123,8 +123,27 @@ jobs:
           PGDATABASE: myticket_ci
         run: |
           test "$(psql -tAc "select count(*) from information_schema.tables where table_schema = 'public' and table_name in ('profiles', 'organizer_requests', 'events', 'reservations', 'tickets', 'payments')")" = "6"
-          test "$(psql -tAc "select count(*) from pg_proc where pronamespace = 'public'::regnamespace and proname in ('create_reservation', 'cancel_reservation', 'submit_event', 'approve_event', 'approve_organizer_request', 'get_organizer_event_reservations', 'cancel_event', 'update_my_profile', 'update_event', 'get_organizer_stats', 'get_admin_stats', 'admin_list_users', 'admin_update_user_role', 'admin_set_user_blocked', 'finish_expired_events', 'get_public_event_detail', 'enforce_event_invariants', 'confirm_online_payment', 'scan_and_checkin_ticket')")" = "19"
+          test "$(psql -tAc "select count(*) from pg_proc where pronamespace = 'public'::regnamespace and proname in ('create_reservation', 'cancel_reservation', 'submit_event', 'approve_event', 'approve_organizer_request', 'get_organizer_event_reservations', 'cancel_event', 'update_my_profile', 'update_event', 'get_organizer_stats', 'get_admin_stats', 'admin_list_users', 'admin_update_user_role', 'admin_set_user_blocked', 'finish_expired_events', 'get_public_event_detail', 'enforce_event_invariants', 'confirm_online_payment', 'scan_and_checkin_ticket', 'promote_user_to_admin', 'delete_or_cancel_event')")" = "21"
           test "$(psql -tAc "select count(*) from pg_class where relnamespace = 'public'::regnamespace and relname in ('profiles', 'organizer_requests', 'events', 'reservations', 'tickets', 'payments') and relrowsecurity")" = "6"
           test "$(psql -tAc "select column_default from information_schema.columns where table_schema = 'public' and table_name = 'reservations' and column_name = 'status'")" = "'PENDING'::text"
-          test "$(psql -tAc "select position('insert into public.tickets' in pg_get_functiondef('public.create_reservation(bigint,integer)'::regprocedure))")" = "0"
+          test "$(psql -tAc "select position('if is_free then' in pg_get_functiondef('public.create_reservation(bigint,integer)'::regprocedure)) > 0")" = "t"
           test "$(psql -tAc "select column_name from information_schema.columns where table_schema = 'public' and table_name = 'organizer_requests' and column_name = 'description'")" = "description"
+
+  deploy-render:
+    name: Deploy to Render
+    needs: [frontend, test, docker-build, migration-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render Deploy Hook
+        env:
+          RENDER_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$RENDER_HOOK" ]; then
+            echo "::warning title=Deploy Hook manquant::Le secret RENDER_DEPLOY_HOOK n'est pas encore configuré dans GitHub Repository Secrets. Déploiement Render ignoré."
+            exit 0
+          fi
+          echo "🚀 Déclenchement du déploiement Render..."
+          curl -fsS -X POST "$RENDER_HOOK"
+          echo "✅ Signal de déploiement envoyé à Render avec succès."

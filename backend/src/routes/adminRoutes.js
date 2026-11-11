@@ -4,8 +4,10 @@ const requireRole = require("../middlewares/requireRole");
 
 const {
     getPendingEvents,
+    getAllEventsForAdmin,
     approveEvent,
-    rejectEvent
+    rejectEvent,
+    deleteEvent
 } = require("../controllers/eventController");
 
 const {
@@ -84,6 +86,20 @@ router.patch(
     requireAuth,
     requireRole("ADMIN"),
     rejectEvent
+);
+
+router.get(
+    "/events",
+    requireAuth,
+    requireRole("ADMIN"),
+    getAllEventsForAdmin
+);
+
+router.delete(
+    "/events/:eventId",
+    requireAuth,
+    requireRole("ADMIN"),
+    deleteEvent
 );
 
 

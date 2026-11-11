@@ -113,8 +113,9 @@ export const authService = {
       method: 'PATCH',
       body: JSON.stringify(profileData),
     });
-    if (response.user) {
-      localStorage.setItem('myticket_user', JSON.stringify(response.user));
+    const updatedUser = response.profile || response.user;
+    if (updatedUser) {
+      localStorage.setItem('myticket_user', JSON.stringify(updatedUser));
     }
     return response;
   },

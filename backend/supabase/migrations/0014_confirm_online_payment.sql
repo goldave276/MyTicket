@@ -64,5 +64,5 @@ begin
 end;
 $$;
 
-revoke all on function public.confirm_online_payment(bigint, text, text, jsonb) from public;
-grant execute on function public.confirm_online_payment(bigint, text, text, jsonb) to authenticated, service_role;
+revoke all on function public.confirm_online_payment(bigint, text, text, jsonb) from public, anon, authenticated;
+grant execute on function public.confirm_online_payment(bigint, text, text, jsonb) to service_role;

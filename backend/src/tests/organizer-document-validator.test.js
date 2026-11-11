@@ -361,4 +361,28 @@ describe("Contrôleur de Demandes Organisateur durci (organizerRequestController
         await rejectOrganizerRequest({ params: { requestId: "-5" }, supabase: {} }, resp2);
         expect(resp2.statusCode).toBe(400);
     });
+
+    it("accepte reason ou adminComment lors du rejet d'une demande organisateur", async () => {
+        const resp = createResponse();
+        let capturedArgs = null;
+        const fakeSupabase = {
+            rpc: async (name, args) => {
+                expect(name).toBe("reject_organizer_request");
+                capturedArgs = args;
+                return { data: { id: 12, status: "REJECTED" }, error: null };
+            }
+        };
+
+        await rejectOrganizerRequest({
+            params: { requestId: "12" },
+            body: { reason: "Justificatif illisible" },
+            supabase: fakeSupabase
+        }, resp);
+
+        expect(resp.statusCode).toBe(200);
+        expect(capturedArgs).toEqual({
+            p_request_id: 12,
+            p_admin_comment: "Justificatif illisible"
+        });
+    });
 });

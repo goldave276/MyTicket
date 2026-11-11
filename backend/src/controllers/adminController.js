@@ -47,7 +47,7 @@ async function getAllUsers(req, res) {
 
 async function updateUserRole(req, res) {
     const { userId } = req.params;
-    const { role, isBlocked } = req.body;
+    const { role, isBlocked } = req.body || {};
 
     if (!userId) {
         return res.status(400).json({
@@ -55,14 +55,28 @@ async function updateUserRole(req, res) {
         });
     }
 
-    if (role !== undefined) {
-        const allowedRoles = ["USER", "ORGANIZER", "ADMIN"];
-        if (!allowedRoles.includes(role)) {
-            return res.status(400).json({
-                message: "Role invalide. Les roles autorises sont: USER, ORGANIZER, ADMIN"
-            });
-        }
+    if (role === undefined && isBlocked === undefined) {
+        return res.status(400).json({
+            message: "Aucune modification fournie"
+        });
+    }
 
+    const allowedRoles = ["USER", "ORGANIZER", "ADMIN"];
+    if (role !== undefined && !allowedRoles.includes(role)) {
+        return res.status(400).json({
+            message: "Role invalide. Les roles autorises sont: USER, ORGANIZER, ADMIN"
+        });
+    }
+
+    if (isBlocked !== undefined && typeof isBlocked !== "boolean") {
+        return res.status(400).json({
+            message: "isBlocked doit etre un booleen"
+        });
+    }
+
+    let updatedUser = null;
+
+    if (role !== undefined) {
         const { data: rpcData, error: rpcError } = await req.supabase.rpc(
             "admin_update_user_role",
             { p_user_id: userId, p_role: role }
@@ -73,22 +87,10 @@ async function updateUserRole(req, res) {
                 message: rpcError.message
             });
         }
-
-        if (isBlocked === undefined) {
-            return res.status(200).json({
-                message: "Utilisateur mis a jour avec succes",
-                user: rpcData
-            });
-        }
+        updatedUser = rpcData;
     }
 
     if (isBlocked !== undefined) {
-        if (typeof isBlocked !== "boolean") {
-            return res.status(400).json({
-                message: "isBlocked doit etre un booleen"
-            });
-        }
-
         const { data: rpcBlockData, error: rpcBlockError } = await req.supabase.rpc(
             "admin_set_user_blocked",
             { p_user_id: userId, p_blocked: isBlocked }
@@ -99,15 +101,12 @@ async function updateUserRole(req, res) {
                 message: rpcBlockError.message
             });
         }
-
-        return res.status(200).json({
-            message: isBlocked ? "Utilisateur bloque" : "Utilisateur debloque",
-            user: rpcBlockData
-        });
+        updatedUser = rpcBlockData;
     }
 
-    return res.status(400).json({
-        message: "Aucune modification fournie"
+    return res.status(200).json({
+        message: "Utilisateur mis a jour avec succes",
+        user: updatedUser
     });
 }
 

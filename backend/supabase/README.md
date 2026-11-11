@@ -31,6 +31,11 @@ Le dossier `migrations/` contient l'ensemble ordonne des migrations PostgreSQL d
 11. `0011_event_lifecycle_and_public_details.sql` : Cycle de vie, trigger invariants, annulation atomique, disponibilite publique et protection du role organisateur.
 12. `0012_organizer_request_description.sql` : Persistance de la description de candidature organisateur (20-1000 caracteres).
 13. `0013_schedule_finish_expired_events.sql` : Planification horaire via `pg_cron` de la finalisation des evenements expirés (`finish_expired_events()`).
+14. `0014_confirm_online_payment.sql` : Fonction RPC `confirm_online_payment` (restreinte à `service_role`) pour confirmation atomique des paiements en ligne et emission des billets.
+15. `0015_ticket_checkin_and_scanner.sql` : Statut `USED`, colonnes `scanned_at`/`scanned_by` et RPC `scan_and_checkin_ticket` pour le scanner de billets.
+16. `0016_allow_admin_event_creation.sql` : Politique RLS permettant aux administrateurs de creer des evenements en statut `DRAFT`.
+17. `0017_admin_hierarchical_permissions.sql` : Permissions hierarchiques `ADMIN` sur l'ensemble des RPC/RLS et fonction `promote_user_to_admin` restreinte à `service_role`.
+18. `0018_audit_security_and_free_events.sql` : Verrouillage `service_role` sur `confirm_online_payment`/`promote_user_to_admin`, suppression de la policy en doublon de `0016`, et confirmation immediate avec emission de billets pour les evenements gratuits (`price = 0`).
 
 ## Validation en Integration Continue (CI)
 

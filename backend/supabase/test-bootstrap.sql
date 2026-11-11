@@ -12,11 +12,15 @@ begin
     if not exists (select 1 from pg_roles where rolname = 'authenticated') then
         create role authenticated;
     end if;
+    if not exists (select 1 from pg_roles where rolname = 'service_role') then
+        create role service_role;
+    end if;
 end
 $$;
 
 create table if not exists auth.users (
     id uuid primary key,
+    email text unique,
     raw_user_meta_data jsonb
 );
 

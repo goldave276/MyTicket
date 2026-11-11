@@ -8,6 +8,15 @@ const nodemailer = require("nodemailer");
 
 let cachedTransporter = null;
 
+function escapeHtml(value = "") {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function getTransporter() {
   if (cachedTransporter) return cachedTransporter;
 
@@ -39,6 +48,14 @@ function getTransporter() {
  * Builds a clean, responsive HTML email for ticket confirmation.
  */
 function buildTicketEmailHtml({ userName, eventTitle, eventDate, eventLocation, tickets, totalAmount, currency }) {
+  const safeUserName = escapeHtml(userName || "Cher participant");
+  const safeEventTitle = escapeHtml(eventTitle || "Événement MyTicket");
+  const safeEventLocation = eventLocation ? escapeHtml(eventLocation) : "";
+  const safeCurrency = escapeHtml(currency || "XOF");
+  const primaryFrontendUrl = (process.env.FRONTEND_URL || "http://localhost:3333")
+    .split(",")[0]
+    .trim();
+
   const formattedDate = eventDate
     ? new Date(eventDate).toLocaleDateString("fr-FR", {
         weekday: "long",
@@ -57,11 +74,11 @@ function buildTicketEmailHtml({ userName, eventTitle, eventDate, eventLocation, 
         <div style="background-color: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 16px; margin-bottom: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #3f3f46; padding-bottom: 8px; margin-bottom: 8px;">
             <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #22d3ee; font-weight: 700;">PASS ENTRÉE #${index + 1}</span>
-            <span style="font-family: monospace; font-size: 12px; color: #a1a1aa;">${t.ticket_code || t.id || "VALIDE"}</span>
+            <span style="font-family: monospace; font-size: 12px; color: #a1a1aa;">${escapeHtml(t.ticket_code || t.id || "VALIDE")}</span>
           </div>
-          <div style="color: #ffffff; font-weight: 600; font-size: 14px; margin-bottom: 4px;">${eventTitle}</div>
+          <div style="color: #ffffff; font-weight: 600; font-size: 14px; margin-bottom: 4px;">${safeEventTitle}</div>
           <div style="color: #94a3b8; font-size: 12px;">📅 ${formattedDate}</div>
-          ${eventLocation ? `<div style="color: #94a3b8; font-size: 12px;">📍 ${eventLocation}</div>` : ""}
+          ${safeEventLocation ? `<div style="color: #94a3b8; font-size: 12px;">📍 ${safeEventLocation}</div>` : ""}
         </div>
       `
         )
@@ -78,7 +95,7 @@ function buildTicketEmailHtml({ userName, eventTitle, eventDate, eventLocation, 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vos billets pour ${eventTitle}</title>
+  <title>Vos billets pour ${safeEventTitle}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0b0d0c; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f2f4f2;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #0b0d0c; padding: 24px 12px;">
@@ -96,7 +113,7 @@ function buildTicketEmailHtml({ userName, eventTitle, eventDate, eventLocation, 
           <!-- Content Body -->
           <tr>
             <td style="padding: 32px 24px;">
-              <h2 style="margin: 0 0 12px; font-size: 20px; font-weight: 700; color: #ffffff;">Bonjour ${userName || "Cher participant"},</h2>
+              <h2 style="margin: 0 0 12px; font-size: 20px; font-weight: 700; color: #ffffff;">Bonjour ${safeUserName},</h2>
               <p style="margin: 0 0 24px; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
                 Votre paiement a été confirmé avec succès ! Vous trouverez ci-dessous votre récapitulatif de commande et vos pass d'accès.
               </p>
@@ -104,10 +121,10 @@ function buildTicketEmailHtml({ userName, eventTitle, eventDate, eventLocation, 
               <!-- Event Card -->
               <div style="background-color: #1e293b; border-left: 4px solid #22d3ee; padding: 16px; border-radius: 6px; margin-bottom: 24px;">
                 <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #22d3ee; font-weight: 700;">Événement</div>
-                <div style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 4px 0;">${eventTitle}</div>
+                <div style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 4px 0;">${safeEventTitle}</div>
                 <div style="font-size: 13px; color: #94a3b8; margin-top: 6px;">📅 ${formattedDate}</div>
-                ${eventLocation ? `<div style="font-size: 13px; color: #94a3b8; margin-top: 2px;">📍 ${eventLocation}</div>` : ""}
-                ${totalAmount ? `<div style="font-size: 13px; color: #22d3ee; margin-top: 6px; font-weight: 600;">Total payé : ${totalAmount} ${currency || "XOF"}</div>` : ""}
+                ${safeEventLocation ? `<div style="font-size: 13px; color: #94a3b8; margin-top: 2px;">📍 ${safeEventLocation}</div>` : ""}
+                ${totalAmount ? `<div style="font-size: 13px; color: #22d3ee; margin-top: 6px; font-weight: 600;">Total payé : ${escapeHtml(totalAmount)} ${safeCurrency}</div>` : ""}
               </div>
 
               <!-- Tickets List -->
@@ -118,7 +135,7 @@ function buildTicketEmailHtml({ userName, eventTitle, eventDate, eventLocation, 
 
               <!-- Instructions & CTA -->
               <div style="text-align: center; margin: 32px 0 16px;">
-                <a href="${process.env.FRONTEND_URL || "http://localhost:3333"}/dashboard/tickets" style="background-color: #0891b2; color: #ffffff; padding: 14px 28px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 8px; display: inline-block; box-shadow: 0 2px 10px rgba(8, 145, 178, 0.4);">
+                <a href="${escapeHtml(primaryFrontendUrl)}/dashboard/tickets" style="background-color: #0891b2; color: #ffffff; padding: 14px 28px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 8px; display: inline-block; box-shadow: 0 2px 10px rgba(8, 145, 178, 0.4);">
                   Accéder à mes QR Codes d'accès
                 </a>
               </div>
@@ -202,5 +219,6 @@ async function sendTicketConfirmationEmail({
 module.exports = {
   sendTicketConfirmationEmail,
   buildTicketEmailHtml,
+  escapeHtml,
   getTransporter,
 };

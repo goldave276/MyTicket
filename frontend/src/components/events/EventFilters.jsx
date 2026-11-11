@@ -60,6 +60,7 @@ export default function EventFilters({ filters, onChange, onReset }) {
         <input
           type="text"
           placeholder="Lieu (ex: Lomé)"
+          aria-label="Lieu"
           value={filters.location || ''}
           onChange={(e) => handleChange('location', e.target.value)}
           className="w-full px-4 py-2.5 rounded-md bg-zinc-950/40 border border-zinc-700/60 text-white placeholder-zinc-500 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-400"
@@ -87,6 +88,7 @@ export default function EventFilters({ filters, onChange, onReset }) {
         <input
           type="number"
           placeholder="Prix min (FCFA)"
+          aria-label="Prix minimum"
           value={filters.minPrice || ''}
           onChange={(e) => handleChange('minPrice', e.target.value)}
           className="w-full px-4 py-2.5 rounded-md bg-zinc-950/40 border border-zinc-700/60 text-white placeholder-zinc-500 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-400"
@@ -96,6 +98,7 @@ export default function EventFilters({ filters, onChange, onReset }) {
         <input
           type="number"
           placeholder="Prix max (FCFA)"
+          aria-label="Prix maximum"
           value={filters.maxPrice || ''}
           onChange={(e) => handleChange('maxPrice', e.target.value)}
           className="w-full px-4 py-2.5 rounded-md bg-zinc-950/40 border border-zinc-700/60 text-white placeholder-zinc-500 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-400"

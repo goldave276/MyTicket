@@ -31,7 +31,7 @@ async function requireAuth(req, res, next) {
 
         const { data: profile, error: profileError } = await req.supabase
             .from("profiles")
-            .select("is_blocked")
+            .select("id, role, is_blocked, full_name")
             .eq("id", user.id)
             .maybeSingle();
 
@@ -52,6 +52,9 @@ async function requireAuth(req, res, next) {
                 message: "Compte bloque"
             });
         }
+
+        req.profile = profile;
+        req.user.role = profile.role;
 
         return next();
     } catch (err) {

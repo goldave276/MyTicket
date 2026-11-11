@@ -6,11 +6,16 @@ import { TicketIcon, CalendarIcon, MapPinIcon } from './Icons';
 export default function QRCodeModal({ isOpen, onClose, ticket }) {
   if (!ticket) return null;
 
-  // Generated entirely client-side with qrcode.react: the ticket holder's
-  // data never leaves the browser to reach a third-party QR rendering service.
+  const ticketCode = ticket.ticket_code || ticket.ticketCode || String(ticket.id);
+  const eventDateValue = ticket.eventDate || ticket.event?.event_date || ticket.event?.date;
+  const eventLocationValue = ticket.eventLocation || ticket.event?.location;
+
+  // Generated entirely client-side with qrcode.react: includes ticketCode (UUID)
+  // required by the organizer check-in scanner.
   const qrData = JSON.stringify({
+    ticketCode,
     ticketId: ticket.id,
-    eventId: ticket.eventId || ticket.event_id,
+    eventId: ticket.eventId || ticket.event_id || ticket.event?.id,
     user: ticket.userName || ticket.user_id,
     createdAt: ticket.createdAt || ticket.created_at,
   });
@@ -22,6 +27,8 @@ export default function QRCodeModal({ isOpen, onClose, ticket }) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
+    const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
     img.onload = () => {
       canvas.width = img.width + 40;
       canvas.height = img.height + 40;
@@ -31,12 +38,13 @@ export default function QRCodeModal({ isOpen, onClose, ticket }) {
         ctx.drawImage(img, 20, 20);
         const pngFile = canvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
-        downloadLink.download = `ticket-qr-${String(ticket.id).slice(-8)}.png`;
+        downloadLink.download = `ticket-qr-${String(ticketCode).slice(0, 8)}.png`;
         downloadLink.href = pngFile;
         downloadLink.click();
       }
+      URL.revokeObjectURL(url);
     };
-    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+    img.src = url;
   };
 
   return (
@@ -53,7 +61,10 @@ export default function QRCodeModal({ isOpen, onClose, ticket }) {
               {ticket.eventName || ticket.event?.title || 'Événement MyTicket'}
             </h4>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-              N° Billet : <span className="font-mono font-semibold text-zinc-700 dark:text-zinc-300">{ticket.id}</span>
+              N° Billet : <span className="font-mono font-semibold text-zinc-700 dark:text-zinc-300">#{ticket.id}</span>
+            </p>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 break-all">
+              Code UUID : <span className="font-mono font-semibold text-indigo-400">{ticketCode}</span>
             </p>
           </div>
 
@@ -74,8 +85,8 @@ export default function QRCodeModal({ isOpen, onClose, ticket }) {
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-4 h-4 text-indigo-500" />
               <span>
-                {ticket.eventDate
-                  ? new Date(ticket.eventDate).toLocaleDateString('fr-FR', {
+                {eventDateValue
+                  ? new Date(eventDateValue).toLocaleDateString('fr-FR', {
                       weekday: 'long',
                       day: 'numeric',
                       month: 'long',
@@ -86,10 +97,10 @@ export default function QRCodeModal({ isOpen, onClose, ticket }) {
                   : 'Date confirmée sur votre réservation'}
               </span>
             </div>
-            {ticket.eventLocation && (
+            {eventLocationValue && (
               <div className="flex items-center gap-2">
                 <MapPinIcon className="w-4 h-4 text-indigo-500" />
-                <span>{ticket.eventLocation}</span>
+                <span>{eventLocationValue}</span>
               </div>
             )}
           </div>
@@ -118,4 +129,3 @@ export default function QRCodeModal({ isOpen, onClose, ticket }) {
     </Modal>
   );
 }
-

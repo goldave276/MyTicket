@@ -6,6 +6,7 @@ import { useRequireAuth } from '@/hooks/useRequireAuth';
 import reservationService from '@/services/reservationService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
+import ErrorState from '@/components/common/ErrorState';
 import { BuildingIcon, ClockIcon, CheckCircleIcon, ArrowRightIcon } from '@/components/common/Icons';
 
 function formatRequestDate(request) {
@@ -14,11 +15,12 @@ function formatRequestDate(request) {
 }
 
 export default function BecomeOrganizerPage() {
-  const { ready, user, isOrganizer } = useRequireAuth();
+  const { ready, isOrganizer } = useRequireAuth();
   const { showToast } = useToast();
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const [eventType, setEventType] = useState('CONCERT');
@@ -27,15 +29,18 @@ export default function BecomeOrganizerPage() {
 
   const fetchRequests = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const data = await reservationService.getMyOrganizerRequests();
       setRequests(Array.isArray(data) ? data : data.requests || []);
-    } catch {
+    } catch (err) {
+      setError(true);
+      showToast(err.message || 'Impossible de charger vos demandes', 'error');
       setRequests([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     // Deferred to a microtask so this effect doesn't call setState synchronously.
@@ -130,6 +135,14 @@ export default function BecomeOrganizerPage() {
               Soumettez vos justificatifs pour obtenir les droits de création et gestion d’événements.
             </p>
           </div>
+
+          {error && (
+            <ErrorState
+              title="Impossible de charger vos demandes"
+              message="Une erreur est survenue lors de la récupération de vos demandes d'accréditation."
+              onRetry={fetchRequests}
+            />
+          )}
 
           {/* Already Organizer Banner */}
           {isOrganizer && (

@@ -47,7 +47,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 - [x] **F2.4. Profil & Demande Organisateur**
   - [x] Page "Mon Profil" (`/dashboard/profile`) : modification du nom complet et consultation de son rôle.
   - [x] Formulaire "Devenir Organisateur" (`/dashboard/become-organizer`) : type d'événement ciblé, justificatif et description de l'activité (persistée et contrainte à 20-1000 caractères).
-  - [x] Téléversement réel du justificatif vers Supabase Storage (PDF, JPG, PNG, max 5 Mo) avec préfixe utilisateur sécurisé, vérification de type/taille et stockage dans `organizer-documents`.
+  - [x] Téléversement réel du justificatif vers Supabase Storage (PDF, JPG, PNG, max 5 Mo) avec préfixe utilisateur sécurisé, vérification de type/taille et stockage dans `organizer-documents` (durci avec `supabaseService.storage` pour contourner les échecs RLS de stockage).
   - [x] Suivi en direct du statut de la demande (`PENDING`, `APPROVED`, `REJECTED`).
 
 ---
@@ -91,6 +91,11 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 
 - [x] **F4.4. Tableau de Bord Global Admin**
   - [x] Vue synthétique (`/admin`) : nombre d'utilisateurs inscrits, événements actifs, demandes/événements en attente.
+
+- [x] **F4.5. Gestion Globale & Modération / Suppression d'Événements**
+  - [x] Page d'administration complète (`/admin/events`) avec filtrage par statut (`APPROVED`, `PENDING`, `DRAFT`, `CANCELLED`, `FINISHED`) et recherche.
+  - [x] Suppression physique si 0 réservation ou annulation d'urgence (`CANCELLED`) avec invalidation des billets et des réservations associées.
+  - [x] Action rapide de modération/suppression directement sur la page publique d'un événement (`/events/[id]`) pour les administrateurs.
 
 ---
 
@@ -195,6 +200,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Créer les index sur `events(event_date, status)`, `reservations(user_id, event_id)`, `tickets(user_id, ticket_code)`, `payments` et `organizer_requests` (Migration 0009).
   - [x] Exploiter les fonctions RPC sécurisées dans les contrôleurs (`get_admin_stats`, `get_organizer_stats`, `admin_list_users`, `admin_update_user_role`, `admin_set_user_blocked`).
   - [x] Migration 0016 : Autorisation RLS d'insertion d'événements en statut DRAFT pour les administrateurs.
+  - [x] Migration 0017 & 0018 (Audit Sécurité & QA) : Verrouillage `service_role` de `promote_user_to_admin` et `confirm_online_payment`, suppression de la policy RLS en doublon, auto-confirmation des réservations d'événements gratuits (`price = 0`) avec génération immédiate des billets, alignement complet des contrats API/Frontend, synchronisation CI/Docs et 134/134 tests unitaires et HTTP validés.
 
 ---
 
@@ -232,6 +238,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Guide de déploiement Web Service Render rédigé dans [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md).
   - [x] Web Service Render déployé en production avec variables d'environnement (`NODE_ENV=production`, `PORT=3000`, `TRUST_PROXY=1`, etc.) sur `https://myticket-llwf.onrender.com`.
   - [x] Point de contrôle opérationnel : `GET /api/health` actif et validé.
+  - [x] **Pipeline CI/CD Automatisé** : Automatisation du déploiement Render conditionné au succès des 4 jobs CI (Next.js build, tests unitaires, build Docker et migrations PostgreSQL) via Deploy Hook Render (`RENDER_DEPLOY_HOOK`) dans `.github/workflows/backend-ci.yml`.
 
 ---
 
@@ -278,3 +285,23 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [ ] **Emails Transactionnels** : Réception de l'email de confirmation stylisé avec récapitulatif des billets et QR codes.
   - [ ] **Accès Billets & Export** : Visualisation sur `/dashboard/tickets`, téléchargement PNG du QR code, test d'impression pass A4 (`@media print`).
   - [ ] **Contrôle d'Accès Scanner** : Test du scanner caméra mobile (`/organizer/events/[id]/scanner`) pour valider l'accès caméra et le check-in en direct (statut `USED`).
+
+---
+
+## 🔍 PARTIE 4 : ASSAINISSEMENT POST-AUDIT (08/11/2026)
+- [x] **A1. Déblocage du build frontend Next.js**
+  - [x] Remplacement du chargement distant `next/font/google` par des polices système natives dans `frontend/src/lib/fonts.js` et `globals.css`.
+  - [x] Configuration du script de build avec Webpack (`next build --webpack`) pour garantir une compilation hors-ligne déterministe (27/27 pages générées en ~4s).
+- [x] **A2. Sécurité des webhooks de paiement**
+  - [x] Garde-fous stricts sur `handleStripeWebhook` et `handleMobileMoneyWebhook` dans `backend/src/controllers/paymentController.js` (rejet 500 immédiat en production si `SUPABASE_SERVICE_ROLE_KEY` est absente).
+- [x] **A3. Performance requêtes SQL profil**
+  - [x] Mutualisation de la récupération du profil utilisateur dans `backend/src/middlewares/authMiddleware.js` (`req.profile`) pour éliminer la seconde requête séquentielle dans `requireRole.js`.
+- [x] **A4. Cohérence mise à jour rôles & blocage Admin**
+  - [x] Traitement conjoint et sans retour hâtif des mutations `role` et `isBlocked` dans `backend/src/controllers/adminController.js`.
+- [x] **A5. Fiabilisation UI, Accessibilité & Standards**
+  - [x] Gestion d'erreur explicite avec composant `ErrorState` dans `frontend/src/pages/dashboard/become-organizer.js`.
+  - [x] Garde de synchronisation `ready` dans `frontend/src/pages/organizer/events/[id]/scanner.js`.
+  - [x] Bouton désactivé sémantique pour les événements complets dans `frontend/src/components/events/EventCard.jsx`.
+  - [x] Élimination de `unescape()` déprécié au profit d'un SVG Blob URL dans `frontend/src/components/common/QRCodeModal.jsx`.
+  - [x] Hydratation correcte du profil utilisateur sur mise à jour dans `frontend/src/services/authService.js`.
+  - [x] Attributs `aria-label` ajoutés sur les filtres et champs de recherche (`EventFilters.jsx`, `admin/users.js`).

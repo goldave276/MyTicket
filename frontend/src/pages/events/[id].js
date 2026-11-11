@@ -8,6 +8,7 @@ import paymentService from '@/services/paymentService';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import Badge from '@/components/common/Badge';
+import Modal from '@/components/common/Modal';
 import ErrorState from '@/components/common/ErrorState';
 import { getEventImage } from '@/utils/eventImages';
 import { CalendarIcon, MapPinIcon, TicketIcon, ArrowRightIcon, CheckCircleIcon } from '@/components/common/Icons';
@@ -15,7 +16,7 @@ import { CalendarIcon, MapPinIcon, TicketIcon, ArrowRightIcon, CheckCircleIcon }
 export default function EventDetailsPage() {
   const router = useRouter();
   const { id } = router.query;
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { showToast } = useToast();
 
   const [event, setEvent] = useState(null);
@@ -25,6 +26,9 @@ export default function EventDetailsPage() {
   const [booking, setBooking] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('CARD');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [forceDelete, setForceDelete] = useState(false);
+  const [submittingAdmin, setSubmittingAdmin] = useState(false);
 
   const loadEvent = useCallback(async () => {
     if (!id) return;
@@ -137,6 +141,20 @@ export default function EventDetailsPage() {
     }
   };
 
+  const handleAdminConfirm = async () => {
+    setSubmittingAdmin(true);
+    try {
+      const res = await eventService.deleteEvent(id, forceDelete);
+      showToast(res.message || 'Opération de modération réussie', 'success');
+      setShowAdminModal(false);
+      router.push('/admin/events');
+    } catch (err) {
+      showToast(err.message || "Erreur lors de l'opération sur l'événement", 'error');
+    } finally {
+      setSubmittingAdmin(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-pulse py-12">
@@ -165,7 +183,9 @@ export default function EventDetailsPage() {
   }
 
   const eventPrice = event.price ?? event.ticket_price ?? 0;
-  const available = event.available_tickets ?? event.availableTickets ?? 0;
+  const totalCapacity = event.capacity ?? event.total_tickets ?? event.totalTickets ?? 100;
+  const available = event.remainingCapacity ?? event.remaining_capacity ?? event.available_tickets ?? event.availableTickets ?? totalCapacity;
+  const eventDateVal = event.date || event.event_date || event.eventDate;
   const totalPrice = eventPrice * quantity;
   const isSoldOut = available <= 0;
   const eventImage =
@@ -219,6 +239,20 @@ export default function EventDetailsPage() {
               <span>💬</span>
               <span>WhatsApp</span>
             </a>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => {
+                  setForceDelete(false);
+                  setShowAdminModal(true);
+                }}
+                className="px-3 py-1.5 rounded-sm bg-red-950/70 hover:bg-red-900 text-red-300 font-mono text-xs flex items-center gap-1.5 border border-red-800 transition-colors"
+                title="Supprimer ou annuler cet événement en tant qu'administrateur"
+              >
+                <span>🛡️</span>
+                <span>Modérer (Admin)</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -257,8 +291,8 @@ export default function EventDetailsPage() {
               <div className="spec-item">
                 <span className="spec-label">Date</span>
                 <span className="spec-value">
-                  {event.date || event.event_date
-                    ? new Date(event.date || event.event_date).toLocaleDateString('fr-FR', {
+                  {eventDateVal
+                    ? new Date(eventDateVal).toLocaleDateString('fr-FR', {
                         day: 'numeric',
                         month: 'short',
                         year: 'numeric',
@@ -270,8 +304,8 @@ export default function EventDetailsPage() {
               <div className="spec-item">
                 <span className="spec-label">Heure</span>
                 <span className="spec-value">
-                  {event.date || event.event_date
-                    ? new Date(event.date || event.event_date).toLocaleTimeString('fr-FR', {
+                  {eventDateVal
+                    ? new Date(eventDateVal).toLocaleTimeString('fr-FR', {
                         hour: '2-digit',
                         minute: '2-digit',
                       })
@@ -425,6 +459,78 @@ export default function EventDetailsPage() {
           </div>
         </div>
       </div>
+
+      {showAdminModal && (
+        <Modal
+          isOpen={showAdminModal}
+          onClose={() => {
+            if (!submittingAdmin) {
+              setShowAdminModal(false);
+              setForceDelete(false);
+            }
+          }}
+          title="Modération Administrateur : Supprimer / Annuler"
+        >
+          <div className="space-y-4 text-sm text-zinc-300">
+            <p>
+              Action d&apos;urgence sur l&apos;événement :
+              <strong className="block text-white mt-1 text-base">
+                {event.title} (ID #{event.id})
+              </strong>
+            </p>
+
+            <div className="bg-amber-950/40 border border-amber-800/80 rounded-md p-3 text-xs text-amber-200 space-y-1">
+              <p className="font-semibold">⚠️ Règles d&apos;application :</p>
+              <ul className="list-disc list-inside space-y-0.5 text-amber-300/90">
+                <li>
+                  <strong>Sans réservation :</strong> L&apos;événement sera <u>supprimé définitivement</u>.
+                </li>
+                <li>
+                  <strong>Avec réservations :</strong> L&apos;événement basculera en <u>ANNULÉ (`CANCELLED`)</u> d&apos;urgence, les réservations seront annulées et les billets QR invalidés.
+                </li>
+              </ul>
+            </div>
+
+            <label className="flex items-start gap-2.5 p-2 rounded bg-zinc-900 border border-zinc-800 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={forceDelete}
+                onChange={(e) => setForceDelete(e.target.checked)}
+                className="mt-0.5 rounded border-zinc-700 text-red-500 focus:ring-red-400"
+              />
+              <span className="text-xs text-zinc-400">
+                <strong className="text-red-400">Forcer la suppression physique complète</strong> même avec réservations (purgera en cascade).
+              </span>
+            </label>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-zinc-800">
+              <button
+                type="button"
+                disabled={submittingAdmin}
+                onClick={() => {
+                  setShowAdminModal(false);
+                  setForceDelete(false);
+                }}
+                className="btn btn-secondary text-xs"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                disabled={submittingAdmin}
+                onClick={handleAdminConfirm}
+                className="btn bg-red-600 hover:bg-red-500 text-white text-xs font-semibold"
+              >
+                {submittingAdmin
+                  ? 'Traitement...'
+                  : forceDelete
+                  ? 'Supprimer définitivement (Force)'
+                  : "Confirmer l'opération"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </>
   );
 }

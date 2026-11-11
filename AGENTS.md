@@ -8,3 +8,7 @@
 
 ## 📊 2. Synchronisation documentaire obligatoire
 - Maintenir systématiquement synchronisés les fichiers [`PROGRESSION.md`](file:///c:/Users/MSI/Desktop/myticket/PROGRESSION.md) et [`TASKS.md`](file:///c:/Users/MSI/Desktop/myticket/TASKS.md) après chaque étape validée et à chaque push.
+
+## 🚀 3. Commit et Push systématique après chaque changement validé
+- Après chaque modification ou ensemble de changements validé, effectuer systématiquement un `git commit` avec un message clair et descriptif reflétant exactement la nature du changement.
+- Effectuer immédiatement le `git push` sur la branche active distante.
