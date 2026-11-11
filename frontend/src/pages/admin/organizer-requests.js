@@ -156,7 +156,7 @@ export default function AdminOrganizerRequestsPage() {
                     <div className="space-y-2 text-xs">
                       <div>
                         <span className="text-zinc-500 uppercase tracking-wider font-semibold block text-[10px]">
-                          Type d'événement
+                          Type d&apos;événement
                         </span>
                         <span className="font-semibold text-zinc-200">
                           {req.eventType || req.event_type}
