@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useToast } from '@/context/ToastContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import eventService from '@/services/eventService';
+import { notifyDataUpdated } from '@/services/api';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
 import ErrorState from '@/components/common/ErrorState';
@@ -50,6 +51,7 @@ export default function OrganizerEventsListPage() {
   const handleSubmitEvent = async (eventId) => {
     try {
       await eventService.submitEvent(eventId);
+      notifyDataUpdated('events');
       showToast('Événement soumis à l’administration pour validation !', 'success');
       fetchEvents();
     } catch (err) {
@@ -62,6 +64,7 @@ export default function OrganizerEventsListPage() {
 
     try {
       await eventService.cancelEvent(eventId);
+      notifyDataUpdated('events');
       showToast('Événement annulé', 'info');
       fetchEvents();
     } catch (err) {
@@ -79,6 +82,7 @@ export default function OrganizerEventsListPage() {
         await eventService.createDraftEvent(formData);
         showToast('Brouillon d’événement créé avec succès', 'success');
       }
+      notifyDataUpdated('events');
       setIsModalOpen(false);
       setEditingEvent(null);
       fetchEvents();

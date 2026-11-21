@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useToast } from '@/context/ToastContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import adminService from '@/services/adminService';
+import { notifyDataUpdated } from '@/services/api';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
 import Modal from '@/components/common/Modal';
@@ -74,6 +75,7 @@ export default function AdminEventsPage() {
     setSubmitting(true);
     try {
       const res = await adminService.deleteOrCancelEvent(selectedEvent.id, forceDelete);
+      notifyDataUpdated('events');
       showToast(res.message || 'Opération réussie', 'success');
       setSelectedEvent(null);
       setForceDelete(false);

@@ -31,8 +31,8 @@ export default function Home() {
   const [pagination, setPagination] = useState({ page: 1, limit: CATALOG_PAGE_SIZE, total: 0 });
   const catalogRef = useRef(null);
 
-  const fetchEvents = useCallback(async () => {
-    setLoading(true);
+  const fetchEvents = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     setError(false);
     try {
       const data = await eventService.getApprovedEvents({
@@ -50,10 +50,12 @@ export default function Home() {
         }
       );
     } catch (err) {
-      setError(true);
-      showToast(err.message || 'Impossible de charger les événements', 'error');
+      if (!silent) {
+        setError(true);
+        showToast(err.message || 'Impossible de charger les événements', 'error');
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [filters, page, showToast]);
 
@@ -62,6 +64,27 @@ export default function Home() {
       fetchEvents();
     }, 300);
     return () => clearTimeout(timer);
+  }, [fetchEvents]);
+
+  useEffect(() => {
+    const handleSilentRefresh = () => {
+      if (document.visibilityState === 'visible') {
+        fetchEvents({ silent: true });
+      }
+    };
+    const handleDataUpdated = () => {
+      fetchEvents({ silent: true });
+    };
+
+    window.addEventListener('focus', handleSilentRefresh);
+    document.addEventListener('visibilitychange', handleSilentRefresh);
+    window.addEventListener('myticket_data_updated', handleDataUpdated);
+
+    return () => {
+      window.removeEventListener('focus', handleSilentRefresh);
+      document.removeEventListener('visibilitychange', handleSilentRefresh);
+      window.removeEventListener('myticket_data_updated', handleDataUpdated);
+    };
   }, [fetchEvents]);
 
   const handleFiltersChange = (nextFilters) => {

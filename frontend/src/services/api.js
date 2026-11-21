@@ -14,6 +14,16 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+export const notifyDataUpdated = (scope = 'all') => {
+  if (typeof window !== 'undefined') {
+    try {
+      window.dispatchEvent(new CustomEvent('myticket_data_updated', { detail: { scope } }));
+    } catch {
+      // CustomEvent unavailable
+    }
+  }
+};
+
 export const clearAuthStorageAndNotify = () => {
   if (typeof window !== 'undefined') {
     try {
@@ -62,6 +72,7 @@ export async function apiFetch(endpoint, options = {}, isRetry = false) {
   }
 
   const config = {
+    cache: 'no-store',
     ...options,
     headers,
   };

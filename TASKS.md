@@ -23,6 +23,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Composants UI atomiques : Modal, Skeleton, Toasts (`ToastContext`), `ErrorState` (état d'erreur réel avec relance, ajouté le 15/09/2026).
   - [x] Composants métiers : Badge de statut (`DRAFT`, `PENDING`, `APPROVED`, `REJECTED`, `CANCELLED`), Carte événement, Carte ticket.
   - [x] **Ergonomie Mobile Android & iPhone (11/11/2026)** : Barre d'onglets de navigation secondaire horizontale à défilement tactile fluide sur mobile (`Sidebar.jsx`), drawer tactile étendu dans `Navbar.jsx`, support des safe-areas iOS (`env(safe-area-inset-bottom)`), élimination du délai de tap de 300ms via `touch-action: manipulation`, cibles tactiles >= 44px.
+  - [x] **Menu mobile unifié sur les 3 barres (`☰`) & Synchro temps réel (21/11/2026)** : Masquage du popover flottant `UserDropdown` sur mobile (`hidden md:block`), fiche utilisateur (initiales, nom, email, rôle) intégrée directement dans le tiroir `☰` de `Navbar.jsx`, `cache: 'no-store'` dans `api.js`, synchronisation automatique du rôle utilisateur au focus (`AuthContext.jsx` + toast `ToastContext.jsx`), redirection propre vers `/` au logout et après fin des parcours clés (`become-organizer.js`, `payment/success.js`).
 
 ---
 

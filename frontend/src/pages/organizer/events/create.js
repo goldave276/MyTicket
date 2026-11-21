@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { useToast } from '@/context/ToastContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import eventService from '@/services/eventService';
+import { notifyDataUpdated } from '@/services/api';
 import Sidebar from '@/components/dashboard/Sidebar';
 import { ArrowRightIcon } from '@/components/common/Icons';
 
@@ -32,6 +33,7 @@ export default function CreateEventPage() {
 
     try {
       await eventService.createDraftEvent(formData);
+      notifyDataUpdated('events');
       showToast('Brouillon d’événement créé avec succès !', 'success');
       router.push('/organizer/events');
     } catch (err) {

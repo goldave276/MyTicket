@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { useToast } from '@/context/ToastContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import adminService from '@/services/adminService';
+import { notifyDataUpdated } from '@/services/api';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
 import Modal from '@/components/common/Modal';
@@ -45,6 +46,7 @@ export default function AdminPaymentsPage() {
     setSubmitting(true);
     try {
       await adminService.confirmOnSitePayment(confirmingPayment.id);
+      notifyDataUpdated('payment');
       showToast('Paiement sur place confirmé avec succès ! Les billets et QR codes ont été générés.', 'success');
       setConfirmingPayment(null);
       fetchPayments();

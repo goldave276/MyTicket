@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { notifyDataUpdated } from '@/services/api';
 import reservationService from '@/services/reservationService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
@@ -22,6 +24,7 @@ function formatRequestDate(request) {
 }
 
 export default function BecomeOrganizerPage() {
+  const router = useRouter();
   const { ready, isOrganizer } = useRequireAuth();
   const { refreshUser } = useAuth();
   const { showToast } = useToast();
@@ -34,7 +37,15 @@ export default function BecomeOrganizerPage() {
   const [eventType, setEventType] = useState('CONCERT');
   const [selectedFile, setSelectedFile] = useState(null);
   const [description, setDescription] = useState('');
-  const prevPendingRef = useRef(false);
+  const redirectTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current);
+      }
+    };
+  }, []);
 
   const fetchRequests = useCallback(async (isBackground = false) => {
     if (!isBackground) setLoading(true);
@@ -156,9 +167,13 @@ export default function BecomeOrganizerPage() {
           base64Data,
         },
       });
-      showToast('Votre demande d’organisateur a été soumise à l’administration !', 'success');
+      showToast('Demande d’organisateur soumise ! Retour à l’accueil...', 'success');
       setSelectedFile(null);
-      fetchRequests();
+      notifyDataUpdated('organizer-request');
+      await fetchRequests();
+      redirectTimerRef.current = setTimeout(() => {
+        router.push('/');
+      }, 1800);
     } catch (err) {
       showToast(err.message || 'Impossible de soumettre la demande', 'error');
     } finally {

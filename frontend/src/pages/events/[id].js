@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import eventService from '@/services/eventService';
 import reservationService from '@/services/reservationService';
 import paymentService from '@/services/paymentService';
+import { notifyDataUpdated } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import Badge from '@/components/common/Badge';
@@ -81,6 +82,7 @@ export default function EventDetailsPage() {
             paymentMethod: 'ON_SITE',
           });
         }
+        notifyDataUpdated('reservation');
         showToast(`Réservation de ${quantity} place(s) enregistrée avec succès !`, 'success');
         router.push(isPaid ? '/dashboard' : '/dashboard/tickets');
         return;
@@ -92,6 +94,7 @@ export default function EventDetailsPage() {
           paymentMethod: 'CARD',
         });
         if (checkoutRes.checkoutUrl) {
+          notifyDataUpdated('reservation');
           window.location.href = checkoutRes.checkoutUrl;
           return;
         }
@@ -103,6 +106,7 @@ export default function EventDetailsPage() {
           paymentMethod: 'MOBILE_MONEY',
           phoneNumber: phoneNumber.trim(),
         });
+        notifyDataUpdated('reservation');
         showToast(mmRes.instructions || 'Demande de débit Mobile Money initiée avec succès.', 'success');
         router.push('/dashboard');
         return;
@@ -145,6 +149,7 @@ export default function EventDetailsPage() {
     setSubmittingAdmin(true);
     try {
       const res = await eventService.deleteEvent(id, forceDelete);
+      notifyDataUpdated('events');
       showToast(res.message || 'Opération de modération réussie', 'success');
       setShowAdminModal(false);
       router.push('/admin/events');

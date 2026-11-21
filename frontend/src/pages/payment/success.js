@@ -3,12 +3,14 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import paymentService from '@/services/paymentService';
+import { notifyDataUpdated } from '@/services/api';
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
   const { paymentId, session_id } = router.query;
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [verifying, setVerifying] = useState(false);
+  const [autoReturnSeconds, setAutoReturnSeconds] = useState(null);
 
   useEffect(() => {
     if (!router.isReady || !paymentId) return;
@@ -22,6 +24,10 @@ export default function PaymentSuccessPage() {
         const match = list.find((p) => String(p.id) === String(paymentId));
         if (!cancelled && match) {
           setPaymentStatus(match.status);
+          if (match.status === 'SUCCEEDED') {
+            notifyDataUpdated('payment');
+            setAutoReturnSeconds(6);
+          }
         }
       } catch {
         // Fallback if unauthenticated or network error
@@ -34,6 +40,20 @@ export default function PaymentSuccessPage() {
       cancelled = true;
     };
   }, [router.isReady, paymentId]);
+
+  useEffect(() => {
+    if (autoReturnSeconds === null) return undefined;
+    if (autoReturnSeconds <= 0) {
+      router.push('/');
+      return undefined;
+    }
+
+    const timer = setTimeout(() => {
+      setAutoReturnSeconds((prev) => (prev !== null ? prev - 1 : null));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [autoReturnSeconds, router]);
 
   const isConfirmed = paymentStatus === 'SUCCEEDED';
   const isPending = paymentStatus === 'PENDING';
@@ -108,6 +128,21 @@ export default function PaymentSuccessPage() {
           </div>
         )}
 
+        {autoReturnSeconds !== null && autoReturnSeconds > 0 && (
+          <div className="text-xs text-zinc-400 flex items-center justify-center gap-3">
+            <span>
+              Retour automatique à l’accueil dans <strong className="text-white">{autoReturnSeconds}s</strong>
+            </span>
+            <button
+              type="button"
+              onClick={() => setAutoReturnSeconds(null)}
+              className="text-indigo-400 hover:underline font-semibold"
+            >
+              Rester sur cette page
+            </button>
+          </div>
+        )}
+
         <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/dashboard/tickets"
@@ -120,6 +155,12 @@ export default function PaymentSuccessPage() {
             className="eyebrow px-6 py-3 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold transition-colors"
           >
             Mes réservations
+          </Link>
+          <Link
+            href="/"
+            className="eyebrow px-6 py-3 rounded-md border border-zinc-700 hover:border-zinc-500 text-zinc-200 font-semibold transition-colors"
+          >
+            ← Accueil
           </Link>
         </div>
       </div>

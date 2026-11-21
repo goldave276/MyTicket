@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useToast } from '@/context/ToastContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import reservationService from '@/services/reservationService';
+import { notifyDataUpdated } from '@/services/api';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
 import ErrorState from '@/components/common/ErrorState';
@@ -54,6 +55,7 @@ export default function UserReservationsPage() {
 
     try {
       await reservationService.cancelReservation(reservationId);
+      notifyDataUpdated('reservation');
       showToast('Réservation annulée avec succès', 'info');
       fetchReservations();
     } catch (err) {

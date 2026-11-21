@@ -115,7 +115,12 @@ export const authService = {
     });
     const updatedUser = response.profile || response.user;
     if (updatedUser) {
-      localStorage.setItem('myticket_user', JSON.stringify(updatedUser));
+      const existing = this.getStoredUser() || {};
+      const merged = { ...existing, ...updatedUser };
+      if (merged.role) {
+        merged.role = String(merged.role).trim().toUpperCase();
+      }
+      localStorage.setItem('myticket_user', JSON.stringify(merged));
     }
     return response;
   },

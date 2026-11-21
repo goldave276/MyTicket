@@ -3,10 +3,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import UserDropdown from './UserDropdown';
+import Badge from '../common/Badge';
 import { TicketIcon, PlusIcon, ShieldIcon, BuildingIcon, UserIcon } from '../common/Icons';
 
 export default function Navbar() {
-  const { user, isOrganizer, isAdmin, loading, logout } = useAuth();
+  const { user, userRole, isOrganizer, isAdmin, loading, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
 
@@ -87,11 +88,13 @@ export default function Navbar() {
         {/* Right Actions */}
         <div className="flex items-center gap-2.5">
           {loading ? (
-            <div className="w-8 h-8 rounded-full bg-slate-800 animate-pulse" />
+            <div className="hidden md:block w-8 h-8 rounded-full bg-slate-800 animate-pulse" />
           ) : user ? (
-            <UserDropdown />
+            <div className="hidden md:block">
+              <UserDropdown />
+            </div>
           ) : (
-            <div className="hidden sm:flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3">
               <Link
                 href="/auth/login"
                 className="text-sm font-medium text-slate-300 hover:text-white px-3 py-2 transition-colors"
@@ -107,9 +110,10 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile Menu Trigger */}
+          {/* Mobile Menu Trigger (3 bars in top-right) */}
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            type="button"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
             className="md:hidden w-11 h-11 rounded-xl text-slate-200 hover:bg-slate-800/80 active:scale-95 touch-manipulation flex items-center justify-center border border-white/10 focus:outline-none"
             aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
             aria-expanded={mobileMenuOpen}
@@ -121,8 +125,23 @@ export default function Navbar() {
 
       {/* Mobile Navigation Drawer Plein Écran */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 top-16 z-50 bg-[#08090e]/98 backdrop-blur-2xl flex flex-col justify-between px-6 py-6 overflow-y-auto animate-in fade-in duration-200 safe-pb">
+        <div className="md:hidden fixed inset-0 top-16 z-50 bg-[#08090e]/98 backdrop-blur-2xl flex flex-col justify-between px-6 py-6 overflow-y-auto animate-in fade-in duration-200 safe-pb">
           <div className="space-y-2">
+            {user && (
+              <div className="mb-4 p-4 rounded-2xl bg-[#11141e] border border-white/10 flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-cyan-500 to-sky-400 text-slate-950 font-bold text-sm flex items-center justify-center shrink-0 shadow-md">
+                  {(user.full_name || user.fullName || user.email || 'U').substring(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-white truncate">
+                    {user.full_name || user.fullName || 'Utilisateur'}
+                  </p>
+                  <p className="text-xs text-slate-400 truncate mb-1.5">{user.email}</p>
+                  <Badge status={userRole} />
+                </div>
+              </div>
+            )}
+
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}

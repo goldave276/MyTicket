@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const ToastContext = createContext(null);
 
@@ -17,6 +17,20 @@ export function ToastProvider({ children }) {
       removeToast(id);
     }, duration);
   }, [removeToast]);
+
+  useEffect(() => {
+    const handleRoleUpdated = (event) => {
+      const nextRole = event?.detail?.role;
+      if (nextRole === 'ORGANIZER') {
+        showToast('Votre compte est désormais Organisateur ! Vous pouvez créer vos événements.', 'success', 6000);
+      } else if (nextRole === 'ADMIN') {
+        showToast('Vos privilèges Administrateur sont actifs.', 'info', 5000);
+      }
+    };
+
+    window.addEventListener('myticket_role_updated', handleRoleUpdated);
+    return () => window.removeEventListener('myticket_role_updated', handleRoleUpdated);
+  }, [showToast]);
 
   return (
     <ToastContext.Provider value={{ showToast, removeToast }}>

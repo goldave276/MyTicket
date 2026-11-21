@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { useToast } from '@/context/ToastContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import adminService from '@/services/adminService';
+import { notifyDataUpdated } from '@/services/api';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
 import Modal from '@/components/common/Modal';
@@ -73,6 +74,7 @@ export default function AdminOrganizerRequestsPage() {
   const handleApprove = async (requestId) => {
     try {
       await adminService.approveOrganizerRequest(requestId);
+      notifyDataUpdated('organizer-requests');
       showToast('Demande approuvée avec succès ! Le membre est désormais Organisateur.', 'success');
       fetchRequests();
     } catch (err) {
@@ -85,6 +87,7 @@ export default function AdminOrganizerRequestsPage() {
     setSubmitting(true);
     try {
       await adminService.rejectOrganizerRequest(rejectingId, rejectReason);
+      notifyDataUpdated('organizer-requests');
       showToast('Demande refusée.', 'info');
       setRejectingId(null);
       setRejectReason('');

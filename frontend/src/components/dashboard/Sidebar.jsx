@@ -33,14 +33,25 @@ export default function Sidebar({ mode = 'user' }) {
     };
 
     fetchCounts();
-    // Rafraîchir doucement les compteurs toutes les 30 secondes si l'onglet est actif
-    const interval = setInterval(() => {
-      if (document.visibilityState === 'visible') fetchCounts();
-    }, 30000);
+    // Rafraîchir doucement les compteurs toutes les 30 secondes si l'onglet est actif,
+    // ainsi qu'immédiatement lors d'une action sur le site ou au retour sur l'onglet.
+    const handleRefresh = () => {
+      if (document.visibilityState === 'visible') {
+        fetchCounts();
+      }
+    };
+
+    const interval = setInterval(handleRefresh, 30000);
+    window.addEventListener('myticket_data_updated', fetchCounts);
+    window.addEventListener('focus', handleRefresh);
+    document.addEventListener('visibilitychange', handleRefresh);
 
     return () => {
       isMounted = false;
       clearInterval(interval);
+      window.removeEventListener('myticket_data_updated', fetchCounts);
+      window.removeEventListener('focus', handleRefresh);
+      document.removeEventListener('visibilitychange', handleRefresh);
     };
   }, [isAdmin]);
 

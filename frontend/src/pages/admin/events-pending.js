@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { useToast } from '@/context/ToastContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import adminService from '@/services/adminService';
+import { notifyDataUpdated } from '@/services/api';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
 import Modal from '@/components/common/Modal';
@@ -45,6 +46,7 @@ export default function AdminPendingEventsPage() {
   const handleApprove = async (eventId) => {
     try {
       await adminService.approveEvent(eventId);
+      notifyDataUpdated('events');
       showToast('Événement approuvé ! Il est désormais public et ouvert aux réservations.', 'success');
       fetchPendingEvents();
     } catch (err) {
@@ -57,6 +59,7 @@ export default function AdminPendingEventsPage() {
     setSubmitting(true);
     try {
       await adminService.rejectEvent(rejectingId, rejectReason);
+      notifyDataUpdated('events');
       showToast('Événement refusé.', 'info');
       setRejectingId(null);
       setRejectReason('');
