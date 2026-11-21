@@ -36,8 +36,9 @@ export default function TicketScannerPage() {
   const [lastScanResult, setLastScanResult] = useState(null);
   const [scanHistory, setScanHistory] = useState([]);
   const [cameraActive, setCameraActive] = useState(false);
-  const [barcodeSupported, setBarcodeSupported] = useState(true);
+  const [scannerEngine, setScannerEngine] = useState(null); // 'native' | 'jsqr' | 'manual'
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const scanIntervalRef = useRef(null);
   const lastDetectedCodeRef = useRef('');
@@ -79,6 +80,7 @@ export default function TicketScannerPage() {
       streamRef.current = null;
     }
     setCameraActive(false);
+    setScannerEngine(null);
   }, []);
 
   // Clean up camera on unmount
@@ -148,41 +150,93 @@ export default function TicketScannerPage() {
     [id, manualCode, showToast]
   );
 
-  // Automatic QR detection loop when camera is active
+  // Automatic QR detection loop when camera is active (native BarcodeDetector or jsQR fallback for iOS/Firefox)
   useEffect(() => {
     if (!cameraActive) return undefined;
 
-    if (typeof window === 'undefined' || !('BarcodeDetector' in window)) {
-      return undefined;
-    }
+    let cancelled = false;
 
-    let detector;
-    try {
-      detector = new window.BarcodeDetector({ formats: ['qr_code'] });
-    } catch {
-      return undefined;
-    }
-
-    scanIntervalRef.current = setInterval(async () => {
-      if (!videoRef.current || videoRef.current.readyState < 2 || scanning) return;
-      try {
-        const barcodes = await detector.detect(videoRef.current);
-        if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
-          const extracted = normalizeScannedPayload(barcodes[0].rawValue);
-          if (extracted && extracted !== lastDetectedCodeRef.current) {
-            lastDetectedCodeRef.current = extracted;
-            await handleValidateTicket(extracted);
-            setTimeout(() => {
-              lastDetectedCodeRef.current = '';
-            }, 3500);
-          }
-        }
-      } catch {
-        // Ignore transient frame detection errors
+    const triggerDetectedPayload = async (rawValue) => {
+      const extracted = normalizeScannedPayload(rawValue);
+      if (extracted && extracted !== lastDetectedCodeRef.current) {
+        lastDetectedCodeRef.current = extracted;
+        await handleValidateTicket(extracted);
+        setTimeout(() => {
+          lastDetectedCodeRef.current = '';
+        }, 3500);
       }
-    }, 600);
+    };
+
+    const startDetectionLoop = async () => {
+      if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
+        try {
+          const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+          if (cancelled) return;
+          setScannerEngine('native');
+          scanIntervalRef.current = setInterval(async () => {
+            if (!videoRef.current || videoRef.current.readyState < 2 || scanning) return;
+            try {
+              const barcodes = await detector.detect(videoRef.current);
+              if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+                await triggerDetectedPayload(barcodes[0].rawValue);
+              }
+            } catch {
+              // Ignore transient frame detection errors
+            }
+          }, 500);
+          return;
+        } catch {
+          // Fall through to universal jsQR fallback
+        }
+      }
+
+      try {
+        const { default: jsQR } = await import('jsqr');
+        if (cancelled) return;
+        setScannerEngine('jsqr');
+
+        if (!canvasRef.current) {
+          canvasRef.current = document.createElement('canvas');
+        }
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+        scanIntervalRef.current = setInterval(async () => {
+          const video = videoRef.current;
+          if (!video || video.readyState < 2 || scanning || !ctx) return;
+          const srcW = video.videoWidth;
+          const srcH = video.videoHeight;
+          if (!srcW || !srcH) return;
+
+          // Cap frame width to 480px to keep decoding fast on entry-level mobile devices
+          const scale = srcW > 480 ? 480 / srcW : 1;
+          const width = Math.max(1, Math.round(srcW * scale));
+          const height = Math.max(1, Math.round(srcH * scale));
+          if (canvas.width !== width || canvas.height !== height) {
+            canvas.width = width;
+            canvas.height = height;
+          }
+
+          ctx.drawImage(video, 0, 0, width, height);
+          const imageData = ctx.getImageData(0, 0, width, height);
+          const decoded = jsQR(imageData.data, width, height, {
+            inversionAttempts: 'dontInvert',
+          });
+          if (decoded && decoded.data) {
+            await triggerDetectedPayload(decoded.data);
+          }
+        }, 400);
+      } catch {
+        if (!cancelled) {
+          setScannerEngine('manual');
+        }
+      }
+    };
+
+    startDetectionLoop();
 
     return () => {
+      cancelled = true;
       if (scanIntervalRef.current) {
         clearInterval(scanIntervalRef.current);
         scanIntervalRef.current = null;
@@ -204,7 +258,7 @@ export default function TicketScannerPage() {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
-      setBarcodeSupported(typeof window !== 'undefined' && 'BarcodeDetector' in window);
+      setScannerEngine(typeof window !== 'undefined' && 'BarcodeDetector' in window ? 'native' : 'jsqr');
       setCameraActive(true);
     } catch (err) {
       showToast('Impossible d’accéder à la caméra : ' + err.message, 'error');
@@ -316,6 +370,7 @@ export default function TicketScannerPage() {
             <video
               ref={videoRef}
               className={`w-full h-full object-cover ${cameraActive ? 'block' : 'hidden'}`}
+              autoPlay
               playsInline
               muted
             />
@@ -356,9 +411,15 @@ export default function TicketScannerPage() {
             )}
           </div>
 
-          {cameraActive && !barcodeSupported && (
+          {cameraActive && scannerEngine === 'jsqr' && (
+            <div className="p-3 rounded-md bg-indigo-500/10 border border-indigo-500/30 text-indigo-200 text-xs">
+              Scanner universel activé (compatible Safari iOS / Firefox). Placez le QR code au centre du cadre ; la saisie manuelle ci-dessous reste également disponible.
+            </div>
+          )}
+
+          {cameraActive && scannerEngine === 'manual' && (
             <div className="p-3 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
-              Votre navigateur ne supporte pas la détection automatique de QR Code (`BarcodeDetector`). Utilisez Chrome/Edge sur mobile ou saisissez le code UUID affiché sur le billet ci-dessous.
+              Détection automatique indisponible sur cet appareil. Saisissez le code UUID affiché sur le billet ci-dessous.
             </div>
           )}
 

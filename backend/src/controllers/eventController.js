@@ -1,6 +1,105 @@
-const { supabase } = require("../config/supabase");
+const supabaseConfig = require("../config/supabase");
 const { validateEventQuery, escapePostgrestValue } = require("../validators/eventQueryValidator");
 const { validateEventInput, validateEventId } = require("../validators/eventValidator");
+
+function getServerReservationsReader(authClient) {
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY && supabaseConfig.supabaseService) {
+        return supabaseConfig.supabaseService;
+    }
+    return authClient || supabaseConfig.supabase;
+}
+
+async function fetchBookedSeatsByEventIds(events, { authClient } = {}) {
+    if (!Array.isArray(events) || events.length === 0) {
+        return {};
+    }
+
+    const eventIds = [...new Set(
+        events
+            .map((evt) => Number(evt?.id))
+            .filter((id) => Number.isSafeInteger(id) && id > 0)
+    )];
+
+    if (eventIds.length === 0) {
+        return {};
+    }
+
+    const publicClient = supabaseConfig.supabase;
+    if (publicClient && typeof publicClient.rpc === "function") {
+        try {
+            const { data, error } = await publicClient.rpc("get_events_booked_counts", {
+                p_event_ids: eventIds
+            });
+            if (!error && Array.isArray(data)) {
+                return data.reduce((acc, row) => {
+                    const id = Number(row.event_id);
+                    if (Number.isSafeInteger(id)) {
+                        acc[id] = Number(row.booked_seats) || 0;
+                    }
+                    return acc;
+                }, {});
+            }
+        } catch {
+            // Fallback to direct reservations aggregation below
+        }
+    }
+
+    const reader = getServerReservationsReader(authClient);
+    if (!reader || typeof reader.from !== "function") {
+        return {};
+    }
+
+    try {
+        let query = reader
+            .from("reservations")
+            .select("event_id, quantity");
+
+        if (eventIds.length === 1 && typeof query.eq === "function") {
+            query = query.eq("event_id", eventIds[0]);
+        } else if (typeof query.in === "function") {
+            query = query.in("event_id", eventIds);
+        }
+
+        if (typeof query.in !== "function") {
+            return {};
+        }
+
+        const { data: reservationsData, error } = await query.in("status", ["PENDING", "CONFIRMED"]);
+        if (error || !Array.isArray(reservationsData)) {
+            return {};
+        }
+
+        return reservationsData.reduce((acc, row) => {
+            const id = Number(row.event_id ?? eventIds[0]);
+            if (Number.isSafeInteger(id)) {
+                acc[id] = (acc[id] || 0) + (Number(row.quantity) || 0);
+            }
+            return acc;
+        }, {});
+    } catch {
+        return {};
+    }
+}
+
+async function enrichEventsWithAvailability(events, options = {}) {
+    if (!Array.isArray(events) || events.length === 0) {
+        return [];
+    }
+
+    const bookedByEventId = await fetchBookedSeatsByEventIds(events, options);
+    return events.map((event) => {
+        const capacity = Number(event.capacity ?? 0);
+        const bookedSeats = Math.max(0, Number(bookedByEventId[Number(event.id)] ?? 0));
+        const remainingCapacity = Math.max(0, capacity - bookedSeats);
+        return {
+            ...event,
+            bookedSeats,
+            booked_seats: bookedSeats,
+            remainingCapacity,
+            remaining_capacity: remainingCapacity
+        };
+    });
+}
 
 async function createEvent(req, res) {
     const validation = validateEventInput(req.body);
@@ -59,8 +158,12 @@ async function getMyEvents(req, res) {
         });
     }
 
+    const events = await enrichEventsWithAvailability(data || [], {
+        authClient: req.supabase
+    });
+
     return res.status(200).json({
-        events: data
+        events
     });
 }
 
@@ -246,7 +349,7 @@ async function getApprovedEvents(req, res) {
         limit
     } = validation.value;
 
-    let query = supabase
+    let query = supabaseConfig.supabase
         .from("events")
         .select("id, title, description, event_type, event_date, location, capacity, price", { count: "exact" })
         .eq("status", "APPROVED")
@@ -278,12 +381,14 @@ async function getApprovedEvents(req, res) {
         });
     }
 
+    const events = await enrichEventsWithAvailability(data || []);
+
     return res.status(200).json({
-        events: data || [],
+        events,
         pagination: {
             page,
             limit,
-            total: count ?? (data ? data.length : 0)
+            total: count ?? events.length
         }
     });
 }
@@ -311,17 +416,9 @@ async function getPublicEventDetail(req, res) {
 
         const { data: ownEvent } = await ownQuery.maybeSingle();
         if (ownEvent) {
-            const { data: reservationsData } = await req.supabase
-                .from("reservations")
-                .select("quantity")
-                .eq("event_id", idValidation.value)
-                .in("status", ["PENDING", "CONFIRMED"]);
-
-            const bookedSeats = Array.isArray(reservationsData)
-                ? reservationsData.reduce((acc, r) => acc + (Number(r.quantity) || 0), 0)
-                : 0;
-
-            const remainingCapacity = Math.max(0, Number(ownEvent.capacity || 0) - bookedSeats);
+            const [enrichedOwn] = await enrichEventsWithAvailability([ownEvent], {
+                authClient: req.supabase
+            });
 
             return res.status(200).json({
                 event: {
@@ -338,20 +435,21 @@ async function getPublicEventDetail(req, res) {
                     status: ownEvent.status,
                     organizerId: ownEvent.organizer_id,
                     organizer_id: ownEvent.organizer_id,
-                    remainingCapacity,
-                    remaining_capacity: remainingCapacity
+                    bookedSeats: enrichedOwn.bookedSeats,
+                    remainingCapacity: enrichedOwn.remainingCapacity,
+                    remaining_capacity: enrichedOwn.remainingCapacity
                 }
             });
         }
     }
 
-    const { data, error } = await supabase.rpc("get_public_event_detail", {
+    const { data, error } = await supabaseConfig.supabase.rpc("get_public_event_detail", {
         p_event_id: idValidation.value
     });
 
     if (error) {
         // Fallback resilient : interrogation directe de la table events si la RPC n'est pas installee ou echoue
-        const { data: fallbackEvent, error: fallbackError } = await supabase
+        const { data: fallbackEvent, error: fallbackError } = await supabaseConfig.supabase
             .from("events")
             .select("id, title, description, event_type, event_date, location, capacity, price, status, organizer_id")
             .eq("id", idValidation.value)
@@ -369,7 +467,8 @@ async function getPublicEventDetail(req, res) {
             return res.status(404).json({ message: "Evenement introuvable" });
         }
 
-        const { data: reservationsData } = await supabase
+        const reader = getServerReservationsReader();
+        const { data: reservationsData } = await reader
             .from("reservations")
             .select("quantity")
             .eq("event_id", idValidation.value)

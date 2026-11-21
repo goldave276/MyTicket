@@ -1,42 +1,61 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import eventService from '@/services/eventService';
 import { useToast } from '@/context/ToastContext';
 import EventFilters from '@/components/events/EventFilters';
 import EventGrid from '@/components/events/EventGrid';
+import Pagination from '@/components/common/Pagination';
 import ErrorState from '@/components/common/ErrorState';
 import { TicketIcon } from '@/components/common/Icons';
+
+const CATALOG_PAGE_SIZE = 12;
+
+const EMPTY_FILTERS = {
+  search: '',
+  eventType: '',
+  location: '',
+  minPrice: '',
+  maxPrice: '',
+  dateFrom: '',
+  dateTo: '',
+};
 
 export default function Home() {
   const { showToast } = useToast();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [filters, setFilters] = useState({
-    search: '',
-    eventType: '',
-    location: '',
-    minPrice: '',
-    maxPrice: '',
-    dateFrom: '',
-    dateTo: '',
-  });
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ page: 1, limit: CATALOG_PAGE_SIZE, total: 0 });
+  const catalogRef = useRef(null);
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
-      const data = await eventService.getApprovedEvents(filters);
+      const data = await eventService.getApprovedEvents({
+        ...filters,
+        page,
+        limit: CATALOG_PAGE_SIZE,
+      });
       const list = Array.isArray(data) ? data : data.events || data.data || [];
       setEvents(list);
+      setPagination(
+        data?.pagination || {
+          page,
+          limit: CATALOG_PAGE_SIZE,
+          total: list.length,
+        }
+      );
     } catch (err) {
       setError(true);
       showToast(err.message || 'Impossible de charger les événements', 'error');
     } finally {
       setLoading(false);
     }
-  }, [filters, showToast]);
+  }, [filters, page, showToast]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -45,16 +64,21 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [fetchEvents]);
 
+  const handleFiltersChange = (nextFilters) => {
+    setFilters(nextFilters);
+    setPage(1);
+  };
+
   const handleResetFilters = () => {
-    setFilters({
-      search: '',
-      eventType: '',
-      location: '',
-      minPrice: '',
-      maxPrice: '',
-      dateFrom: '',
-      dateTo: '',
-    });
+    setFilters(EMPTY_FILTERS);
+    setPage(1);
+  };
+
+  const handlePageChange = (nextPage) => {
+    setPage(nextPage);
+    if (catalogRef.current && typeof catalogRef.current.scrollIntoView === 'function') {
+      catalogRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
@@ -101,7 +125,7 @@ export default function Home() {
       </section>
 
       {/* Main Catalog Header */}
-      <section className="space-y-6">
+      <section ref={catalogRef} className="space-y-6 scroll-mt-24">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <span className="eyebrow text-indigo-400">Catalogue</span>
@@ -123,13 +147,23 @@ export default function Home() {
         </div>
 
         {/* Filter Bar */}
-        <EventFilters filters={filters} onChange={setFilters} onReset={handleResetFilters} />
+        <EventFilters filters={filters} onChange={handleFiltersChange} onReset={handleResetFilters} />
 
         {/* Event Grid */}
         {error ? (
           <ErrorState title="Impossible de charger les événements" onRetry={fetchEvents} />
         ) : (
-          <EventGrid events={events} loading={loading} />
+          <>
+            <EventGrid events={events} loading={loading} />
+            {!loading && (
+              <Pagination
+                page={pagination.page}
+                limit={pagination.limit}
+                total={pagination.total}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </>
         )}
       </section>
     </>

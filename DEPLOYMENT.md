@@ -38,6 +38,8 @@ Assurez-vous que toutes les migrations du dossier `backend/supabase/migrations/`
 18. `0018_audit_security_and_free_events.sql` (Verrouillage `service_role` sur `confirm_online_payment`/`promote_user_to_admin`, nettoyage doublon RLS et confirmation immédiate des événements gratuits `price = 0`)
 19. `0019_fix_rls_infinite_recursion.sql` (Résolution de la récursion infinie RLS sur `profiles` via `auth.jwt()` et fonction helper `public.is_admin()`)
 20. `0020_admin_delete_or_cancel_event.sql` (Suppression physique pure si 0 réservation ou annulation d'urgence atomique de l'événement et de ses réservations/billets par l'administrateur)
+21. `0021_allow_multiple_reservations_per_user.sql` (Suppression de la contrainte restrictive `one_reservation_per_user_event` pour autoriser plusieurs réservations par utilisateur)
+22. `0022_event_availability_and_reservations_details.sql` (RPC `get_events_booked_counts` pour le calcul des places restantes et jointure nom/email dans `get_organizer_event_reservations`)
 
 ---
 

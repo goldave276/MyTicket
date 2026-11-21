@@ -1,8 +1,89 @@
+const supabaseConfig = require("../config/supabase");
 const {
     validateReservationInput,
     validateReservationId
 } = require("../validators/reservationValidator");
 const { validateEventId } = require("../validators/eventValidator");
+
+async function enrichOrganizerReservations(rows) {
+    if (!Array.isArray(rows) || rows.length === 0) {
+        return [];
+    }
+
+    const needsFallbackLookup = rows.some(
+        (r) => r.participant_name === undefined && r.participant_email === undefined
+    );
+
+    const profileNameMap = {};
+    const userEmailMap = {};
+
+    if (needsFallbackLookup && process.env.SUPABASE_SERVICE_ROLE_KEY && supabaseConfig.supabaseService) {
+        const serviceClient = supabaseConfig.supabaseService;
+        const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
+
+        if (userIds.length > 0) {
+            try {
+                const { data: profiles } = await serviceClient
+                    .from("profiles")
+                    .select("id, full_name")
+                    .in("id", userIds);
+
+                if (Array.isArray(profiles)) {
+                    for (const p of profiles) {
+                        if (p?.id && p.full_name) {
+                            profileNameMap[p.id] = p.full_name;
+                        }
+                    }
+                }
+            } catch {
+                // Non-blocking fallback
+            }
+
+            if (typeof serviceClient.auth?.admin?.getUserById === "function") {
+                const results = await Promise.allSettled(
+                    userIds.slice(0, 50).map((uid) => serviceClient.auth.admin.getUserById(uid))
+                );
+                for (const res of results) {
+                    if (res.status === "fulfilled" && res.value?.data?.user) {
+                        const authUser = res.value.data.user;
+                        if (authUser.email) {
+                            userEmailMap[authUser.id] = authUser.email;
+                        }
+                        if (!profileNameMap[authUser.id] && authUser.user_metadata?.full_name) {
+                            profileNameMap[authUser.id] = authUser.user_metadata.full_name;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return rows.map((row) => {
+        const fullName =
+            row.participant_name ||
+            row.user?.fullName ||
+            row.user?.full_name ||
+            row.userName ||
+            profileNameMap[row.user_id] ||
+            "Participant";
+        const email =
+            row.participant_email ||
+            row.user?.email ||
+            row.userEmail ||
+            userEmailMap[row.user_id] ||
+            "";
+
+        return {
+            ...row,
+            userName: fullName,
+            userEmail: email,
+            user: {
+                fullName,
+                email
+            }
+        };
+    });
+}
 
 async function createReservation(req, res) {
     const validation = validateReservationInput(req.body);
@@ -106,8 +187,10 @@ async function getEventReservations(req, res) {
         });
     }
 
+    const reservations = await enrichOrganizerReservations(data || []);
+
     return res.status(200).json({
-        reservations: data
+        reservations
     });
 }
 

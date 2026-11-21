@@ -269,6 +269,16 @@ describe("Invariants SQL, RLS et Validations Safe BigInt (Phase B0.5)", () => {
             expect(migration0020).toContain("create policy \"Admins can delete events\"");
             expect(migration0020).toContain("delete from public.events where id = p_event_id;");
             expect(migration0020).toContain("set status = 'CANCELLED'");
+
+            const migration0022 = fs.readFileSync(
+                path.join(__dirname, "../../supabase/migrations/0022_event_availability_and_reservations_details.sql"),
+                "utf8"
+            );
+            expect(migration0022).toContain("create or replace function public.get_events_booked_counts(p_event_ids bigint[])");
+            expect(migration0022).toContain("grant execute on function public.get_events_booked_counts(bigint[]) to anon, authenticated, service_role;");
+            expect(migration0022).toContain("create function public.get_organizer_event_reservations(");
+            expect(migration0022).toContain("participant_name");
+            expect(migration0022).toContain("participant_email");
         });
     });
 });

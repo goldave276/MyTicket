@@ -199,11 +199,23 @@ export default function OrganizerEventsListPage() {
                         <td className="font-bold text-indigo-400">
                           {event.price || event.ticket_price || 0} FCFA
                         </td>
-                        <td className="text-xs">
-                          <span className="font-bold text-white">
-                            {event.availableTickets ?? event.available_tickets ?? 0}
-                          </span>{' '}
-                          / {event.totalTickets ?? event.total_tickets ?? 0}
+                        <td className="text-xs whitespace-nowrap">
+                          {(() => {
+                            const total = event.capacity ?? event.totalTickets ?? event.total_tickets ?? 0;
+                            const remaining =
+                              event.remainingCapacity ??
+                              event.remaining_capacity ??
+                              event.availableTickets ??
+                              event.available_tickets ??
+                              total;
+                            return (
+                              <>
+                                <span className="font-bold text-white">{remaining}</span>{' '}
+                                <span className="text-zinc-500">/ {total}</span>
+                                <span className="block text-[10px] text-zinc-500">restantes</span>
+                              </>
+                            );
+                          })()}
                         </td>
                         <td>
                           <Badge status={event.status} />

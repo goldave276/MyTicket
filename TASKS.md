@@ -34,6 +34,8 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 
 - [x] **F2.2. Catalogue & Découverte des Événements**
   - [x] Page d'accueil (`/`) : Affichage de la liste des événements approuvés et futurs, avec état d'erreur réel (plus de données factices depuis le 15/09/2026).
+  - [x] Disponibilité en temps réel (`remainingCapacity` / `bookedSeats`) calculée côté backend sur le catalogue public (`GET /api/events/approved`) et l'espace organisateur (`GET /api/events/me`) via la RPC `get_events_booked_counts` (Migration 0022) + fallback `supabaseService`.
+  - [x] Pagination accessible du catalogue public (`Pagination.jsx`, `limit = 12` cartes/page, remise à la page 1 lors des filtres).
   - [x] Barre de recherche et filtres combinés (Recherche texte, Type d'événement, Lieu, Fourchette de prix).
   - [x] Filtres de dates (`dateFrom`/`dateTo`) intégrés dans `EventFilters` et connectés au catalogue public.
   - [x] Page détail d'un événement (`/events/[id]`) avec détails, places restantes, lieu, prix en XOF.
@@ -66,11 +68,12 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Action "Annuler l'événement" avec confirmation.
 
 - [x] **F3.3. Gestion des Participants**
-  - [x] Vue détaillée des réservations par événement (`/organizer/events/[id]/reservations`) : noms des acheteurs, quantités, statuts.
+  - [x] Vue détaillée des réservations par événement (`/organizer/events/[id]/reservations`) : noms des acheteurs, emails, quantités, statuts (enrichis via Migration 0022 et fallback serveur).
+  - [x] Affichage des places restantes / capacité réelle sur `/organizer/events` (correction du `0 / 0`).
   - [x] Export des réservations au format CSV UTF-8 BOM compatible Excel avec bouton d'export direct en en-tête.
 
 - [x] **F3.4. Contrôle d'accès & Scanner Mobile des Billets**
-  - [x] Page scanner mobile pour l'organisateur (`/organizer/events/[id]/scanner`) avec caméra vidéo et saisie manuelle de secours.
+  - [x] Page scanner mobile pour l'organisateur (`/organizer/events/[id]/scanner`) avec caméra vidéo (`BarcodeDetector` natif + fallback universel `jsqr` chargé dynamiquement pour Safari iOS / Firefox) et saisie manuelle de secours.
   - [x] Alertes visuelles haute visibilité (Vert: Valide, Rouge clignotant: Déjà scanné/Fraude, Jaune: Invalide) et compteur d'entrées en direct.
 
 ---
@@ -204,6 +207,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Migration 0016 : Autorisation RLS d'insertion d'événements en statut DRAFT pour les administrateurs.
   - [x] Migration 0017 & 0018 (Audit Sécurité & QA) : Verrouillage `service_role` de `promote_user_to_admin` et `confirm_online_payment`, suppression de la policy RLS en doublon, auto-confirmation des réservations d'événements gratuits (`price = 0`) avec génération immédiate des billets, alignement complet des contrats API/Frontend, synchronisation CI/Docs et 134/134 tests unitaires et HTTP validés.
   - [x] Migration 0021 : Assouplissement des réservations multiples par utilisateur (suppression de la contrainte bloquante `one_reservation_per_user_event`), gestion d'erreur applicative conviviale et fiabilisation de la lecture des réservations organisateur.
+  - [x] Migration 0022 : RPC `get_events_booked_counts` pour la disponibilité temps réel sur les listes d'événements et enrichissement de `get_organizer_event_reservations` avec le nom et l'email des participants.
 
 ---
 
