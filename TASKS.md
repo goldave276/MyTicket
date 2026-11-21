@@ -312,3 +312,4 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Attributs `aria-label` ajoutés sur les filtres et champs de recherche (`EventFilters.jsx`, `admin/users.js`).
   - [x] Refonte ergonomique mobile-first et design system moderne (Style Linear x Spotify) : viewport-fit=cover, safe-areas, suppression de l'écrasement de radius, header compact 64px, tiroir plein écran occultant, segmented pills tactiles avec scroll-mask, cartes de réservations mobiles et footer responsive épuré.
   - [x] Résolution de la fermeture de la Navbar mobile (`routeChangeComplete` asynchrone évitant les cascading renders du React Compiler).
+  - [x] Fiabilisation de l'ouverture tactile du menu profil sur mobile Android (`pointerdown` conditionnel sur `isOpen`, suppression du rebond d'événement synthétique, `touch-manipulation`, lien "Mon Profil" dans le tiroir mobile).

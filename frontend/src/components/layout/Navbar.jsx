@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import UserDropdown from './UserDropdown';
-import { TicketIcon, PlusIcon, ShieldIcon, BuildingIcon } from '../common/Icons';
+import { TicketIcon, PlusIcon, ShieldIcon, BuildingIcon, UserIcon } from '../common/Icons';
 
 export default function Navbar() {
   const { user, isOrganizer, isAdmin, loading, logout } = useAuth();
@@ -175,6 +175,15 @@ export default function Navbar() {
                     Espace Administration
                   </Link>
                 )}
+
+                <Link
+                  href="/dashboard/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-3.5 rounded-xl text-base font-semibold text-slate-100 hover:bg-slate-900 active:bg-slate-800 min-h-[48px]"
+                >
+                  <UserIcon className="w-5 h-5 text-cyan-400" />
+                  Mon Profil
+                </Link>
               </>
             ) : (
               <div className="pt-4 space-y-3">
