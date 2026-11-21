@@ -24,8 +24,15 @@ export default function Navbar() {
 
   // Fermer le menu automatiquement lors d'une navigation
   useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [router.asPath]);
+    const handleRouteChange = () => {
+      setMobileMenuOpen(false);
+    };
+
+    router.events?.on('routeChangeComplete', handleRouteChange);
+    return () => {
+      router.events?.off('routeChangeComplete', handleRouteChange);
+    };
+  }, [router]);
 
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[#08090e]/90 border-b border-white/10 transition-colors">
