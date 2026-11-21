@@ -1,11 +1,15 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
+import dynamic from 'next/dynamic';
 import { useToast } from '@/context/ToastContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import ticketService from '@/services/ticketService';
 import Sidebar from '@/components/dashboard/Sidebar';
-import QRCodeModal from '@/components/common/QRCodeModal';
 import ErrorState from '@/components/common/ErrorState';
+
+const QRCodeModal = dynamic(() => import('@/components/common/QRCodeModal'), {
+  ssr: false,
+});
 import { SkeletonCard } from '@/components/common/Skeleton';
 import { TicketIcon, QrCodeIcon, CalendarIcon, MapPinIcon } from '@/components/common/Icons';
 

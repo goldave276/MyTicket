@@ -3,6 +3,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { sans, mono } from "@/lib/fonts";
 
 export default function App({ Component, pageProps }) {
@@ -18,10 +19,12 @@ export default function App({ Component, pageProps }) {
   ));
 
   return (
-    <AuthProvider>
-      <ToastProvider>
-        {getLayout(<Component {...pageProps} />)}
-      </ToastProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ToastProvider>
+          {getLayout(<Component {...pageProps} />)}
+        </ToastProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

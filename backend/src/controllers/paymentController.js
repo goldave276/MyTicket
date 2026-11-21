@@ -121,6 +121,7 @@ const {
     confirmOnlinePayment
 } = require("../services/paymentService");
 const { sendTicketConfirmationEmail } = require("../services/emailService");
+const { reportCriticalError } = require("../services/monitoringService");
 
 async function triggerTicketEmailAsync(supabase, { paymentId, recipientEmail, recipientName }) {
     if (!paymentId || !supabase || typeof supabase.from !== "function") return;
@@ -284,7 +285,11 @@ async function handleStripeWebhook(req, res) {
 
     const dbClient = req.supabase || supabaseService;
     if (!req.supabase && !process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NODE_ENV === "production") {
-        console.error("[handleStripeWebhook] SUPABASE_SERVICE_ROLE_KEY manquante pour exécuter confirm_online_payment");
+        reportCriticalError({
+            context: "STRIPE_WEBHOOK_CONFIG",
+            error: new Error("SUPABASE_SERVICE_ROLE_KEY manquante pour confirm_online_payment"),
+            metadata: { paymentId: idValidation.value }
+        });
         return res.status(500).json({ message: "Configuration service role Supabase manquante sur le serveur" });
     }
 
@@ -312,6 +317,11 @@ async function handleStripeWebhook(req, res) {
 
         return res.status(200).json({ received: true });
     } catch (err) {
+        reportCriticalError({
+            context: "STRIPE_WEBHOOK_FAILURE",
+            error: err,
+            metadata: { paymentId: idValidation.value }
+        });
         return res.status(400).json({
             message: err instanceof TypeError
                 ? "Erreur lors du traitement du webhook Stripe"
@@ -345,7 +355,11 @@ async function handleMobileMoneyWebhook(req, res) {
 
     const dbClient = req.supabase || supabaseService;
     if (!req.supabase && !process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NODE_ENV === "production") {
-        console.error("[handleMobileMoneyWebhook] SUPABASE_SERVICE_ROLE_KEY manquante pour exécuter confirm_online_payment");
+        reportCriticalError({
+            context: "MOMO_WEBHOOK_CONFIG",
+            error: new Error("SUPABASE_SERVICE_ROLE_KEY manquante pour confirm_online_payment"),
+            metadata: { paymentId: idValidation.value }
+        });
         return res.status(500).json({ message: "Configuration service role Supabase manquante sur le serveur" });
     }
 
@@ -373,6 +387,11 @@ async function handleMobileMoneyWebhook(req, res) {
 
         return res.status(200).json({ received: true });
     } catch (err) {
+        reportCriticalError({
+            context: "MOMO_WEBHOOK_FAILURE",
+            error: err,
+            metadata: { paymentId: idValidation.value }
+        });
         return res.status(400).json({
             message: err instanceof TypeError
                 ? "Erreur lors du traitement du webhook Mobile Money"

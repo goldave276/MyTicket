@@ -1,13 +1,17 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useToast } from '@/context/ToastContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import eventService from '@/services/eventService';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Badge from '@/components/common/Badge';
-import EventFormModal from '@/components/events/EventFormModal';
 import ErrorState from '@/components/common/ErrorState';
+
+const EventFormModal = dynamic(() => import('@/components/events/EventFormModal'), {
+  ssr: false,
+});
 import { SkeletonTable } from '@/components/common/Skeleton';
 import { PlusIcon, EditIcon, CheckCircleIcon, XCircleIcon, CalendarIcon } from '@/components/common/Icons';
 

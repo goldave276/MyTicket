@@ -192,6 +192,33 @@ export default function EventDetailsPage() {
     event.image_url || event.imageUrl || getEventImage(event.event_type || event.eventType);
 
   const cleanDescription = (event.description || `Réservez votre place pour ${event.title} sur MyTicket.`).slice(0, 160);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://my-ticket-virid.vercel.app';
+  const eventJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: event.title,
+    description: cleanDescription,
+    startDate: eventDateVal || undefined,
+    eventStatus:
+      event.status === 'CANCELLED'
+        ? 'https://schema.org/EventCancelled'
+        : 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    location: {
+      '@type': 'Place',
+      name: event.location || 'Lieu confirmé sur le billet',
+      address: event.location || 'Togo',
+    },
+    image: eventImage ? [eventImage] : undefined,
+    offers: {
+      '@type': 'Offer',
+      price: Number(eventPrice),
+      priceCurrency: 'XOF',
+      availability: isSoldOut ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
+      url: `${siteUrl}/events/${id}`,
+    },
+  };
+  const serializedEventJsonLd = JSON.stringify(eventJsonLd).replace(/</g, '\\u003c');
 
   return (
     <>
@@ -208,6 +235,10 @@ export default function EventDetailsPage() {
         <meta name="twitter:title" content={`${event.title} | MyTicket`} />
         <meta name="twitter:description" content={cleanDescription} />
         <meta name="twitter:image" content={eventImage} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializedEventJsonLd }}
+        />
       </Head>
 
       <div className="max-w-5xl mx-auto space-y-8">
@@ -262,6 +293,7 @@ export default function EventDetailsPage() {
           <img
             src={eventImage}
             alt={event.title}
+            decoding="async"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />

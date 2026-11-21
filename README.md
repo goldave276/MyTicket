@@ -358,3 +358,11 @@ confirmee genere ses tickets via la fonction PostgreSQL transactionnelle.
 | GET | `/api/admin/payments/pending` | Oui | ADMIN | Lister les paiements sur place en attente |
 | PATCH | `/api/admin/payments/:paymentId/confirm-onsite` | Oui | ADMIN | Confirmer le paiement sur place et emettre les billets |
 
+### Spécification OpenAPI & Audits
+
+- **Contrat OpenAPI 3.0.3 complet** : [`docs/api.yaml`](docs/api.yaml) (validé automatiquement par test unitaire `openapi-spec.test.js`).
+- **Tests Frontend (Vitest + React Testing Library)** : `cd frontend && npm test`
+- **Audit SEO & Accessibilité WCAG (`axe-core`)** : `cd frontend && npm run audit:seo-a11y`
+- **Garde-fou anti-secrets pre-commit** : activé via `git config core.hooksPath .githooks` (`scripts/check-secrets.mjs`).
+
+

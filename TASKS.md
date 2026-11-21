@@ -313,3 +313,26 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Refonte ergonomique mobile-first et design system moderne (Style Linear x Spotify) : viewport-fit=cover, safe-areas, suppression de l'écrasement de radius, header compact 64px, tiroir plein écran occultant, segmented pills tactiles avec scroll-mask, cartes de réservations mobiles et footer responsive épuré.
   - [x] Résolution de la fermeture de la Navbar mobile (`routeChangeComplete` asynchrone évitant les cascading renders du React Compiler).
   - [x] Fiabilisation de l'ouverture tactile du menu profil sur mobile Android (`pointerdown` conditionnel sur `isOpen`, suppression du rebond d'événement synthétique, `touch-manipulation`, lien "Mon Profil" dans le tiroir mobile).
+
+---
+
+## 🚀 PARTIE 5 : QUALITÉ AVANCÉE, DEVSECOPS, PERF MOBILE, SEO/A11Y, OPENAPI & MONITORING (21/11/2026)
+- [x] **Lot 1 : Suite de tests unitaires UI Frontend (Vitest + React Testing Library)**
+  - [x] Configuration [`frontend/vitest.config.mjs`](file:///c:/Users/MSI/Desktop/myticket/frontend/vitest.config.mjs) et [`frontend/src/test/setup.js`](file:///c:/Users/MSI/Desktop/myticket/frontend/src/test/setup.js) + intégration CI GitHub Actions.
+  - [x] Tests composants ciblés (`QRCodeModal.test.jsx`, `EventCard.test.jsx`, `UserDropdown.test.jsx`, `ErrorBoundary.test.jsx`).
+- [x] **Lot 2 : Hygiène des secrets & Garde-fou Pre-Commit + CI**
+  - [x] Script anti-secrets sans faux positifs [`scripts/check-secrets.mjs`](file:///c:/Users/MSI/Desktop/myticket/scripts/check-secrets.mjs) et hook [`.githooks/pre-commit`](file:///c:/Users/MSI/Desktop/myticket/.githooks/pre-commit) (`git config core.hooksPath .githooks`).
+  - [x] Suppression des identifiants hardcodés dans [`frontend/scripts/e2e-browser-suite.mjs`](file:///c:/Users/MSI/Desktop/myticket/frontend/scripts/e2e-browser-suite.mjs) au profit des variables d'environnement `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASS`.
+  - [x] Job `secret-scan` bloquant ajouté dans [`.github/workflows/backend-ci.yml`](file:///c:/Users/MSI/Desktop/myticket/.github/workflows/backend-ci.yml).
+- [x] **Lot 3 : Audit & Optimisation Performance Mobile (3G / Android)**
+  - [x] Support `@next/bundle-analyzer` (`npm run analyze`) et `outputFileTracingRoot` dans [`frontend/next.config.mjs`](file:///c:/Users/MSI/Desktop/myticket/frontend/next.config.mjs).
+  - [x] Chargement paresseux des images (`loading="lazy"`, `decoding="async"`) sur [`EventCard.jsx`](file:///c:/Users/MSI/Desktop/myticket/frontend/src/components/events/EventCard.jsx) et code-splitting `next/dynamic` sur les modales lourdes (`QRCodeModal`, `EventFormModal`).
+  - [x] Script de mesure mobile sous contrainte 3G/CPU 4x [`frontend/scripts/audit-mobile-lighthouse.mjs`](file:///c:/Users/MSI/Desktop/myticket/frontend/scripts/audit-mobile-lighthouse.mjs).
+- [x] **Lot 4 : SEO & Accessibilité WCAG 2.1 A/AA (`axe-core` en CI)**
+  - [x] Ajout de [`frontend/public/robots.txt`](file:///c:/Users/MSI/Desktop/myticket/frontend/public/robots.txt), [`frontend/public/sitemap.xml`](file:///c:/Users/MSI/Desktop/myticket/frontend/public/sitemap.xml), balises OG/description sur `/`, et données structurées JSON-LD `schema.org/Event` sur `/events/[id]`.
+  - [x] Script automatisé [`frontend/scripts/audit-seo-a11y.mjs`](file:///c:/Users/MSI/Desktop/myticket/frontend/scripts/audit-seo-a11y.mjs) exécuté dans la CI et résolution de 100 % des violations critiques/sérieuses (labels `EventFilters`, contrastes/liens/`h1` sur `login.js` & `signup.js`, contrastes et liens soulignés sur `conditions-generales.js` & `contact.js`).
+- [x] **Lot 5 : Documentation API OpenAPI 3.0.3**
+  - [x] Spécification complète [`docs/api.yaml`](file:///c:/Users/MSI/Desktop/myticket/docs/api.yaml) (44 routes) liée dans [`README.md`](file:///c:/Users/MSI/Desktop/myticket/README.md) et vérifiée contre les routeurs Express par [`backend/src/tests/openapi-spec.test.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/tests/openapi-spec.test.js).
+- [x] **Lot 6 : Monitoring & Alerting Free Tier**
+  - [x] Service [`backend/src/services/monitoringService.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/services/monitoringService.js) intégrant `@sentry/node` optionnel (masquage des headers sensibles) et alertes email admin critiques throttled sur erreurs webhooks paiement et `500` Express, avec tests [`monitoring-service.test.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/tests/monitoring-service.test.js).
+  - [x] `ErrorBoundary` React léger sur [`frontend/src/pages/_app.js`](file:///c:/Users/MSI/Desktop/myticket/frontend/src/pages/_app.js) et documentation complète dans [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md).

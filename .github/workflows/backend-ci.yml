@@ -7,6 +7,21 @@ on:
     branches: [main]
 
 jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Scan repository for accidental secrets
+        run: node scripts/check-secrets.mjs --all
+
   frontend:
     runs-on: ubuntu-latest
 
@@ -31,10 +46,20 @@ jobs:
       - name: Run lint
         run: npm run lint
 
+      - name: Run unit tests (Vitest + RTL)
+        run: npm test
+
       - name: Run build
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3000/api
+
+      - name: Run SEO & Accessibility audit (axe-core)
+        run: |
+          if [ -x /usr/bin/google-chrome ]; then
+            export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
+          fi
+          npm run audit:seo-a11y
 
   test:
     runs-on: ubuntu-latest
@@ -131,7 +156,7 @@ jobs:
 
   deploy-render:
     name: Deploy to Render
-    needs: [frontend, test, docker-build, migration-test]
+    needs: [secret-scan, frontend, test, docker-build, migration-test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 

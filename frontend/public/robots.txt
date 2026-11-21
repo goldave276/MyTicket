@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /organizer/
+Disallow: /dashboard/
+Disallow: /payment/
+
+Sitemap: https://my-ticket-virid.vercel.app/sitemap.xml

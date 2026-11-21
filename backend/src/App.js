@@ -19,6 +19,9 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const { initMonitoring, reportCriticalError } = require("./services/monitoringService");
+
+initMonitoring();
 
 const app = express();
 
@@ -120,7 +123,14 @@ app.use((err, req, res, next) => {
         });
     }
 
-    console.error(err);
+    reportCriticalError({
+        context: "EXPRESS_UNHANDLED_500",
+        error: err,
+        metadata: {
+            method: req.method,
+            path: req.originalUrl
+        }
+    });
 
     res.status(500).json({
         message: "Erreur interne du serveur"

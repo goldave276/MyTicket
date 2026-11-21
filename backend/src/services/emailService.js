@@ -335,11 +335,62 @@ async function sendOrganizerRequestNotificationEmail({
   }
 }
 
+/**
+ * Envoie une alerte critique immediate aux administrateurs (paiements, RLS, erreurs 500).
+ */
+async function sendCriticalAlertEmail({ context, message, stack, metadata }) {
+  const recipient = process.env.ALERT_EMAIL || process.env.ADMIN_EMAIL || process.env.SMTP_USER;
+  if (!recipient) {
+    return { success: false, reason: "MISSING_ALERT_EMAIL" };
+  }
+
+  const transporter = getTransporter();
+  const safeContext = escapeHtml(context || "SYSTEM_ERROR");
+  const safeMessage = escapeHtml(message || "Erreur critique non specifiee");
+  const safeMeta = escapeHtml(metadata ? JSON.stringify(metadata, null, 2) : "{}");
+  const safeStack = escapeHtml(stack ? String(stack).slice(0, 1500) : "N/A");
+
+  const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background:#0b0d0c; color:#f4f4f5; padding:24px;">
+  <div style="max-width:600px; margin:0 auto; background:#18181b; border:1px solid #ef4444; border-radius:10px; padding:24px;">
+    <h2 style="margin:0 0 12px; color:#f87171;">Alerte Critique MyTicket [${safeContext}]</h2>
+    <p style="margin:0 0 16px; font-size:14px;">${safeMessage}</p>
+    <pre style="background:#09090b; padding:12px; border-radius:6px; font-size:12px; overflow:auto; color:#a1a1aa;">${safeMeta}</pre>
+    <pre style="background:#09090b; padding:12px; border-radius:6px; font-size:11px; overflow:auto; color:#fca5a5;">${safeStack}</pre>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  const mailOptions = {
+    from: process.env.SMTP_FROM || '"MyTicket Monitoring" <no-reply@myticket.tg>',
+    to: recipient,
+    subject: `[ALERTE CRITIQUE] MyTicket - ${context || "ERREUR SERVEUR"}`,
+    html,
+  };
+
+  if (!transporter) {
+    console.info(`[emailService:SIMULATION] Alerte critique [${context}] simulee vers ${recipient}.`);
+    return { success: true, simulated: true, messageId: `alert-sim-${Date.now()}` };
+  }
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    return { success: true, simulated: false, messageId: info.messageId };
+  } catch (err) {
+    console.error("[emailService] Echec envoi alerte critique:", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 module.exports = {
   sendTicketConfirmationEmail,
   buildTicketEmailHtml,
   sendOrganizerRequestNotificationEmail,
   buildOrganizerRequestNotificationHtml,
+  sendCriticalAlertEmail,
   escapeHtml,
   getTransporter,
 };

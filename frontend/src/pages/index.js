@@ -61,6 +61,17 @@ export default function Home() {
     <>
       <Head>
         <title>MyTicket - Réservation et Billetterie d’Événements</title>
+        <meta
+          name="description"
+          content="Découvrez concerts, conférences, festivals et ateliers près de chez vous. Réservez en ligne et recevez vos billets QR Pass sécurisés sur MyTicket."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="MyTicket - Réservation et Billetterie d’Événements" />
+        <meta
+          property="og:description"
+          content="Réservez vos places en ligne (Carte, Flooz, T-Money ou sur place) et accédez à vos QR Pass instantanément."
+        />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
       {/* Hero Banner Section */}

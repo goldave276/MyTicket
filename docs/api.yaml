@@ -1,0 +1,737 @@
+openapi: 3.0.3
+info:
+  title: MyTicket API
+  version: 1.0.0
+  description: |
+    API REST de la plateforme de billetterie MyTicket (Express 5 + Supabase PostgreSQL/Auth/Storage).
+    Gère l'authentification par rôle (`USER`, `ORGANIZER`, `ADMIN`), le cycle de vie des événements,
+    les réservations transactionnelles, les paiements (Stripe, Mobile Money Togo Flooz/T-Money, Sur place),
+    l'émission de billets QR UUID et le check-in mobile.
+
+servers:
+  - url: https://myticket-llwf.onrender.com
+    description: Production (Render)
+  - url: http://localhost:3000
+    description: Développement local
+
+tags:
+  - name: Health
+    description: Sonde de disponibilité
+  - name: Auth
+    description: Authentification, profil et jetons
+  - name: Events
+    description: Catalogue public et gestion organisateur
+  - name: Reservations
+    description: Réservations de places utilisateur
+  - name: Payments
+    description: Paiements en ligne (Stripe, Mobile Money Togo) et sur place
+  - name: Tickets
+    description: Billets électroniques et contrôle d'accès QR
+  - name: OrganizerRequests
+    description: Candidatures pour devenir organisateur
+  - name: Admin
+    description: Modération globale et administration
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+
+    EventPayload:
+      type: object
+      required: [title, description, eventType, eventDate, location, capacity, price]
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 150
+        description:
+          type: string
+          minLength: 10
+          maxLength: 5000
+        eventType:
+          type: string
+          minLength: 2
+          maxLength: 80
+        eventDate:
+          type: string
+          format: date-time
+        location:
+          type: string
+          minLength: 2
+          maxLength: 200
+        capacity:
+          type: integer
+          minimum: 1
+          maximum: 100000
+        price:
+          type: number
+          minimum: 0
+          maximum: 100000000
+
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Vérifier l'état de l'API
+      responses:
+        "200":
+          description: API opérationnelle
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Connexion utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Session ouverte avec jetons et profil hydraté
+        "401":
+          description: Identifiants invalides
+        "403":
+          description: Compte bloqué
+
+  /api/auth/signup:
+    post:
+      tags: [Auth]
+      summary: Inscription d'un nouvel utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                fullName:
+                  type: string
+      responses:
+        "201":
+          description: Compte créé
+        "400":
+          description: Données d'inscription invalides
+
+  /api/auth/password-reset:
+    post:
+      tags: [Auth]
+      summary: Demande de réinitialisation de mot de passe (anti-énumération)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: Réponse neutre systématique si le format email est valide
+
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Renouvellement silencieux du token d'accès
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        "200":
+          description: Nouveaux jetons générés
+        "401":
+          description: Refresh token invalide ou expiré
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Récupérer l'utilisateur connecté et son rôle
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Profil utilisateur
+        "401":
+          description: Non authentifié
+
+  /api/auth/profile:
+    patch:
+      tags: [Auth]
+      summary: Mettre à jour le profil utilisateur
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullName]
+              properties:
+                fullName:
+                  type: string
+      responses:
+        "200":
+          description: Profil mis à jour
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Déconnexion utilisateur
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Session fermée
+
+  /api/organizer-requests:
+    get:
+      tags: [OrganizerRequests]
+      summary: Lister mes demandes organisateur
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Liste des candidatures de l'utilisateur
+    post:
+      tags: [OrganizerRequests]
+      summary: Soumettre une candidature organisateur avec justificatif
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventType, description]
+              properties:
+                eventType:
+                  type: string
+                description:
+                  type: string
+                  minLength: 20
+                  maxLength: 1000
+                documentPath:
+                  type: string
+                fileBase64:
+                  type: string
+                fileName:
+                  type: string
+      responses:
+        "201":
+          description: Demande enregistrée
+
+  /api/events/approved:
+    get:
+      tags: [Events]
+      summary: Catalogue public paginé des événements approuvés à venir
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: eventType
+          schema: { type: string }
+        - in: query
+          name: location
+          schema: { type: string }
+        - in: query
+          name: dateFrom
+          schema: { type: string, format: date-time }
+        - in: query
+          name: dateTo
+          schema: { type: string, format: date-time }
+        - in: query
+          name: minPrice
+          schema: { type: number }
+        - in: query
+          name: maxPrice
+          schema: { type: number }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: Liste des événements approuvés
+
+  /api/events:
+    post:
+      tags: [Events]
+      summary: Créer un brouillon d'événement (ORGANIZER ou ADMIN)
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventPayload"
+      responses:
+        "201":
+          description: Brouillon créé
+
+  /api/events/me:
+    get:
+      tags: [Events]
+      summary: Lister les événements de l'organisateur connecté
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Liste des événements créés
+
+  /api/events/stats:
+    get:
+      tags: [Events]
+      summary: Statistiques de ventes de l'organisateur
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Statistiques agrégées
+
+  /api/events/{eventId}:
+    get:
+      tags: [Events]
+      summary: Détail d'un événement et places restantes (public si APPROVED, créateur/ADMIN sinon)
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Détail complet de l'événement
+        "404":
+          description: Événement introuvable
+    patch:
+      tags: [Events]
+      summary: Modifier un événement DRAFT ou REJECTED
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventPayload"
+      responses:
+        "200":
+          description: Événement mis à jour
+    delete:
+      tags: [Events]
+      summary: Supprimer ou annuler un événement (ADMIN)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Événement supprimé ou annulé
+
+  /api/events/{eventId}/submit:
+    patch:
+      tags: [Events]
+      summary: Soumettre un événement à la validation admin
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Événement passé en statut PENDING
+
+  /api/events/{eventId}/cancel:
+    patch:
+      tags: [Events]
+      summary: Annuler un événement et invalider les tickets associés
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Événement annulé
+
+  /api/events/{eventId}/reservations:
+    get:
+      tags: [Events]
+      summary: Liste des réservations d'un événement (Organisateur ou ADMIN)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Réservations de l'événement
+
+  /api/reservations/me:
+    get:
+      tags: [Reservations]
+      summary: Lister mes réservations
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Historique des réservations utilisateur
+
+  /api/reservations:
+    post:
+      tags: [Reservations]
+      summary: Créer une réservation (auto-confirmée si événement gratuit)
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventId, quantity]
+              properties:
+                eventId: { type: integer }
+                quantity: { type: integer, minimum: 1, maximum: 100 }
+      responses:
+        "201":
+          description: Réservation enregistrée
+
+  /api/reservations/{reservationId}/cancel:
+    patch:
+      tags: [Reservations]
+      summary: Annuler une réservation
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: reservationId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Réservation annulée
+
+  /api/tickets/me:
+    get:
+      tags: [Tickets]
+      summary: Lister mes billets électroniques
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Billets utilisateur avec QR UUID
+
+  /api/tickets/scan:
+    post:
+      tags: [Tickets]
+      summary: Valider un billet au contrôle d'accès (Organisateur / ADMIN)
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticketCode, eventId]
+              properties:
+                ticketCode: { type: string }
+                eventId: { type: integer }
+      responses:
+        "200":
+          description: Entrée validée
+        "409":
+          description: Billet déjà scanné (anti-fraude)
+
+  /api/tickets/events/{eventId}/checkin-summary:
+    get:
+      tags: [Tickets]
+      summary: Bilan des entrées scannées pour un événement
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Compteurs d'entrées et liste des billets
+
+  /api/payments/me:
+    get:
+      tags: [Payments]
+      summary: Historique de mes paiements
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Liste des paiements
+
+  /api/payments:
+    post:
+      tags: [Payments]
+      summary: Enregistrer une intention de paiement liée à une réservation
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reservationId, paymentMethod]
+              properties:
+                reservationId: { type: integer }
+                paymentMethod:
+                  type: string
+                  enum: [ON_SITE, CARD, PAYPAL, MOBILE_MONEY]
+      responses:
+        "201":
+          description: Paiement initialisé
+
+  /api/payments/checkout:
+    post:
+      tags: [Payments]
+      summary: Démarrer un paiement (Stripe Checkout, Mobile Money Togo ou Sur place)
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reservationId, paymentMethod]
+              properties:
+                reservationId: { type: integer }
+                paymentMethod:
+                  type: string
+                  enum: [ON_SITE, CARD, MOBILE_MONEY]
+                phoneNumber:
+                  type: string
+                  description: Numéro Flooz ou T-Money (+228) requis pour MOBILE_MONEY
+      responses:
+        "200":
+          description: Session Stripe ou instructions Mobile Money retournées
+        "201":
+          description: Paiement sur place enregistré
+
+  /api/payments/webhook/stripe:
+    post:
+      tags: [Payments]
+      summary: Webhook de confirmation asynchrone Stripe
+      responses:
+        "200":
+          description: Paiement confirmé et billets émis
+
+  /api/payments/webhook/mobile-money:
+    post:
+      tags: [Payments]
+      summary: Webhook de confirmation asynchrone Mobile Money
+      responses:
+        "200":
+          description: Paiement confirmé et billets émis
+
+  /api/admin/stats:
+    get:
+      tags: [Admin]
+      summary: Statistiques globales plateforme (ADMIN)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Indicateurs globaux
+
+  /api/admin/users:
+    get:
+      tags: [Admin]
+      summary: Lister tous les utilisateurs (ADMIN)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Liste des comptes
+
+  /api/admin/users/{userId}/role:
+    patch:
+      tags: [Admin]
+      summary: Modifier le rôle d'un utilisateur (ADMIN)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Rôle mis à jour
+
+  /api/admin/users/{userId}/block:
+    patch:
+      tags: [Admin]
+      summary: Bloquer ou débloquer un utilisateur (ADMIN)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Statut de blocage mis à jour
+
+  /api/admin/organizer-requests:
+    get:
+      tags: [Admin]
+      summary: Lister les demandes organisateur et liens signés de justificatifs (ADMIN)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Liste des candidatures
+
+  /api/admin/organizer-requests/{requestId}/approve:
+    patch:
+      tags: [Admin]
+      summary: Approuver une candidature organisateur (ADMIN)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: requestId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Demande approuvée
+
+  /api/admin/organizer-requests/{requestId}/reject:
+    patch:
+      tags: [Admin]
+      summary: Refuser une candidature organisateur avec motif (ADMIN)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: requestId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Demande refusée
+
+  /api/admin/events/pending:
+    get:
+      tags: [Admin]
+      summary: Lister les événements en attente d'approbation (ADMIN)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Événements PENDING
+
+  /api/admin/events/{eventId}/approve:
+    patch:
+      tags: [Admin]
+      summary: Approuver un événement (ADMIN)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Événement approuvé
+
+  /api/admin/events/{eventId}/reject:
+    patch:
+      tags: [Admin]
+      summary: Refuser un événement avec motif (ADMIN)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Événement refusé
+
+  /api/admin/events:
+    get:
+      tags: [Admin]
+      summary: Lister tous les événements tous statuts confondus (ADMIN)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Tous les événements
+
+  /api/admin/events/{eventId}:
+    delete:
+      tags: [Admin]
+      summary: Supprimer ou annuler d'urgence un événement (ADMIN)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Événement supprimé ou annulé
+
+  /api/admin/payments/pending:
+    get:
+      tags: [Admin]
+      summary: Lister les paiements sur place en attente d'encaissement (ADMIN)
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: Paiements PENDING
+
+  /api/admin/payments/{paymentId}/confirm-onsite:
+    patch:
+      tags: [Admin]
+      summary: Confirmer un paiement sur place et émettre les tickets (ADMIN)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - in: path
+          name: paymentId
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Paiement confirmé et billets émis

@@ -52,14 +52,14 @@ export default function SignupPage() {
         <div className="max-w-md w-full space-y-8 bg-white dark:bg-zinc-900 p-8 sm:p-10 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-lg">
           {/* Header */}
           <div className="text-center space-y-3">
-            <Link href="/" className="inline-flex items-center gap-2">
-              <div className="w-12 h-12 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-lg">
+            <Link href="/" aria-label="Retour à l'accueil MyTicket" className="inline-flex items-center gap-2">
+              <div className="w-12 h-12 rounded-lg bg-cyan-500 text-slate-950 flex items-center justify-center shadow-lg">
                 <TicketIcon className="w-7 h-7" />
               </div>
             </Link>
-            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+            <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
               Créer un compte
-            </h2>
+            </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
               Rejoignez MyTicket pour réserver vos billets en toute simplicité.
             </p>
@@ -123,7 +123,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-4 px-6 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? 'Création du compte...' : 'Créer mon Compte'}
               <ArrowRightIcon className="w-4 h-4" />

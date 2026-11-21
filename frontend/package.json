@@ -7,7 +7,12 @@
     "build": "next build --webpack",
     "pages:build": "npx @cloudflare/next-on-pages@1",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "analyze": "node -e \"process.env.ANALYZE='true'; require('child_process').execSync('npx next build --webpack', {stdio:'inherit'})\"",
+    "audit:seo-a11y": "node scripts/audit-seo-a11y.mjs",
+    "audit:mobile": "node scripts/audit-mobile-lighthouse.mjs"
   },
   "dependencies": {
     "next": "16.3.4",
@@ -16,11 +21,18 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.4.6",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^8.0.0",
+    "@testing-library/react": "^16.3.3",
+    "@vitejs/plugin-react": "^6.3.0",
+    "axe-core": "^4.14.1",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
+    "jsdom": "^29.1.1",
     "puppeteer": "^25.16.0",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "vitest": "^5.1.1"
   }
 }

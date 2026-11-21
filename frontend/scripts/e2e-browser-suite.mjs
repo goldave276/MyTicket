@@ -1,8 +1,13 @@
 import puppeteer from 'puppeteer';
 
-const BASE_URL = 'https://my-ticket-virid.vercel.app';
-const ADMIN_EMAIL = 'e2e.test.runner@example.com';
-const ADMIN_PASS = 'Password123!';
+const BASE_URL = process.env.TEST_URL || 'https://my-ticket-virid.vercel.app';
+const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || '';
+const ADMIN_PASS = process.env.E2E_ADMIN_PASS || '';
+
+if (!ADMIN_EMAIL || !ADMIN_PASS) {
+  console.error('Variables E2E_ADMIN_EMAIL et E2E_ADMIN_PASS requises pour exécuter la recette admin.');
+  process.exit(1);
+}
 
 async function runBrowserSuite() {
   console.log('--- Lancement du test automatisé sur Chrome ---');

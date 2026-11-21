@@ -52,7 +52,7 @@ export default function TermsPage() {
         </p>
 
         <nav className="panel p-6">
-          <span className="eyebrow text-zinc-500">Sommaire</span>
+          <span className="eyebrow text-zinc-400">Sommaire</span>
           <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
             {SECTIONS.map((s, i) => (
               <li key={s.id}>
@@ -132,7 +132,7 @@ export default function TermsPage() {
           <Section id="annulation" index="08" title="Annulation & remboursement">
             <ul className="list-disc list-inside space-y-1.5 ml-1">
               <li>Si un organisateur annule un événement, les billets déjà réservés sont remboursés intégralement.</li>
-              <li>Une demande d’annulation à l’initiative de l’utilisateur est traitée au cas par cas via notre <Link href="/contact" className="text-indigo-400 hover:underline">Centre d’aide</Link>, en fonction de la politique de l’organisateur concerné.</li>
+              <li>Une demande d’annulation à l’initiative de l’utilisateur est traitée au cas par cas via notre <Link href="/contact" className="text-indigo-400 underline underline-offset-2 hover:text-indigo-300">Centre d’aide</Link>, en fonction de la politique de l’organisateur concerné.</li>
               <li>Aucun remboursement n’est dû en cas de simple absence de l’utilisateur le jour de l’événement.</li>
             </ul>
           </Section>
@@ -199,7 +199,7 @@ export default function TermsPage() {
           <Section id="contact" index="16" title="Contact">
             <p>
               Une question sur ces conditions ? Rendez-vous sur notre{' '}
-              <Link href="/contact" className="text-indigo-400 hover:underline">page Contact</Link>.
+              <Link href="/contact" className="text-indigo-400 underline underline-offset-2 hover:text-indigo-300">page Contact</Link>.
             </p>
           </Section>
         </div>

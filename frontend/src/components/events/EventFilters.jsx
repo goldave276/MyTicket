@@ -28,6 +28,7 @@ export default function EventFilters({ filters, onChange, onReset }) {
           <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
           <input
             type="text"
+            aria-label="Rechercher un événement"
             placeholder="Rechercher un événement, un artiste, un lieu..."
             value={filters.search || ''}
             onChange={(e) => handleChange('search', e.target.value)}
@@ -38,6 +39,7 @@ export default function EventFilters({ filters, onChange, onReset }) {
         {/* Category Selector */}
         <div className="relative w-full md:w-64">
           <select
+            aria-label="Catégorie d'événement"
             value={filters.eventType || ''}
             onChange={(e) => handleChange('eventType', e.target.value)}
             className="w-full px-4 py-3.5 rounded-md bg-zinc-950/60 border border-zinc-700/80 text-white font-medium text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400 appearance-none cursor-pointer"

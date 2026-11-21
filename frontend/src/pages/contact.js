@@ -70,7 +70,7 @@ export default function ContactPage() {
         {/* Direct contact */}
         <div className="panel p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
-            <span className="eyebrow text-zinc-500">Nous écrire</span>
+            <span className="eyebrow text-zinc-400">Nous écrire</span>
             <p className="text-white font-bold text-lg mt-1">support@myticket.app</p>
             <p className="text-sm text-zinc-400 mt-1">Réponse sous 24 à 48h ouvrées.</p>
           </div>

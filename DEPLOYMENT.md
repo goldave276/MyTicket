@@ -152,3 +152,20 @@ npm run backup
 * Le snapshot JSON est généré dans `backend/backups/myticket_backup_<TIMESTAMP>.json`.
 * Le répertoire `backups/` est automatiquement ignoré par Git (`.gitignore`).
 * En cas de sinistre ou corruption, les données JSON exportées peuvent être réinjectées via script ou SQL seed.
+
+---
+
+### Observabilité, Alerting & Sécurité (Free Tier)
+
+1. **Monitoring Sentry & Alertes Critiques** :
+   - Définir `SENTRY_DSN` dans Render (optionnel ; désactivé sans impact si vide) pour remonter automatiquement les exceptions Express avec masquage des en-têtes sensibles (`authorization`, `cookie`, signatures webhooks).
+   - Définir `ALERT_EMAIL` (ou `ADMIN_EMAIL`) sur Render pour recevoir des alertes emails immédiates (throttlées à 5 min/contexte) en cas d'échec critique de webhook paiement ou d'erreur serveur `500`.
+   - Consulter les logs PostgreSQL / Auth / Edge en direct depuis le tableau de bord Supabase (**Logs Explorer**).
+
+2. **Protection Pre-Commit Anti-Secrets** :
+   - Activez le hook local après clonage avec :
+     ```bash
+     git config core.hooksPath .githooks
+     ```
+   - Chaque commit exécute `node scripts/check-secrets.mjs` pour bloquer l'ajout accidentel de `.env`, clés Stripe live, JWT ou mots de passe en dur. Le contrôle est également exécuté sur l'ensemble du dépôt dans la CI GitHub Actions.
+
