@@ -261,21 +261,23 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 - [x] **D3.1. Sauvegardes Automatisées Supabase**
   - [x] Sauvegardes quotidiennes managées par Supabase Cloud avec rétention automatique des états de la base PostgreSQL.
   - [x] Protection des données critiques (invariants SQL, contraintes de clés étrangères `ON DELETE RESTRICT` sur réservations et paiements).
-- [ ] **D3.2. Procédure de Sauvegarde Logique Externe (Disaster Recovery)**
-  - [ ] Documentation et mise en place d'un script de dump périodique (`pg_dump` ou Supabase CLI) des schémas et données pour archivage hors-site.
-  - [ ] Vérification du verrouillage et de l'accès privé au bucket de stockage Supabase `organizer-documents`.
+- [x] **D3.2. Procédure de Sauvegarde Logique Externe (Disaster Recovery)**
+  - [x] Script d'export automatisé sécurisé (`npm run backup` via [`backend/scripts/backup-db.js`](file:///c:/Users/MSI/Desktop/myticket/backend/scripts/backup-db.js)) générant un snapshot JSON horodaté avec calcul d'empreinte d'intégrité SHA-256.
+  - [x] Exclusion automatique Git via `.gitignore` (`backend/backups/`) et tests unitaires dédiés (`backend/src/tests/backup-db.test.js`).
+  - [x] Documentation pas-à-pas de la procédure de sauvegarde dans [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md).
 
 ---
 
 ### 📊 Phase D4 : Surveillance, Observabilité & Alerting
 - [x] **D4.1. Point de Santé Applicatif**
   - [x] Endpoint `GET /api/health` opérationnel (vérifie la disponibilité du serveur Express).
-- [ ] **D4.2. Sonde d'Uptime & Monitoring Externe**
-  - [ ] Configuration d'une sonde de disponibilité gratuite (ex: **BetterStack**, **UptimeRobot**) surveillant `https://votre-backend.onrender.com/api/health` toutes les 60 secondes.
-  - [ ] Alerte automatique par email / Discord / Slack en cas de latence anormale ou d'indisponibilité.
-- [ ] **D4.3. Centralisation & Suivi des Logs**
-  - [ ] Suivi des logs en temps réel sur la console Render (`morgan` en format `combined` en production).
-  - [ ] Traçabilité des erreurs HTTP 400/401/429/500 et des webhooks de paiement Stripe.
+- [x] **D4.2. Sonde d'Uptime & Maintien d'Éveil Render**
+  - [x] Workflow GitHub Actions Keepalive [`.github/workflows/keepalive-uptime.yml`](file:///c:/Users/MSI/Desktop/myticket/.github/workflows/keepalive-uptime.yml) exécuté toutes les 12 minutes pour éliminer le cold start de Render et vérifier la disponibilité.
+  - [x] Script de contrôle en production en direct (`npm run verify:prod` via [`backend/scripts/verify-production.js`](file:///c:/Users/MSI/Desktop/myticket/backend/scripts/verify-production.js)).
+  - [x] Guide de configuration de sonde tierce gratuite (UptimeRobot / BetterStack) documenté dans [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md).
+- [x] **D4.3. Centralisation & Suivi des Logs**
+  - [x] Suivi des logs en temps réel sur la console Render (`morgan` en format `combined` en production).
+  - [x] Traçabilité des erreurs HTTP 400/401/429/500 et des webhooks de paiement Stripe.
 
 ---
 

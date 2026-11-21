@@ -111,8 +111,44 @@ Configurez les variables suivantes dans le tableau de bord de votre hébergeur (
    ```
    *Réponse attendue : `200 OK` avec `{"message":"API MyTicket operationnelle"}`.*
 
-2. **Test des en-têtes de sécurité :**
+2. **Vérification globale automatisée en production :**
+   Depuis la racine ou le dossier `backend/`, lancez la suite de contrôle en direct :
+   ```bash
+   npm run verify:prod
+   ```
+   *Vérifie simultanément l'endpoint de santé Render (<200ms), le catalogue public et la page d'accueil Vercel.*
+
+3. **Test des en-têtes de sécurité :**
    Vérifiez que `X-Content-Type-Options: nosniff` et `X-Frame-Options: SAMEORIGIN` sont bien présents dans les en-têtes de réponse.
 
-3. **Logs applicatifs :**
+4. **Logs applicatifs :**
    Consultez les logs de l'hébergeur pour vous assurer de l'absence d'erreurs de connexion avec Supabase.
+
+---
+
+## ⚡ Étape 5 : Anti-mise en veille & Monitoring H24 (Render Free Tier)
+
+Le plan gratuit de Render met en veille les conteneurs après 15 minutes d'inactivité, causant un délai de démarrage à froid de 30 à 50 secondes.
+
+1. **GitHub Actions Keepalive (Automatisé)** :
+   Le fichier [`.github/workflows/keepalive-uptime.yml`](.github/workflows/keepalive-uptime.yml) sonde automatiquement `GET https://myticket-llwf.onrender.com/api/health` toutes les 12 minutes pour maintenir le conteneur actif et chaud.
+
+2. **Sonde Externe Redondante (Recommandé - Gratuit)** :
+   - Créez un compte gratuit sur [UptimeRobot](https://uptimerobot.com) ou [BetterStack](https://betterstack.com).
+   - Ajoutez un moniteur HTTP(s) pointant sur : `https://myticket-llwf.onrender.com/api/health` avec un intervalle de **5 minutes**.
+   - Configurez une alerte email/Discord/Slack en cas d'indisponibilité.
+
+---
+
+## 📦 Étape 6 : Procédure de Sauvegarde & Disaster Recovery
+
+Pour exporter l'état complet de la base de données Supabase (données hors-site horodatées et vérifiées par empreinte SHA-256) :
+
+```bash
+cd backend
+npm run backup
+```
+
+* Le snapshot JSON est généré dans `backend/backups/myticket_backup_<TIMESTAMP>.json`.
+* Le répertoire `backups/` est automatiquement ignoré par Git (`.gitignore`).
+* En cas de sinistre ou corruption, les données JSON exportées peuvent être réinjectées via script ou SQL seed.

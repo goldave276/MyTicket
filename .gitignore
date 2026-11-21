@@ -14,6 +14,10 @@ build/
 # Logs
 *.log
 
+# Backups & data dumps
+backups/
+backend/backups/
+
 # Local editor and operating-system files
 .DS_Store
 Thumbs.db

@@ -1,0 +1,28 @@
+name: Render Keepalive & Uptime Monitoring
+
+on:
+  schedule:
+    # Exécution toutes les 12 minutes pour neutraliser la mise en veille Render (seuil d'inactivité de 15 min)
+    - cron: '*/12 * * * *'
+  workflow_dispatch: # Déclenchement manuel possible depuis l'interface GitHub
+
+jobs:
+  uptime-check:
+    name: Check Render API Health
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render Backend Health Endpoint
+        run: |
+          URL="https://myticket-llwf.onrender.com/api/health"
+          echo "Vérification de l'API MyTicket sur Render ($URL)..."
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" --max-time 60 "$URL")
+          echo "Code statut HTTP: $HTTP_STATUS"
+          if [ -f response.json ]; then
+            cat response.json
+            echo ""
+          fi
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "::error::Échec du contrôle de santé : code HTTP $HTTP_STATUS reçu au lieu de 200"
+            exit 1
+          fi
+          echo "Le backend Render est actif et opérationnel !"
