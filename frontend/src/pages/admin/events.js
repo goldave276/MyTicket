@@ -107,6 +107,8 @@ export default function AdminEventsPage() {
     }
   };
 
+  if (!ready) return null;
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 py-10 px-4 sm:px-6 lg:px-8">
       <Head>

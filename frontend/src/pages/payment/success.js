@@ -14,6 +14,7 @@ export default function PaymentSuccessPage() {
 
   useEffect(() => {
     if (!router.isReady || !paymentId) return;
+    if (typeof window !== 'undefined' && !localStorage.getItem('myticket_token')) return;
 
     let cancelled = false;
     queueMicrotask(async () => {

@@ -135,14 +135,37 @@ export default function EventDetailsPage() {
       }
     }
 
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(shareUrl);
         showToast('Lien copié dans le presse-papier !', 'success');
+        return;
       } catch {
-        showToast('Impossible de copier le lien', 'error');
+        // Fallback below
       }
     }
+
+    if (typeof document !== 'undefined' && shareUrl) {
+      try {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = shareUrl;
+        tempInput.setAttribute('readonly', '');
+        tempInput.style.position = 'fixed';
+        tempInput.style.opacity = '0';
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        const copied = document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        if (copied) {
+          showToast('Lien copié dans le presse-papier !', 'success');
+          return;
+        }
+      } catch {
+        // Ignore execCommand failure
+      }
+    }
+
+    showToast('Copiez le lien depuis la barre d’adresse pour le partager.', 'info');
   };
 
   const handleAdminConfirm = async () => {

@@ -56,6 +56,8 @@ describe('Navbar (menu mobile 3 barres)', () => {
     expect(desktopTrigger.closest('.hidden.md\\:block')).not.toBeNull();
 
     fireEvent.click(hamburger);
+    const drawer = screen.getByTestId('mobile-nav-drawer');
+    expect(drawer.closest('header')).toBeNull();
     expect(screen.getByRole('button', { name: 'Fermer le menu' })).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByText('kewiyodaably@gmail.com')).toBeInTheDocument();
     expect(screen.getByText('Mon Profil')).toBeInTheDocument();

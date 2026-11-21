@@ -75,11 +75,17 @@ export default function SignupPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+              <label
+                htmlFor="signup-fullname"
+                className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5"
+              >
                 Nom complet *
               </label>
               <input
+                id="signup-fullname"
+                name="fullName"
                 type="text"
+                autoComplete="name"
                 required
                 placeholder="ex: Jean Dupont"
                 value={fullName}
@@ -89,11 +95,17 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+              <label
+                htmlFor="signup-email"
+                className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5"
+              >
                 Adresse Email *
               </label>
               <input
+                id="signup-email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 required
                 placeholder="votre.email@exemple.com"
                 value={email}
@@ -103,14 +115,20 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+              <label
+                htmlFor="signup-password"
+                className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5"
+              >
                 Mot de passe *
               </label>
               <input
+                id="signup-password"
+                name="password"
                 type="password"
+                autoComplete="new-password"
                 required
                 minLength={8}
-                placeholder="•••••••• (8 car. min, 1 lettre, 1 chiffre)"
+                placeholder="•••••••• (min. 8 caractères)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"

@@ -27,6 +27,8 @@ export default function EventFilters({ filters, onChange, onReset }) {
         <div className="relative flex-1">
           <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
           <input
+            id="filter-search"
+            name="search"
             type="text"
             aria-label="Rechercher un événement"
             placeholder="Rechercher un événement, un artiste, un lieu..."
@@ -39,6 +41,8 @@ export default function EventFilters({ filters, onChange, onReset }) {
         {/* Category Selector */}
         <div className="relative w-full md:w-64">
           <select
+            id="filter-event-type"
+            name="eventType"
             aria-label="Catégorie d'événement"
             value={filters.eventType || ''}
             onChange={(e) => handleChange('eventType', e.target.value)}
@@ -60,6 +64,8 @@ export default function EventFilters({ filters, onChange, onReset }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 pt-4 border-t border-zinc-800/80 items-center">
         {/* Location input */}
         <input
+          id="filter-location"
+          name="location"
           type="text"
           placeholder="Lieu (ex: Lomé)"
           aria-label="Lieu"
@@ -70,6 +76,8 @@ export default function EventFilters({ filters, onChange, onReset }) {
 
         {/* Date From */}
         <input
+          id="filter-date-from"
+          name="dateFrom"
           type="date"
           aria-label="Date de début"
           value={filters.dateFrom || ''}
@@ -79,6 +87,8 @@ export default function EventFilters({ filters, onChange, onReset }) {
 
         {/* Date To */}
         <input
+          id="filter-date-to"
+          name="dateTo"
           type="date"
           aria-label="Date de fin"
           value={filters.dateTo || ''}
@@ -88,6 +98,8 @@ export default function EventFilters({ filters, onChange, onReset }) {
 
         {/* Min Price */}
         <input
+          id="filter-min-price"
+          name="minPrice"
           type="number"
           placeholder="Prix min (FCFA)"
           aria-label="Prix minimum"
@@ -98,6 +110,8 @@ export default function EventFilters({ filters, onChange, onReset }) {
 
         {/* Max Price */}
         <input
+          id="filter-max-price"
+          name="maxPrice"
           type="number"
           placeholder="Prix max (FCFA)"
           aria-label="Prix maximum"

@@ -118,4 +118,35 @@ describe("Detail public d'evenement", () => {
         expect(response.body.event.capacity).toBe(200);
         expect(response.body.event.remainingCapacity).toBe(180); // 200 - (15 + 5)
     });
+
+    it("reconcilie remainingCapacity avec get_events_booked_counts lorsque la RPC detail retourne une valeur desynchronisee", async () => {
+        supabaseModule.supabase = {
+            rpc(name, payload) {
+                if (name === "get_public_event_detail") {
+                    return Promise.resolve({
+                        data: { id: 5, title: "amapiano", capacity: 100, remainingCapacity: 100 },
+                        error: null
+                    });
+                }
+                if (name === "get_events_booked_counts") {
+                    expect(payload).toEqual({ p_event_ids: [5] });
+                    return Promise.resolve({
+                        data: [{ event_id: 5, booked_seats: 1 }],
+                        error: null
+                    });
+                }
+                return Promise.resolve({ data: null, error: null });
+            }
+        };
+
+        delete require.cache[require.resolve("../controllers/eventController")];
+        const { getPublicEventDetail } = require("../controllers/eventController");
+        const response = createResponse();
+
+        await getPublicEventDetail({ params: { eventId: "5" } }, response);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body.event.remainingCapacity).toBe(99);
+        expect(response.body.event.bookedSeats).toBe(1);
+    });
 });

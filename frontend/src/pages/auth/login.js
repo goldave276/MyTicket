@@ -70,11 +70,17 @@ export default function LoginPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5">
+              <label
+                htmlFor="login-email"
+                className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 mb-1.5"
+              >
                 Adresse Email *
               </label>
               <input
+                id="login-email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 required
                 placeholder="votre.email@exemple.com"
                 value={email}
@@ -85,7 +91,10 @@ export default function LoginPage() {
 
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                <label
+                  htmlFor="login-password"
+                  className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
+                >
                   Mot de passe *
                 </label>
                 <Link
@@ -96,7 +105,10 @@ export default function LoginPage() {
                 </Link>
               </div>
               <input
+                id="login-password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
                 required
                 placeholder="••••••••"
                 value={password}

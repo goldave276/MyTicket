@@ -36,7 +36,8 @@ export default function Navbar() {
   }, [router]);
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[#08090e]/90 border-b border-white/10 transition-colors">
+    <>
+      <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[#08090e]/90 border-b border-white/10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
@@ -122,10 +123,14 @@ export default function Navbar() {
           </button>
         </div>
       </div>
+      </header>
 
-      {/* Mobile Navigation Drawer Plein Écran */}
+      {/* Mobile Navigation Drawer Plein Écran (hors <header> pour éviter le bloc englobant backdrop-filter sur position:fixed) */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-16 z-50 bg-[#08090e]/98 backdrop-blur-2xl flex flex-col justify-between px-6 py-6 overflow-y-auto animate-in fade-in duration-200 safe-pb">
+        <div
+          data-testid="mobile-nav-drawer"
+          className="md:hidden fixed inset-0 top-16 z-50 bg-[#08090e]/98 backdrop-blur-2xl flex flex-col justify-between px-6 py-6 overflow-y-auto animate-in fade-in duration-200 safe-pb"
+        >
           <div className="space-y-2">
             {user && (
               <div className="mb-4 p-4 rounded-2xl bg-[#11141e] border border-white/10 flex items-center gap-3.5">
@@ -240,6 +245,6 @@ export default function Navbar() {
           )}
         </div>
       )}
-    </header>
+    </>
   );
 }

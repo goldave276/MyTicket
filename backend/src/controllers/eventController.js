@@ -505,6 +505,22 @@ async function getPublicEventDetail(req, res) {
         return res.status(404).json({ message: "Evenement introuvable" });
     }
 
+    const eventIdNum = Number(data.id ?? idValidation.value);
+    if (data.capacity !== undefined && Number.isSafeInteger(eventIdNum) && eventIdNum > 0) {
+        const bookedMap = await fetchBookedSeatsByEventIds([{ id: eventIdNum }]);
+        const bookedSeats = Math.max(0, Number(bookedMap[eventIdNum] ?? 0));
+        const remainingCapacity = Math.max(0, Number(data.capacity || 0) - bookedSeats);
+        return res.status(200).json({
+            event: {
+                ...data,
+                bookedSeats,
+                booked_seats: bookedSeats,
+                remainingCapacity,
+                remaining_capacity: remainingCapacity
+            }
+        });
+    }
+
     return res.status(200).json({ event: data });
 }
 
