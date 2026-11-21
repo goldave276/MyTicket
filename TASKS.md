@@ -203,6 +203,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Exploiter les fonctions RPC sécurisées dans les contrôleurs (`get_admin_stats`, `get_organizer_stats`, `admin_list_users`, `admin_update_user_role`, `admin_set_user_blocked`).
   - [x] Migration 0016 : Autorisation RLS d'insertion d'événements en statut DRAFT pour les administrateurs.
   - [x] Migration 0017 & 0018 (Audit Sécurité & QA) : Verrouillage `service_role` de `promote_user_to_admin` et `confirm_online_payment`, suppression de la policy RLS en doublon, auto-confirmation des réservations d'événements gratuits (`price = 0`) avec génération immédiate des billets, alignement complet des contrats API/Frontend, synchronisation CI/Docs et 134/134 tests unitaires et HTTP validés.
+  - [x] Migration 0021 : Assouplissement des réservations multiples par utilisateur (suppression de la contrainte bloquante `one_reservation_per_user_event`), gestion d'erreur applicative conviviale et fiabilisation de la lecture des réservations organisateur.
 
 ---
 

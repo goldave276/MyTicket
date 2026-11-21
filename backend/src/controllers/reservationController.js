@@ -24,6 +24,11 @@ async function createReservation(req, res) {
     );
 
     if (error) {
+        if (error.message && error.message.includes("one_reservation_per_user_event")) {
+            return res.status(400).json({
+                message: "Vous avez déjà une réservation enregistrée pour cet événement. Rendez-vous dans votre espace pour la consulter."
+            });
+        }
         return res.status(400).json({
             message: error.message
         });

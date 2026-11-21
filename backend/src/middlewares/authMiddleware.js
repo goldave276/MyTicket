@@ -64,4 +64,39 @@ async function requireAuth(req, res, next) {
     }
 }
 
+async function optionalAuth(req, res, next) {
+    try {
+        const authorization = req.headers.authorization;
+        if (!authorization || !authorization.startsWith("Bearer ")) {
+            return next();
+        }
+
+        const token = authorization.replace("Bearer ", "");
+        const {
+            data: { user } = {},
+            error: userError
+        } = await supabase.auth.getUser(token);
+
+        if (!userError && user) {
+            req.user = user;
+            req.supabase = createAuthenticatedClient(token);
+
+            const { data: profile } = await req.supabase
+                .from("profiles")
+                .select("id, role, is_blocked, full_name")
+                .eq("id", user.id)
+                .maybeSingle();
+
+            if (profile && !profile.is_blocked) {
+                req.profile = profile;
+                req.user.role = profile.role;
+            }
+        }
+    } catch (_) {
+        // En cas d'erreur de parsing du token, continuer en mode public/anonyme
+    }
+    return next();
+}
+
 module.exports = requireAuth;
+module.exports.optionalAuth = optionalAuth;

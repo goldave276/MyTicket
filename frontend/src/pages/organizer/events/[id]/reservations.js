@@ -29,10 +29,10 @@ export default function EventReservationsListPage() {
     try {
       const [resData, eventData] = await Promise.all([
         eventService.getEventReservations(id),
-        eventService.getEventDetails(id),
+        eventService.getEventDetails(id).catch(() => null),
       ]);
 
-      setReservations(Array.isArray(resData) ? resData : resData.reservations || []);
+      setReservations(Array.isArray(resData) ? resData : resData?.reservations || []);
       setEventDetails(eventData?.event || eventData || { title: 'Événement' });
     } catch (err) {
       setError(true);

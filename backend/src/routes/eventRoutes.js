@@ -1,5 +1,6 @@
 const express = require("express");
 const requireAuth = require("../middlewares/authMiddleware");
+const { optionalAuth } = require("../middlewares/authMiddleware");
 const requireRole = require("../middlewares/requireRole");
 
 const {
@@ -81,6 +82,7 @@ router.get(
 
 router.get(
     "/:eventId",
+    optionalAuth,
     getPublicEventDetail
 );
 

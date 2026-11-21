@@ -295,6 +295,56 @@ async function getPublicEventDetail(req, res) {
         return res.status(400).json({ message: idValidation.error });
     }
 
+    const userId = req.user?.id;
+    const userRole = req.profile?.role;
+
+    // Si utilisateur connecté créateur de l'événement ou ADMIN, autoriser l'accès direct même non-APPROVED
+    if (userId && req.supabase) {
+        let ownQuery = req.supabase
+            .from("events")
+            .select("id, title, description, event_type, event_date, location, capacity, price, status, organizer_id")
+            .eq("id", idValidation.value);
+
+        if (userRole !== "ADMIN") {
+            ownQuery = ownQuery.eq("organizer_id", userId);
+        }
+
+        const { data: ownEvent } = await ownQuery.maybeSingle();
+        if (ownEvent) {
+            const { data: reservationsData } = await req.supabase
+                .from("reservations")
+                .select("quantity")
+                .eq("event_id", idValidation.value)
+                .in("status", ["PENDING", "CONFIRMED"]);
+
+            const bookedSeats = Array.isArray(reservationsData)
+                ? reservationsData.reduce((acc, r) => acc + (Number(r.quantity) || 0), 0)
+                : 0;
+
+            const remainingCapacity = Math.max(0, Number(ownEvent.capacity || 0) - bookedSeats);
+
+            return res.status(200).json({
+                event: {
+                    id: ownEvent.id,
+                    title: ownEvent.title,
+                    description: ownEvent.description,
+                    eventType: ownEvent.event_type,
+                    event_type: ownEvent.event_type,
+                    eventDate: ownEvent.event_date,
+                    event_date: ownEvent.event_date,
+                    location: ownEvent.location,
+                    capacity: ownEvent.capacity,
+                    price: ownEvent.price,
+                    status: ownEvent.status,
+                    organizerId: ownEvent.organizer_id,
+                    organizer_id: ownEvent.organizer_id,
+                    remainingCapacity,
+                    remaining_capacity: remainingCapacity
+                }
+            });
+        }
+    }
+
     const { data, error } = await supabase.rpc("get_public_event_detail", {
         p_event_id: idValidation.value
     });
