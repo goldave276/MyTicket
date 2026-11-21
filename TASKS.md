@@ -241,7 +241,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] Guide de déploiement Web Service Render rédigé dans [`DEPLOYMENT.md`](file:///c:/Users/MSI/Desktop/myticket/DEPLOYMENT.md).
   - [x] Web Service Render déployé en production avec variables d'environnement (`NODE_ENV=production`, `PORT=3000`, `TRUST_PROXY=1`, etc.) sur `https://myticket-llwf.onrender.com`.
   - [x] Point de contrôle opérationnel : `GET /api/health` actif et validé.
-  - [x] **Pipeline CI/CD Automatisé** : Automatisation du déploiement Render conditionné au succès des 4 jobs CI (Next.js build, tests unitaires, build Docker et migrations PostgreSQL) via Deploy Hook Render (`RENDER_DEPLOY_HOOK`) dans `.github/workflows/backend-ci.yml`.
+  - [x] **Pipeline CI/CD Automatisé** : Automatisation du déploiement Render conditionné au succès des 5 jobs CI (`secret-scan`, `frontend`, `test`, `docker-build`, `migration-test`) via Deploy Hook Render (`RENDER_DEPLOY_HOOK`) dans [`.github/workflows/backend-ci.yml`](file:///c:/Users/MSI/Desktop/myticket/.github/workflows/backend-ci.yml), avec `Auto-Deploy: Off` côté Render (Option A) et assertion SQL `migration-test` alignée sur `0018_audit_security_and_free_events.sql` (corrigée le 21/11/2026).
 
 ---
 
