@@ -292,9 +292,9 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
   - [x] **Authentification & Session** : Création de compte (`/auth/signup`), connexion (`/auth/login`), persistance de session au rechargement et disponibilité `/auth/reset-password` (recette live Vercel + Render du 22/11/2026).
   - [x] **Catalogue Public** : Consultation de la liste des événements approuvés (`/`), filtres par catégorie/date `YYYY-MM-DD`, affichage de la page détail (`/events/[id]`) (recette live du 22/11/2026).
   - [ ] **Réservation & Paiement** : Réservation gratuite validée en live (`PASS CONFIRMÉ` sur `/dashboard/tickets`) ; reste à tester sur un événement payant (Stripe Checkout réel/test + webhook).
-  - [ ] **Emails Transactionnels** : Réception de l'email de confirmation stylisé avec récapitulatif des billets et QR codes (à confirmer en boîte mail sur un flux payant/SMTP réel).
+  - [x] **Emails Transactionnels** : Réception de l'email de confirmation de billet (`https://my-ticket-virid.vercel.app/dashboard/tickets`) et de l'email de réinitialisation (`/auth/reset-password`) validée en boîte mail réelle (`daveably01@gmail.com`).
   - [x] **Accès Billets & Export** : Visualisation sur `/dashboard/tickets`, génération QR Pass et présence des actions téléchargement PNG & impression A4 (`@media print`) validées en live.
-  - [ ] **Contrôle d'Accès Scanner** : Protection de route par rôle validée en live ; reste à tester avec un compte `ORGANIZER`/`ADMIN` et caméra physique sur `/organizer/events/[id]/scanner` (statut `USED`).
+  - [x] **Contrôle d'Accès Scanner** : Protection de route par rôle, check-in summary (`200 OK`), détection UUID invalide (`400`), validation en direct (`200 OK` → statut `USED`) et anti-doublon (`409 Conflict`) validés en live sur `/organizer/events/5/scanner`.
 
 ---
 
