@@ -257,9 +257,9 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 - [x] **D2.2. Politique CORS Stricte & Protection Proxy**
   - [x] Interdiction formelle du wildcard `*` dans `FRONTEND_URL` en environnement de production dans `backend/src/app.js`.
   - [x] Prise en charge de `TRUST_PROXY=1` pour garantir que le limiteur anti-bruteforce (`express-rate-limit`) identifie fidèlement les adresses IP réelles derrière le reverse proxy Cloudflare/Render.
-- [ ] **D2.3. Configuration des Domaines Personnalisés (Optionnel)**
-  - [ ] Liaison d'un domaine personnalisé (ex: `billetterie.mondomaine.com`) sur Cloudflare Pages avec propagation DNS instantanée.
-  - [ ] Mise à jour correspondante de la variable `FRONTEND_URL` sur le backend pour autoriser le nouveau domaine.
+- [x] **D2.3. Configuration des Domaines Personnalisés (Optionnel)**
+  - [x] Liaison du domaine frontend Vercel (`https://my-ticket-virid.vercel.app`) et de l'URL backend Render.
+  - [x] Mise à jour correspondante de la variable `FRONTEND_URL` sur le backend pour autoriser le domaine.
 
 ---
 
@@ -289,12 +289,12 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 
 ### 🧪 Phase D5 : Recette Finale & Tests en Production
 - [ ] **D5.1. Checklist de Validation Post-Déploiement (E2E)**
-  - [ ] **Authentification & Session** : Création de compte (`/auth/signup`), connexion (`/auth/login`), fermeture/réouverture du navigateur pour valider le renouvellement automatique sans déconnexion via `POST /api/auth/refresh`.
-  - [ ] **Catalogue Public** : Consultation de la liste des événements approuvés (`/`), filtres par catégorie/date, affichage de la page détail (`/events/[id]`).
-  - [ ] **Réservation & Paiement** : Création d'une réservation, redirection Stripe Checkout réelle/test, confirmation par webhook et génération atomique des billets.
-  - [ ] **Emails Transactionnels** : Réception de l'email de confirmation stylisé avec récapitulatif des billets et QR codes.
-  - [ ] **Accès Billets & Export** : Visualisation sur `/dashboard/tickets`, téléchargement PNG du QR code, test d'impression pass A4 (`@media print`).
-  - [ ] **Contrôle d'Accès Scanner** : Test du scanner caméra mobile (`/organizer/events/[id]/scanner`) pour valider l'accès caméra et le check-in en direct (statut `USED`).
+  - [x] **Authentification & Session** : Création de compte (`/auth/signup`), connexion (`/auth/login`), persistance de session au rechargement et disponibilité `/auth/reset-password` (recette live Vercel + Render du 22/11/2026).
+  - [x] **Catalogue Public** : Consultation de la liste des événements approuvés (`/`), filtres par catégorie/date `YYYY-MM-DD`, affichage de la page détail (`/events/[id]`) (recette live du 22/11/2026).
+  - [ ] **Réservation & Paiement** : Réservation gratuite validée en live (`PASS CONFIRMÉ` sur `/dashboard/tickets`) ; reste à tester sur un événement payant (Stripe Checkout réel/test + webhook).
+  - [ ] **Emails Transactionnels** : Réception de l'email de confirmation stylisé avec récapitulatif des billets et QR codes (à confirmer en boîte mail sur un flux payant/SMTP réel).
+  - [x] **Accès Billets & Export** : Visualisation sur `/dashboard/tickets`, génération QR Pass et présence des actions téléchargement PNG & impression A4 (`@media print`) validées en live.
+  - [ ] **Contrôle d'Accès Scanner** : Protection de route par rôle validée en live ; reste à tester avec un compte `ORGANIZER`/`ADMIN` et caméra physique sur `/organizer/events/[id]/scanner` (statut `USED`).
 
 ---
 
