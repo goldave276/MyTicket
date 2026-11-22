@@ -254,6 +254,7 @@ Ce document regroupe **l'intégralité des tâches nécessaires pour finaliser l
 - [x] **D2.1. Politique HTTPS & Chiffrement de Bout en Bout**
   - [x] Certificats SSL/TLS automatiques et renouvelés sans coupure gérés par Cloudflare (Frontend) et Render (Backend).
   - [x] Forçage automatique des redirections HTTP vers HTTPS sur l'ensemble des routes.
+  - [x] **Durcissement En-têtes & Dépendances (22/11/2026)** : `app.disable("x-powered-by")` et `helmet()` monté avant `cors()` dans [`App.js`](file:///c:/Users/MSI/Desktop/myticket/backend/src/App.js) (aucune fuite `x-powered-by` sur rejet CORS 403), `Content-Security-Policy` ajouté dans [`vercel.json`](file:///c:/Users/MSI/Desktop/myticket/frontend/vercel.json), et `npm audit fix` appliqué (0 vulnérabilité prod backend ; `sharp` corrigé côté frontend).
 - [x] **D2.2. Politique CORS Stricte & Protection Proxy**
   - [x] Interdiction formelle du wildcard `*` dans `FRONTEND_URL` en environnement de production dans `backend/src/app.js`.
   - [x] Prise en charge de `TRUST_PROXY=1` pour garantir que le limiteur anti-bruteforce (`express-rate-limit`) identifie fidèlement les adresses IP réelles derrière le reverse proxy Cloudflare/Render.

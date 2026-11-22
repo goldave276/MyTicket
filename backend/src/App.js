@@ -24,6 +24,7 @@ const { initMonitoring, reportCriticalError } = require("./services/monitoringSe
 initMonitoring();
 
 const app = express();
+app.disable("x-powered-by");
 
 // A activer uniquement derriere un proxy unique de confiance (Render, Railway,
 // Nginx configure comme unique saut). Sans ce reglage, le rate limiting voit
@@ -31,6 +32,10 @@ const app = express();
 if (process.env.TRUST_PROXY === "1") {
     app.set("trust proxy", 1);
 }
+
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 const rawFrontendUrl = process.env.FRONTEND_URL || "http://localhost:3333";
 const allowedOrigins = rawFrontendUrl
@@ -70,9 +75,6 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: "10mb" }));
 

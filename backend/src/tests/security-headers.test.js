@@ -21,4 +21,14 @@ describe("Tests de securite des en-tetes HTTP et CORS", () => {
         expect(response.status).toBe(200);
         expect(response.headers["access-control-allow-origin"]).toBe("http://localhost:3333");
     });
+
+    it("masque x-powered-by et applique Helmet meme lors d'un rejet CORS 403", async () => {
+        const response = await request(app)
+            .get("/api/health")
+            .set("Origin", "https://evil.example.com");
+
+        expect(response.status).toBe(403);
+        expect(response.headers["x-powered-by"]).toBeUndefined();
+        expect(response.headers["x-content-type-options"]).toBe("nosniff");
+    });
 });
