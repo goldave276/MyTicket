@@ -52,10 +52,31 @@ export default function Footer() {
               Catégories
             </h4>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li>Concerts & Festivals</li>
-              <li>Conférences & Tech</li>
-              <li>Théâtre & Spectacles</li>
-              <li>Sport & Esport</li>
+              <li>
+                <Link href="/?eventType=CONCERT" className="hover:text-cyan-400 transition-colors">
+                  Concerts &amp; Musique
+                </Link>
+              </li>
+              <li>
+                <Link href="/?eventType=FESTIVAL" className="hover:text-cyan-400 transition-colors">
+                  Festivals
+                </Link>
+              </li>
+              <li>
+                <Link href="/?eventType=CONFERENCE" className="hover:text-cyan-400 transition-colors">
+                  Conférences &amp; Tech
+                </Link>
+              </li>
+              <li>
+                <Link href="/?eventType=THEATRE" className="hover:text-cyan-400 transition-colors">
+                  Théâtre &amp; Spectacles
+                </Link>
+              </li>
+              <li>
+                <Link href="/?eventType=SPORT" className="hover:text-cyan-400 transition-colors">
+                  Sport &amp; Compétitions
+                </Link>
+              </li>
             </ul>
           </div>
 

@@ -13,13 +13,12 @@ export default function Navbar() {
 
   // Empêcher le défilement de l'arrière-plan quand le tiroir mobile est ouvert
   useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    const overflowValue = mobileMenuOpen ? 'hidden' : '';
+    document.body.style.overflow = overflowValue;
+    document.documentElement.style.overflow = overflowValue;
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, [mobileMenuOpen]);
 
@@ -63,6 +62,26 @@ export default function Navbar() {
             }`}
           >
             Découvrir
+          </Link>
+
+          {!isOrganizer && (
+            <Link
+              href="/dashboard/become-organizer"
+              className={`text-sm font-semibold transition-colors hover:text-cyan-400 ${
+                router.pathname === '/dashboard/become-organizer' ? 'text-cyan-400' : 'text-slate-300'
+              }`}
+            >
+              Organiser un événement
+            </Link>
+          )}
+
+          <Link
+            href="/contact"
+            className={`text-sm font-semibold transition-colors hover:text-cyan-400 ${
+              router.pathname === '/contact' ? 'text-cyan-400' : 'text-slate-300'
+            }`}
+          >
+            Aide &amp; Contact
           </Link>
 
           {isOrganizer && (
@@ -154,6 +173,26 @@ export default function Navbar() {
             >
               <TicketIcon className="w-5 h-5 text-cyan-400" />
               Découvrir les Événements
+            </Link>
+
+            {!user && (
+              <Link
+                href="/dashboard/become-organizer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 p-3.5 rounded-xl text-base font-semibold text-cyan-400 hover:bg-slate-900 active:bg-slate-800 min-h-[48px]"
+              >
+                <BuildingIcon className="w-5 h-5 text-cyan-400" />
+                Organiser un événement
+              </Link>
+            )}
+
+            <Link
+              href="/contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 p-3.5 rounded-xl text-base font-semibold text-slate-100 hover:bg-slate-900 active:bg-slate-800 min-h-[48px]"
+            >
+              <span className="w-5 h-5 flex items-center justify-center text-cyan-400 font-bold">?</span>
+              Aide &amp; Contact
             </Link>
 
             {user ? (

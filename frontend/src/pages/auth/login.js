@@ -13,8 +13,13 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const rawRedirect = typeof router.query.redirect === 'string' ? router.query.redirect : '';
+  const safeRedirect = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : null;
+  const signupHref = safeRedirect ? `/auth/signup?redirect=${encodeURIComponent(safeRedirect)}` : '/auth/signup';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,8 +29,6 @@ export default function LoginPage() {
     try {
       const res = await login({ email, password });
       showToast('Connexion réussie ! Bienvenue sur MyTicket.', 'success');
-      const rawRedirect = typeof router.query.redirect === 'string' ? router.query.redirect : '';
-      const safeRedirect = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : null;
       const userRole = res?.user?.role?.toUpperCase();
       const defaultRedirect = userRole === 'ADMIN' ? '/admin' : userRole === 'ORGANIZER' ? '/organizer' : '/dashboard';
       const redirectUrl = safeRedirect || defaultRedirect;
@@ -60,6 +63,13 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {/* Redirect Context Banner */}
+          {safeRedirect && (
+            <div className="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-medium">
+              Connectez-vous pour poursuivre votre action. Vous serez automatiquement redirigé après connexion.
+            </div>
+          )}
+
           {/* Alert Error */}
           {error && (
             <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold">
@@ -85,12 +95,12 @@ export default function LoginPage() {
                 placeholder="votre.email@exemple.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-base sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-1.5">
+              <div className="flex justify-between items-center mb-1.5 gap-2">
                 <label
                   htmlFor="login-password"
                   className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
@@ -99,22 +109,32 @@ export default function LoginPage() {
                 </label>
                 <Link
                   href="/auth/password-reset"
-                  className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                  className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline py-1.5 px-2 -mr-2 rounded-md touch-manipulation"
                 >
                   Mot de passe oublié ?
                 </Link>
               </div>
-              <input
-                id="login-password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-              />
+              <div className="relative">
+                <input
+                  id="login-password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-4 pr-12 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-base sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60 transition-colors touch-manipulation"
+                >
+                  {showPassword ? '🙈' : '👁'}
+                </button>
+              </div>
             </div>
 
             <button
@@ -130,7 +150,7 @@ export default function LoginPage() {
           {/* Footer link */}
           <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 text-center text-xs text-zinc-500 dark:text-zinc-400">
             Vous n’avez pas de compte ?{' '}
-            <Link href="/auth/signup" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+            <Link href={signupHref} className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
               Créer un compte gratuitement
             </Link>
           </div>

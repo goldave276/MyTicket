@@ -14,8 +14,13 @@ export default function SignupPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const rawRedirect = typeof router.query.redirect === 'string' ? router.query.redirect : '';
+  const safeRedirect = rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') ? rawRedirect : null;
+  const loginHref = safeRedirect ? `/auth/login?redirect=${encodeURIComponent(safeRedirect)}` : '/auth/login';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +34,7 @@ export default function SignupPage() {
         password,
       });
       showToast('Votre compte a été créé avec succès !', 'success');
-      router.push('/dashboard');
+      router.push(safeRedirect || '/dashboard');
     } catch (err) {
       if (err.data?.errors) {
         const errorDetails = Object.values(err.data.errors).join('. ');
@@ -65,6 +70,13 @@ export default function SignupPage() {
             </p>
           </div>
 
+          {/* Redirect Context Banner */}
+          {safeRedirect && (
+            <div className="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-medium">
+              Créez votre compte pour poursuivre votre action. Vous serez automatiquement redirigé après inscription.
+            </div>
+          )}
+
           {/* Alert Error */}
           {error && (
             <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold">
@@ -90,7 +102,7 @@ export default function SignupPage() {
                 placeholder="ex: Jean Dupont"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-base sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
 
@@ -110,7 +122,7 @@ export default function SignupPage() {
                 placeholder="votre.email@exemple.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-base sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
 
@@ -121,18 +133,28 @@ export default function SignupPage() {
               >
                 Mot de passe *
               </label>
-              <input
-                id="signup-password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={8}
-                placeholder="•••••••• (min. 8 caractères)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-              />
+              <div className="relative">
+                <input
+                  id="signup-password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  minLength={8}
+                  placeholder="•••••••• (min. 8 caractères)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-4 pr-12 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-medium text-base sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60 transition-colors touch-manipulation"
+                >
+                  {showPassword ? '🙈' : '👁'}
+                </button>
+              </div>
               <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
                 8 caractères minimum, comprenant au moins 1 lettre et 1 chiffre.
               </p>
@@ -151,7 +173,7 @@ export default function SignupPage() {
           {/* Footer link */}
           <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 text-center text-xs text-zinc-500 dark:text-zinc-400">
             Vous avez déjà un compte ?{' '}
-            <Link href="/auth/login" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+            <Link href={loginHref} className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
               Se connecter
             </Link>
           </div>

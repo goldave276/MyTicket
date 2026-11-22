@@ -40,7 +40,7 @@ export default function EventCard({ event, showStatus = false, onAction }) {
   return (
     <div className="group relative rounded-md border border-zinc-800 bg-zinc-900/60 overflow-hidden hover:border-indigo-500/40 transition-all duration-300 flex flex-col justify-between">
       {/* Event Cover Image & Badge */}
-      <div className="frame-corners relative h-48 w-full overflow-hidden bg-zinc-800">
+      <Link href={`/events/${id}`} className="frame-corners relative h-48 w-full overflow-hidden bg-zinc-800 block">
         {/* eslint-disable-next-line @next/next/no-img-element -- remote event cover URL */}
         <img
           src={image}
@@ -69,14 +69,16 @@ export default function EventCard({ event, showStatus = false, onAction }) {
             {eventPrice === 0 ? 'GRATUIT' : `${eventPrice} FCFA`}
           </span>
         </div>
-      </div>
+      </Link>
 
       {/* Card Content */}
       <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
         <div>
-          <h3 className="text-xl font-bold text-white tracking-tight line-clamp-1 group-hover:text-indigo-400 transition-colors">
-            {title}
-          </h3>
+          <Link href={`/events/${id}`} className="block">
+            <h3 className="text-xl font-bold text-white tracking-tight line-clamp-1 group-hover:text-indigo-400 transition-colors">
+              {title}
+            </h3>
+          </Link>
           {description && (
             <p className="text-sm text-zinc-400 mt-1 line-clamp-2 leading-relaxed">
               {description}
@@ -89,15 +91,18 @@ export default function EventCard({ event, showStatus = false, onAction }) {
           <div className="spec-item">
             <span className="spec-label flex items-center gap-1.5">
               <CalendarIcon className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-              Date
+              Date &amp; heure
             </span>
             <span className="spec-value truncate">
               {eventDateStr
-                ? new Date(eventDateStr).toLocaleDateString('fr-FR', {
+                ? `${new Date(eventDateStr).toLocaleDateString('fr-FR', {
                     day: 'numeric',
                     month: 'short',
                     year: 'numeric',
-                  })
+                  })} • ${new Date(eventDateStr).toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}`
                 : 'À venir'}
             </span>
           </div>

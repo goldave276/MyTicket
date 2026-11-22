@@ -217,7 +217,7 @@ body {
     letter-spacing: 0.12em;
     font-size: 0.625rem;
     font-weight: 600;
-    color: color-mix(in oklab, var(--foreground) 45%, transparent);
+    color: color-mix(in oklab, var(--foreground) 72%, transparent);
   }
   .spec-item .spec-value {
     font-size: 0.875rem;
@@ -279,7 +279,7 @@ body {
     letter-spacing: 0.1em;
     font-size: 0.625rem;
     font-weight: 600;
-    color: color-mix(in oklab, var(--foreground) 45%, transparent);
+    color: color-mix(in oklab, var(--foreground) 75%, transparent);
     padding: 1rem;
   }
   .table-shell tbody {

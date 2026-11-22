@@ -30,6 +30,7 @@ export default function EventDetailsPage() {
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [forceDelete, setForceDelete] = useState(false);
   const [submittingAdmin, setSubmittingAdmin] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const loadEvent = useCallback(async () => {
     if (!id) return;
@@ -138,6 +139,8 @@ export default function EventDetailsPage() {
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(shareUrl);
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2500);
         showToast('Lien copié dans le presse-papier !', 'success');
         return;
       } catch {
@@ -157,6 +160,8 @@ export default function EventDetailsPage() {
         const copied = document.execCommand('copy');
         document.body.removeChild(tempInput);
         if (copied) {
+          setCopiedLink(true);
+          setTimeout(() => setCopiedLink(false), 2500);
           showToast('Lien copié dans le presse-papier !', 'success');
           return;
         }
@@ -285,8 +290,8 @@ export default function EventDetailsPage() {
               className="px-3 py-1.5 rounded-sm bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 font-mono text-xs flex items-center gap-1.5 border border-zinc-700 transition-colors"
               title="Copier le lien ou partager"
             >
-              <span>🔗</span>
-              <span>Partager</span>
+              <span>{copiedLink ? '✓' : '🔗'}</span>
+              <span>{copiedLink ? 'Lien copié' : 'Partager'}</span>
             </button>
             <a
               href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Découvre "${event.title}" sur MyTicket : ${typeof window !== 'undefined' ? window.location.href : ''}`)}`}
@@ -316,7 +321,7 @@ export default function EventDetailsPage() {
         </div>
 
         {/* Hero Cover Image & Header */}
-        <div className="frame-corners relative rounded-md overflow-hidden h-80 sm:h-96 w-full border border-zinc-800 bg-zinc-900">
+        <div className="frame-corners relative rounded-md overflow-hidden h-56 sm:h-72 w-full border border-zinc-800 bg-zinc-900">
           {/* eslint-disable-next-line @next/next/no-img-element -- remote Unsplash placeholder, not a next/image-optimized asset */}
           <img
             src={eventImage}
@@ -326,14 +331,16 @@ export default function EventDetailsPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
-          <div className="absolute bottom-6 left-6 right-6 space-y-3 text-white">
+          <div className="absolute bottom-5 left-5 right-5 sm:bottom-6 sm:left-6 sm:right-6 space-y-2.5 text-white">
             <div className="flex flex-wrap gap-2">
               <span className="eyebrow px-3 py-1 rounded-sm bg-indigo-400 text-zinc-950">
                 {event.event_type || event.eventType || 'Événement'}
               </span>
-              <Badge status={event.status || 'APPROVED'} />
+              {event.status && (event.status !== 'APPROVED' || isAdmin) && (
+                <Badge status={event.status} />
+              )}
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{event.title}</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">{event.title}</h1>
           </div>
         </div>
 
@@ -395,7 +402,7 @@ export default function EventDetailsPage() {
               </div>
               <div className="eyebrow flex items-center gap-3 p-4 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
                 <TicketIcon className="w-5 h-5 shrink-0" />
-                Annulation & Gestion autonome
+                Annulation avant événement selon CGU
               </div>
             </div>
           </div>
@@ -412,7 +419,7 @@ export default function EventDetailsPage() {
                 </div>
                 <div className="text-right">
                   <span className="eyebrow text-emerald-400">
-                    {available} places rest.
+                    {available} {available > 1 ? 'places restantes' : 'place restante'}
                   </span>
                 </div>
               </div>
@@ -424,15 +431,21 @@ export default function EventDetailsPage() {
                   </label>
                   <div className="flex items-center gap-3">
                     <button
+                      type="button"
+                      disabled={quantity <= 1}
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-10 h-10 rounded-md bg-zinc-800 font-bold text-lg hover:bg-zinc-700 transition-colors"
+                      aria-label="Diminuer le nombre de places"
+                      className="w-10 h-10 rounded-md bg-zinc-800 font-bold text-lg hover:bg-zinc-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-zinc-800"
                     >
                       -
                     </button>
                     <span className="flex-1 text-center font-bold text-lg">{quantity}</span>
                     <button
+                      type="button"
+                      disabled={quantity >= available}
                       onClick={() => setQuantity(Math.min(available, quantity + 1))}
-                      className="w-10 h-10 rounded-md bg-zinc-800 font-bold text-lg hover:bg-zinc-700 transition-colors"
+                      aria-label="Augmenter le nombre de places"
+                      className="w-10 h-10 rounded-md bg-zinc-800 font-bold text-lg hover:bg-zinc-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-zinc-800"
                     >
                       +
                     </button>
@@ -495,7 +508,7 @@ export default function EventDetailsPage() {
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         placeholder="Ex: 90 12 34 56"
-                        className="w-full px-3 py-2 text-sm bg-zinc-900 border border-zinc-800 rounded-md text-white placeholder-zinc-600 focus:outline-none focus:border-indigo-500"
+                        className="w-full px-3 py-2 text-base sm:text-sm bg-zinc-900 border border-zinc-800 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500"
                       />
                     </div>
                   )}

@@ -5,7 +5,6 @@ export default function Document() {
     <Html lang="fr" className="dark scroll-smooth">
       <Head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
         <link rel="icon" href="/favicon.ico" />
         <meta name="theme-color" content="#08090e" />
         <meta name="description" content="MyTicket - Réservation et billetterie en ligne pour vos événements" />

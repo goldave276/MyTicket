@@ -5,6 +5,7 @@ const {
     passwordResetSchema,
     updateProfileSchema,
     refreshTokenSchema,
+    updatePasswordSchema,
     formatZodErrors
 } = require("../validators/authValidator");
 
@@ -250,10 +251,49 @@ async function refreshSession(req, res) {
     });
 }
 
+async function updatePassword(req, res) {
+    const parseResult = updatePasswordSchema.safeParse(req.body);
+
+    if (!parseResult.success) {
+        return res.status(400).json({
+            message: "Donnees de reinitialisation invalides",
+            errors: formatZodErrors(parseResult.error)
+        });
+    }
+
+    const { accessToken, refreshToken, password } = parseResult.data;
+    const recoveryClient = createAuthenticatedClient(accessToken);
+
+    if (refreshToken) {
+        const { error: sessionError } = await recoveryClient.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+        });
+        if (sessionError) {
+            return res.status(400).json({
+                message: "Lien de reinitialisation expire ou invalide"
+            });
+        }
+    }
+
+    const { error } = await recoveryClient.auth.updateUser({ password });
+
+    if (error) {
+        return res.status(400).json({
+            message: "Impossible de mettre a jour le mot de passe (lien expire ou invalide)"
+        });
+    }
+
+    return res.status(200).json({
+        message: "Mot de passe mis a jour avec succes"
+    });
+}
+
 module.exports = {
     login,
     signup,
     requestPasswordReset,
+    updatePassword,
     logout,
     updateProfile,
     getMe,

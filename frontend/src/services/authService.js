@@ -132,6 +132,13 @@ export const authService = {
     });
   },
 
+  async updatePassword({ accessToken, refreshToken, password }) {
+    return apiFetch('/auth/update-password', {
+      method: 'POST',
+      body: JSON.stringify({ accessToken, refreshToken, password }),
+    });
+  },
+
   async logout() {
     try {
       await apiFetch('/auth/logout', { method: 'POST' });

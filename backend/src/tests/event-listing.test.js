@@ -219,4 +219,40 @@ describe("Liste publique des evenements", () => {
             remainingCapacity: 96
         });
     });
+
+    it("inclut event_type dans la recherche texte publique", async () => {
+        const response = createResponse();
+        const orCalls = [];
+        const query = {
+            select() { return this; },
+            eq() { return this; },
+            gte() { return this; },
+            or(clause) {
+                orCalls.push(clause);
+                return this;
+            },
+            order() { return this; },
+            range() {
+                return Promise.resolve({ data: [], count: 0, error: null });
+            }
+        };
+
+        const supabaseModule = require.cache[require.resolve("../config/supabase")];
+        const originalSupabase = supabaseModule.exports.supabase;
+        supabaseModule.exports.supabase = {
+            from() { return query; }
+        };
+
+        try {
+            delete require.cache[require.resolve("../controllers/eventController")];
+            const { getApprovedEvents } = require("../controllers/eventController");
+            await getApprovedEvents({ query: { search: "concert" } }, response);
+        } finally {
+            supabaseModule.exports.supabase = originalSupabase;
+            delete require.cache[require.resolve("../controllers/eventController")];
+        }
+
+        expect(response.statusCode).toBe(200);
+        expect(orCalls[0]).toContain("event_type.ilike.%concert%");
+    });
 });

@@ -64,7 +64,22 @@ export default function CookiesPage() {
           </Section>
 
           <Section index="03" title="Les cookies que nous utilisons">
-            <div className="table-shell">
+            <div className="sm:hidden space-y-3">
+              {COOKIES.map((c) => (
+                <div key={c.name} className="panel p-4 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-xs text-indigo-300 break-all">{c.name}</span>
+                    <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-200 text-[11px] font-semibold shrink-0">
+                      {c.type}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-200 leading-relaxed">{c.purpose}</p>
+                  <p className="text-[11px] text-zinc-300 font-mono">Durée : {c.duration}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="hidden sm:block table-shell">
               <div className="overflow-x-auto">
                 <table>
                   <thead>
@@ -78,10 +93,10 @@ export default function CookiesPage() {
                   <tbody>
                     {COOKIES.map((c) => (
                       <tr key={c.name}>
-                        <td className="font-mono text-xs text-indigo-400">{c.name}</td>
-                        <td className="text-zinc-300">{c.purpose}</td>
-                        <td className="text-zinc-500 text-xs">{c.duration}</td>
-                        <td className="text-zinc-300 text-xs">{c.type}</td>
+                        <td className="font-mono text-xs text-indigo-300">{c.name}</td>
+                        <td className="text-zinc-200">{c.purpose}</td>
+                        <td className="text-zinc-300 text-xs">{c.duration}</td>
+                        <td className="text-zinc-200 text-xs">{c.type}</td>
                       </tr>
                     ))}
                   </tbody>

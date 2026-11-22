@@ -56,6 +56,22 @@ describe("Validateur de requete d'evenements (eventQueryValidator)", () => {
         expect(result.errors.dateFrom).toBeDefined();
     });
 
+    it("accepte et normalise les dates YYYY-MM-DD des inputs HTML", () => {
+        const result = validateEventQuery({
+            dateFrom: "2027-05-10",
+            dateTo: "2027-05-10"
+        });
+        expect(result.isValid).toBe(true);
+        expect(result.value.dateFrom).toBe("2027-05-10T00:00:00.000Z");
+        expect(result.value.dateTo).toBe("2027-05-10T23:59:59.999Z");
+    });
+
+    it("rejette une date YYYY-MM-DD calendairement impossible", () => {
+        const result = validateEventQuery({ dateFrom: "2027-02-31" });
+        expect(result.isValid).toBe(false);
+        expect(result.errors.dateFrom).toBeDefined();
+    });
+
     it("rejette si dateFrom > dateTo", () => {
         const result = validateEventQuery({
             dateFrom: "2027-06-01T00:00:00.000Z",

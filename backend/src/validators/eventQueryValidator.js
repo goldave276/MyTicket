@@ -37,11 +37,39 @@ function parsePositiveInteger(val, defaultVal, minVal, maxVal) {
     return num;
 }
 
-function parseIsoDate(val) {
+function parseIsoDate(val, { endOfDay = false } = {}) {
     if (val === undefined || val === null || val === "") return undefined;
     if (typeof val !== "string") return null;
     const trimmed = val.trim();
     if (!trimmed) return undefined;
+
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+    if (dateOnlyMatch) {
+        const year = Number(dateOnlyMatch[1]);
+        const month = Number(dateOnlyMatch[2]);
+        const day = Number(dateOnlyMatch[3]);
+        const date = new Date(
+            Date.UTC(
+                year,
+                month - 1,
+                day,
+                endOfDay ? 23 : 0,
+                endOfDay ? 59 : 0,
+                endOfDay ? 59 : 0,
+                endOfDay ? 999 : 0
+            )
+        );
+        if (
+            Number.isNaN(date.getTime()) ||
+            date.getUTCFullYear() !== year ||
+            date.getUTCMonth() !== month - 1 ||
+            date.getUTCDate() !== day
+        ) {
+            return null;
+        }
+        return date.toISOString();
+    }
+
     if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(trimmed)) {
         return null;
     }
@@ -119,7 +147,7 @@ function validateEventQuery(query = {}) {
     }
 
     if (query.dateFrom !== undefined) {
-        const parsed = parseIsoDate(query.dateFrom);
+        const parsed = parseIsoDate(query.dateFrom, { endOfDay: false });
         if (parsed === null) {
             errors.dateFrom = "La date de debut doit etre une date ISO valide";
         } else if (parsed !== undefined) {
@@ -128,7 +156,7 @@ function validateEventQuery(query = {}) {
     }
 
     if (query.dateTo !== undefined) {
-        const parsed = parseIsoDate(query.dateTo);
+        const parsed = parseIsoDate(query.dateTo, { endOfDay: true });
         if (parsed === null) {
             errors.dateTo = "La date de fin doit etre une date ISO valide";
         } else if (parsed !== undefined) {

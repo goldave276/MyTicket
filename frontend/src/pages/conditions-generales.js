@@ -95,10 +95,12 @@ export default function TermsPage() {
 
           <Section id="organisateur" index="04" title="Devenir organisateur">
             <p>
-              Tout membre peut soumettre une demande d’accréditation Organisateur, accompagnée d’un document
-              justificatif et d’une description de son activité. L’administration examine chaque demande et
-              peut l’approuver ou la refuser, avec un motif communiqué au demandeur. MyTicket se réserve le
-              droit de retirer le statut Organisateur en cas de non-respect des présentes conditions.
+              Tout membre peut soumettre une demande d’accréditation Organisateur, accompagnée d’une description
+              de son activité (20 à 1 000 caractères) et d’un document justificatif officiel en cours de validité :
+              Carte Nationale d’Identité (CNI), passeport, ou extrait RCCM / attestation d’enregistrement pour les
+              structures et associations (format PDF, JPG ou PNG, 5 Mo max). L’administration examine chaque
+              demande et peut l’approuver ou la refuser, avec un motif communiqué au demandeur. MyTicket se
+              réserve le droit de retirer le statut Organisateur en cas de non-respect des présentes conditions.
             </p>
           </Section>
 
@@ -120,12 +122,17 @@ export default function TermsPage() {
             </p>
           </Section>
 
-          <Section id="prix-paiement" index="07" title="Prix & paiement">
+          <Section id="prix-paiement" index="07" title="Prix, paiement & reversement organisateur">
             <p>
-              Les prix des billets sont fixés par l’organisateur et affichés en FCFA, toutes taxes comprises
+              Les prix des billets sont fixés par l’organisateur et affichés en FCFA (XOF), toutes taxes comprises
               sauf mention contraire. Le paiement est traité par un prestataire tiers sécurisé (carte bancaire
-              ou mobile money selon les moyens disponibles) ; MyTicket ne stocke jamais vos coordonnées
-              bancaires complètes.
+              Stripe ou Mobile Money Togo Flooz / T-Money, ou règlement sur place validé par l’administration) ;
+              MyTicket ne stocke jamais vos coordonnées bancaires complètes.
+            </p>
+            <p>
+              Pour les organisateurs, les recettes des ventes en ligne confirmées sont reversées par virement
+              bancaire ou Mobile Money sous 3 à 5 jours ouvrés après la tenue effective de l’événement, sous
+              réserve de l’absence de litige ou d’annulation, et après déduction des frais de transaction.
             </p>
           </Section>
 
@@ -182,9 +189,9 @@ export default function TermsPage() {
 
           <Section id="droit" index="14" title="Droit applicable & règlement des litiges">
             <p>
-              Les présentes conditions sont soumises au droit applicable au lieu d’établissement de MyTicket.
-              En cas de litige, une solution amiable sera recherchée en priorité via notre Centre d’aide avant
-              toute action contentieuse.
+              Les présentes conditions sont régies par le droit togolais. En cas de litige, une solution amiable
+              sera recherchée en priorité via notre Centre d’aide avant toute action contentieuse. À défaut
+              d’accord amiable, les juridictions compétentes de Lomé (Togo) seront seules compétentes.
             </p>
           </Section>
 

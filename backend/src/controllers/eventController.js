@@ -361,7 +361,7 @@ async function getApprovedEvents(req, res) {
     if (search) {
         const escaped = escapePostgrestValue(search);
         if (escaped) {
-            query = query.or(`title.ilike.%${escaped}%,description.ilike.%${escaped}%,location.ilike.%${escaped}%`);
+            query = query.or(`title.ilike.%${escaped}%,description.ilike.%${escaped}%,location.ilike.%${escaped}%,event_type.ilike.%${escaped}%`);
         }
     }
     if (minPrice !== undefined) query = query.gte("price", minPrice);

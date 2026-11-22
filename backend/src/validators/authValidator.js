@@ -15,14 +15,16 @@ const loginSchema = z.object({
         .max(128, { message: "Le mot de passe ne peut pas depasser 128 caracteres" })
 });
 
+const passwordPolicySchema = z
+    .string({ required_error: "Mot de passe obligatoire" })
+    .min(8, { message: "Le mot de passe doit contenir au moins 8 caracteres" })
+    .max(100, { message: "Le mot de passe ne peut pas depasser 100 caracteres" })
+    .regex(/[A-Za-z]/, { message: "Le mot de passe doit contenir au moins une lettre" })
+    .regex(/[0-9]/, { message: "Le mot de passe doit contenir au moins un chiffre" });
+
 const signupSchema = z.object({
     email: emailSchema,
-    password: z
-        .string({ required_error: "Mot de passe obligatoire" })
-        .min(8, { message: "Le mot de passe doit contenir au moins 8 caracteres" })
-        .max(100, { message: "Le mot de passe ne peut pas depasser 100 caracteres" })
-        .regex(/[A-Za-z]/, { message: "Le mot de passe doit contenir au moins une lettre" })
-        .regex(/[0-9]/, { message: "Le mot de passe doit contenir au moins un chiffre" }),
+    password: passwordPolicySchema,
     fullName: z
         .string()
         .trim()
@@ -50,6 +52,14 @@ const refreshTokenSchema = z.object({
         .min(10, { message: "Refresh token invalide" })
 });
 
+const updatePasswordSchema = z.object({
+    accessToken: z
+        .string({ required_error: "Jeton de reinitialisation obligatoire" })
+        .min(10, { message: "Jeton de reinitialisation invalide" }),
+    refreshToken: z.string().optional(),
+    password: passwordPolicySchema
+});
+
 function formatZodErrors(error) {
     const errors = {};
     if (error && error.issues) {
@@ -67,5 +77,6 @@ module.exports = {
     passwordResetSchema,
     updateProfileSchema,
     refreshTokenSchema,
+    updatePasswordSchema,
     formatZodErrors
 };

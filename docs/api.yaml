@@ -161,6 +161,31 @@ paths:
         "200":
           description: Réponse neutre systématique si le format email est valide
 
+  /api/auth/update-password:
+    post:
+      tags: [Auth]
+      summary: Mise à jour du mot de passe via le jeton de réinitialisation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [accessToken, password]
+              properties:
+                accessToken:
+                  type: string
+                refreshToken:
+                  type: string
+                password:
+                  type: string
+                  minLength: 8
+      responses:
+        "200":
+          description: Mot de passe mis à jour avec succès
+        "400":
+          description: Données ou lien de réinitialisation invalide
+
   /api/auth/refresh:
     post:
       tags: [Auth]

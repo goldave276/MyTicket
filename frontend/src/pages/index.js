@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import eventService from '@/services/eventService';
 import { useToast } from '@/context/ToastContext';
-import EventFilters from '@/components/events/EventFilters';
+import EventFilters, { getFilterValidationError } from '@/components/events/EventFilters';
 import EventGrid from '@/components/events/EventGrid';
 import Pagination from '@/components/common/Pagination';
 import ErrorState from '@/components/common/ErrorState';
@@ -22,6 +23,7 @@ const EMPTY_FILTERS = {
 };
 
 export default function Home() {
+  const router = useRouter();
   const { showToast } = useToast();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,25 @@ export default function Home() {
   const [pagination, setPagination] = useState({ page: 1, limit: CATALOG_PAGE_SIZE, total: 0 });
   const catalogRef = useRef(null);
 
+  useEffect(() => {
+    if (!router.isReady) return;
+    const queryType = typeof router.query.eventType === 'string' ? router.query.eventType.toUpperCase() : '';
+    if (queryType) {
+      queueMicrotask(() => {
+        setFilters((prev) => (prev.eventType === queryType ? prev : { ...prev, eventType: queryType }));
+        setPage(1);
+      });
+    }
+  }, [router.isReady, router.query.eventType]);
+
   const fetchEvents = useCallback(async ({ silent = false } = {}) => {
+    if (getFilterValidationError(filters)) {
+      if (!silent) {
+        setError(false);
+        setLoading(false);
+      }
+      return;
+    }
     if (!silent) setLoading(true);
     setError(false);
     try {

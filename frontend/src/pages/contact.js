@@ -12,7 +12,7 @@ const FAQ_GROUPS = [
       },
       {
         q: 'Comment supprimer mon compte ?',
-        a: 'Écrivez-nous via le formulaire ci-dessous en précisant l’adresse email de votre compte : nous traitons chaque demande de suppression manuellement sous quelques jours.',
+        a: 'Écrivez-nous par email à support@myticket.app en précisant l’adresse email de votre compte : nous traitons chaque demande de suppression manuellement sous 48 à 72h ouvrées.',
       },
     ],
   },
@@ -40,7 +40,11 @@ const FAQ_GROUPS = [
     items: [
       {
         q: 'Comment publier mon propre événement ?',
-        a: 'Faites une demande d’accréditation Organisateur depuis « Devenir Organisateur » dans votre espace compte, avec un justificatif. Une fois validée par notre équipe, vous pourrez créer des événements.',
+        a: 'Faites une demande d’accréditation Organisateur depuis « Devenir Organisateur » dans votre espace compte, accompagnée d’un justificatif officiel (CNI, passeport ou extrait RCCM pour les structures, au format PDF/JPG/PNG, max 5 Mo). Une fois validée par notre équipe, vous pourrez créer des événements.',
+      },
+      {
+        q: 'Comment et quand sont reversées les recettes de billetterie ?',
+        a: 'Les recettes collectées en ligne (Carte bancaire, Flooz, T-Money) sont consolidées et reversées à l’organisateur par virement bancaire ou Mobile Money sous 3 à 5 jours ouvrés après la clôture de l’événement, déduction faite des frais de service applicables.',
       },
       {
         q: 'Combien de temps prend la validation d’un événement ?',
